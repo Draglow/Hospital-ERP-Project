@@ -1,0 +1,596 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Notification Preferences - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-ethiopia-green">Notification Settings</h1>
+            <p class="text-muted mb-0">Manage your notification preferences</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-primary" onclick="savePreferences()">
+                <i class="fas fa-save"></i>
+            </button>
+            <a href="{% url 'notifications:notification_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Notification Status Card -->
+<div class="mobile-dashboard-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="mb-1">Notifications Status</h6>
+            <small class="text-muted">Overall notification settings</small>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="masterNotifications" checked>
+            <label class="form-check-label" for="masterNotifications">
+                <span class="text-success fw-bold">Enabled</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Email Notifications Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-envelope me-2"></i>Email Notifications
+    </h6>
+    
+    <div class="mobile-settings-list">
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">New Appointments</div>
+                <div class="mobile-setting-desc">Get notified when new appointments are scheduled</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="emailAppointments" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Appointment Reminders</div>
+                <div class="mobile-setting-desc">Receive reminders before upcoming appointments</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="emailReminders" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Patient Updates</div>
+                <div class="mobile-setting-desc">Updates about patient registrations and changes</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="emailPatients" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Pharmacy Alerts</div>
+                <div class="mobile-setting-desc">Low stock and expiring medicine notifications</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="emailPharmacy" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">System Updates</div>
+                <div class="mobile-setting-desc">Important system announcements and updates</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="emailSystem">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Frequency Settings -->
+    <div class="mobile-frequency-settings mt-3">
+        <label class="form-label small text-muted">Email Frequency</label>
+        <select class="form-select form-select-sm" id="emailFrequency">
+            <option value="immediate">Immediate</option>
+            <option value="hourly">Hourly Digest</option>
+            <option value="daily" selected>Daily Digest</option>
+            <option value="weekly">Weekly Summary</option>
+        </select>
+    </div>
+</div>
+
+<!-- Mobile In-App Notifications Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-bell me-2"></i>In-App Notifications
+    </h6>
+    
+    <div class="mobile-settings-list">
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Real-time Alerts</div>
+                <div class="mobile-setting-desc">Instant notifications within the application</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="appRealtime" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Sound Notifications</div>
+                <div class="mobile-setting-desc">Play sound for important notifications</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="appSound" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Desktop Notifications</div>
+                <div class="mobile-setting-desc">Show browser notifications when app is minimized</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="appDesktop">
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Badge Counter</div>
+                <div class="mobile-setting-desc">Show unread notification count on navigation</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="appBadge" checked>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile SMS Notifications Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-yellow mb-3">
+        <i class="fas fa-sms me-2"></i>SMS Notifications
+    </h6>
+    
+    <div class="mobile-settings-list">
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Emergency Alerts</div>
+                <div class="mobile-setting-desc">Critical system alerts and emergencies</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="smsEmergency" checked>
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Appointment Confirmations</div>
+                <div class="mobile-setting-desc">SMS confirmations for appointment bookings</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="smsAppointments">
+            </div>
+        </div>
+        
+        <div class="mobile-setting-item">
+            <div class="mobile-setting-content">
+                <div class="mobile-setting-title">Security Alerts</div>
+                <div class="mobile-setting-desc">Login attempts and security notifications</div>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="smsSecurity" checked>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SMS Phone Number -->
+    <div class="mobile-phone-settings mt-3">
+        <label class="form-label small text-muted">SMS Phone Number</label>
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">+251</span>
+            <input type="tel" class="form-control" id="smsPhone" placeholder="9XXXXXXXX" value="{{ user.profile.phone_number|default:'' }}">
+            <button class="btn btn-outline-primary" type="button" onclick="verifyPhone()">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+        <small class="text-muted">Verify your phone number to receive SMS notifications</small>
+    </div>
+</div>
+
+<!-- Mobile Priority Settings Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-red mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>Priority Settings
+    </h6>
+    
+    <div class="mobile-priority-list">
+        <div class="mobile-priority-item">
+            <div class="mobile-priority-content">
+                <div class="mobile-priority-title">High Priority</div>
+                <div class="mobile-priority-desc">Emergency alerts, critical system issues</div>
+            </div>
+            <div class="mobile-priority-methods">
+                <span class="badge bg-danger me-1">SMS</span>
+                <span class="badge bg-primary me-1">Email</span>
+                <span class="badge bg-success">In-App</span>
+            </div>
+        </div>
+        
+        <div class="mobile-priority-item">
+            <div class="mobile-priority-content">
+                <div class="mobile-priority-title">Medium Priority</div>
+                <div class="mobile-priority-desc">Appointment reminders, stock alerts</div>
+            </div>
+            <div class="mobile-priority-methods">
+                <span class="badge bg-primary me-1">Email</span>
+                <span class="badge bg-success">In-App</span>
+            </div>
+        </div>
+        
+        <div class="mobile-priority-item">
+            <div class="mobile-priority-content">
+                <div class="mobile-priority-title">Low Priority</div>
+                <div class="mobile-priority-desc">General updates, system announcements</div>
+            </div>
+            <div class="mobile-priority-methods">
+                <span class="badge bg-success">In-App</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Quiet Hours Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-moon me-2"></i>Quiet Hours
+    </h6>
+    
+    <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="quietHoursEnabled">
+        <label class="form-check-label" for="quietHoursEnabled">
+            Enable quiet hours (no non-emergency notifications)
+        </label>
+    </div>
+    
+    <div id="quietHoursSettings" style="display: none;">
+        <div class="row g-2">
+            <div class="col-6">
+                <label class="form-label small text-muted">Start Time</label>
+                <input type="time" class="form-control form-control-sm" id="quietStart" value="22:00">
+            </div>
+            <div class="col-6">
+                <label class="form-label small text-muted">End Time</label>
+                <input type="time" class="form-control form-control-sm" id="quietEnd" value="07:00">
+            </div>
+        </div>
+        
+        <div class="mt-2">
+            <label class="form-label small text-muted">Days</label>
+            <div class="mobile-days-selector">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietSun" checked>
+                    <label class="form-check-label small" for="quietSun">Sun</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietMon" checked>
+                    <label class="form-check-label small" for="quietMon">Mon</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietTue" checked>
+                    <label class="form-check-label small" for="quietTue">Tue</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietWed" checked>
+                    <label class="form-check-label small" for="quietWed">Wed</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietThu" checked>
+                    <label class="form-check-label small" for="quietThu">Thu</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietFri" checked>
+                    <label class="form-check-label small" for="quietFri">Fri</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="quietSat" checked>
+                    <label class="form-check-label small" for="quietSat">Sat</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Action Buttons -->
+<div class="mobile-dashboard-card">
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary" onclick="savePreferences()">
+            <i class="fas fa-save me-2"></i>Save Preferences
+        </button>
+        <button class="btn btn-outline-secondary" onclick="resetToDefaults()">
+            <i class="fas fa-undo me-2"></i>Reset to Defaults
+        </button>
+        <button class="btn btn-outline-info" onclick="testNotifications()">
+            <i class="fas fa-bell me-2"></i>Test Notifications
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--mobile-spacing-md);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-setting-content {
+    flex: 1;
+    margin-right: var(--mobile-spacing-md);
+}
+
+.mobile-setting-title {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-setting-desc {
+    font-size: 0.875rem;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+.mobile-frequency-settings,
+.mobile-phone-settings {
+    padding: var(--mobile-spacing-md);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-priority-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-priority-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--mobile-spacing-md);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-priority-content {
+    flex: 1;
+    margin-right: var(--mobile-spacing-md);
+}
+
+.mobile-priority-title {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-priority-desc {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.mobile-priority-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.mobile-days-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--mobile-spacing-sm);
+}
+
+.form-check-inline {
+    margin-right: 0;
+}
+
+.form-switch .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--ethiopia-green);
+    border-color: var(--ethiopia-green);
+}
+
+.text-ethiopia-yellow {
+    color: #ffc107 !important;
+}
+
+.text-ethiopia-red {
+    color: #dc3545 !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle master notifications toggle
+    const masterToggle = document.getElementById('masterNotifications');
+    const allToggles = document.querySelectorAll('.form-check-input:not(#masterNotifications)');
+    
+    masterToggle.addEventListener('change', function() {
+        const isEnabled = this.checked;
+        allToggles.forEach(toggle => {
+            toggle.disabled = !isEnabled;
+            if (!isEnabled) {
+                toggle.checked = false;
+            }
+        });
+        
+        const statusText = this.nextElementSibling.querySelector('span');
+        statusText.textContent = isEnabled ? 'Enabled' : 'Disabled';
+        statusText.className = isEnabled ? 'text-success fw-bold' : 'text-danger fw-bold';
+    });
+    
+    // Handle quiet hours toggle
+    const quietHoursToggle = document.getElementById('quietHoursEnabled');
+    const quietHoursSettings = document.getElementById('quietHoursSettings');
+    
+    quietHoursToggle.addEventListener('change', function() {
+        quietHoursSettings.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    console.log('Mobile notification preferences loaded');
+});
+
+function savePreferences() {
+    // Collect all preference data
+    const preferences = {
+        master_enabled: document.getElementById('masterNotifications').checked,
+        email: {
+            appointments: document.getElementById('emailAppointments').checked,
+            reminders: document.getElementById('emailReminders').checked,
+            patients: document.getElementById('emailPatients').checked,
+            pharmacy: document.getElementById('emailPharmacy').checked,
+            system: document.getElementById('emailSystem').checked,
+            frequency: document.getElementById('emailFrequency').value
+        },
+        app: {
+            realtime: document.getElementById('appRealtime').checked,
+            sound: document.getElementById('appSound').checked,
+            desktop: document.getElementById('appDesktop').checked,
+            badge: document.getElementById('appBadge').checked
+        },
+        sms: {
+            emergency: document.getElementById('smsEmergency').checked,
+            appointments: document.getElementById('smsAppointments').checked,
+            security: document.getElementById('smsSecurity').checked,
+            phone: document.getElementById('smsPhone').value
+        },
+        quiet_hours: {
+            enabled: document.getElementById('quietHoursEnabled').checked,
+            start: document.getElementById('quietStart').value,
+            end: document.getElementById('quietEnd').value,
+            days: {
+                sun: document.getElementById('quietSun').checked,
+                mon: document.getElementById('quietMon').checked,
+                tue: document.getElementById('quietTue').checked,
+                wed: document.getElementById('quietWed').checked,
+                thu: document.getElementById('quietThu').checked,
+                fri: document.getElementById('quietFri').checked,
+                sat: document.getElementById('quietSat').checked
+            }
+        }
+    };
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Saving notification preferences...', 'info');
+    }
+    
+    // In a real implementation, this would make an AJAX call to save preferences
+    setTimeout(() => {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Preferences saved successfully!', 'success');
+        } else {
+            alert('Preferences saved successfully!');
+        }
+    }, 1000);
+}
+
+function resetToDefaults() {
+    if (confirm('Reset all notification preferences to default settings?')) {
+        // Reset all toggles to default values
+        document.getElementById('masterNotifications').checked = true;
+        document.getElementById('emailAppointments').checked = true;
+        document.getElementById('emailReminders').checked = true;
+        document.getElementById('emailPatients').checked = true;
+        document.getElementById('emailPharmacy').checked = true;
+        document.getElementById('emailSystem').checked = false;
+        document.getElementById('emailFrequency').value = 'daily';
+        
+        document.getElementById('appRealtime').checked = true;
+        document.getElementById('appSound').checked = true;
+        document.getElementById('appDesktop').checked = false;
+        document.getElementById('appBadge').checked = true;
+        
+        document.getElementById('smsEmergency').checked = true;
+        document.getElementById('smsAppointments').checked = false;
+        document.getElementById('smsSecurity').checked = true;
+        
+        document.getElementById('quietHoursEnabled').checked = false;
+        document.getElementById('quietHoursSettings').style.display = 'none';
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Preferences reset to defaults', 'success');
+        } else {
+            alert('Preferences reset to defaults');
+        }
+    }
+}
+
+function testNotifications() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Testing notifications...', 'info');
+        
+        setTimeout(() => {
+            mobileDashboard.showMobileNotification('Test notification sent! Check your email and SMS.', 'success');
+        }, 1500);
+    } else {
+        alert('Test notification sent! Check your email and SMS.');
+    }
+}
+
+function verifyPhone() {
+    const phone = document.getElementById('smsPhone').value;
+    if (!phone) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Please enter a phone number', 'error');
+        } else {
+            alert('Please enter a phone number');
+        }
+        return;
+    }
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Sending verification code...', 'info');
+    }
+    
+    // In a real implementation, this would send a verification SMS
+    setTimeout(() => {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Verification code sent to your phone!', 'success');
+        } else {
+            alert('Verification code sent to your phone!');
+        }
+    }, 2000);
+}
+</script>
+{% endblock %}

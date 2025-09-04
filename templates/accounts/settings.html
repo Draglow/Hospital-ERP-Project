@@ -1,0 +1,733 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Settings - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">Settings</h1>
+        <p class="text-muted">Manage your application preferences and system settings</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" id="resetBtn">
+            <i class="fas fa-undo me-2"></i>Reset to Default
+        </button>
+        <button class="btn btn-outline-info" id="importBtn">
+            <i class="fas fa-upload me-2"></i>Import Settings
+        </button>
+        <button class="btn btn-outline-primary" id="exportBtn" onclick="exportSettings()">
+            <i class="fas fa-download me-2"></i>Export Settings
+        </button>
+        <button class="btn btn-primary" id="saveAllBtn" onclick="saveAllSettings()">
+            <i class="fas fa-save me-2"></i>Save All Changes
+        </button>
+    </div>
+</div>
+
+<!-- Settings Tabs -->
+<div class="row g-4">
+    <div class="col-lg-3">
+        <div class="dashboard-card">
+            <div class="nav flex-column nav-pills" id="settings-tab" role="tablist">
+                <button class="nav-link active" id="general-tab" data-bs-toggle="pill" data-bs-target="#general" type="button" role="tab">
+                    <i class="fas fa-cog me-2"></i>General
+                </button>
+                <button class="nav-link" id="notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </button>
+                <button class="nav-link" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab">
+                    <i class="fas fa-shield-alt me-2"></i>Security
+                </button>
+                <button class="nav-link" id="appearance-tab" data-bs-toggle="pill" data-bs-target="#appearance" type="button" role="tab">
+                    <i class="fas fa-palette me-2"></i>Appearance
+                </button>
+                <button class="nav-link" id="system-tab" data-bs-toggle="pill" data-bs-target="#system" type="button" role="tab">
+                    <i class="fas fa-server me-2"></i>System
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="tab-content" id="settings-tabContent">
+            <!-- General Settings -->
+            <div class="tab-pane fade show active" id="general" role="tabpanel">
+                <div class="dashboard-card">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-cog text-ethiopia-green me-2"></i>General Settings
+                    </h5>
+                    
+                    <form id="generalSettingsForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Default Language</label>
+                                <select class="form-select" name="language">
+                                    <option value="en" selected>English</option>
+                                    <option value="am">Amharic (አማርኛ)</option>
+                                    <option value="or">Oromo (Afaan Oromoo)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Time Zone</label>
+                                <select class="form-select" name="timezone">
+                                    <option value="Africa/Addis_Ababa" selected>East Africa Time (EAT)</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Date Format</label>
+                                <select class="form-select" name="dateFormat">
+                                    <option value="dd/mm/yyyy" selected>DD/MM/YYYY</option>
+                                    <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                    <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Currency Display</label>
+                                <select class="form-select" name="currency">
+                                    <option value="ETB" selected>Ethiopian Birr (ETB)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="autoSave" checked>
+                                    <label class="form-check-label" for="autoSave">
+                                        Auto-save changes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="tab-pane fade" id="notifications" role="tabpanel">
+                <div class="dashboard-card">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-bell text-ethiopia-green me-2"></i>Notification Preferences
+                    </h5>
+                    
+                    <form id="notificationSettingsForm">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h6 class="text-muted">Email Notifications</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailAppointments" checked>
+                                            <label class="form-check-label" for="emailAppointments">
+                                                New appointments
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailPatients" checked>
+                                            <label class="form-check-label" for="emailPatients">
+                                                New patient registrations
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailBilling">
+                                            <label class="form-check-label" for="emailBilling">
+                                                Billing updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailStock" checked>
+                                            <label class="form-check-label" for="emailStock">
+                                                Low stock alerts
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <h6 class="text-muted">System Notifications</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="systemMaintenance" checked>
+                                            <label class="form-check-label" for="systemMaintenance">
+                                                System maintenance alerts
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="systemUpdates">
+                                            <label class="form-check-label" for="systemUpdates">
+                                                Software updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="tab-pane fade" id="security" role="tabpanel">
+                <div class="dashboard-card">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-shield-alt text-ethiopia-green me-2"></i>Security Settings
+                    </h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Your account security is important. Enable two-factor authentication for enhanced protection.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Change Password</h6>
+                                    <p class="card-text text-muted">Update your account password regularly</p>
+                                    <button class="btn btn-outline-primary" id="changePasswordBtn">
+                                        <i class="fas fa-key me-2"></i>Change Password
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Two-Factor Authentication</h6>
+                                    <p class="card-text text-muted">Add an extra layer of security</p>
+                                    <button class="btn btn-outline-success" id="enable2FABtn">
+                                        <i class="fas fa-mobile-alt me-2"></i>Enable 2FA
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <h6 class="text-muted">Session Management</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoLogout" checked>
+                                <label class="form-check-label" for="autoLogout">
+                                    Auto-logout after 30 minutes of inactivity
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance Settings -->
+            <div class="tab-pane fade" id="appearance" role="tabpanel">
+                <div class="dashboard-card">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-palette text-ethiopia-green me-2"></i>Appearance Settings
+                    </h5>
+                    
+                    <form id="appearanceSettingsForm">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Theme</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="theme" id="lightTheme" value="light" checked>
+                                    <label class="form-check-label" for="lightTheme">
+                                        <i class="fas fa-sun me-2"></i>Light Theme
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="theme" id="darkTheme" value="dark">
+                                    <label class="form-check-label" for="darkTheme">
+                                        <i class="fas fa-moon me-2"></i>Dark Theme
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="theme" id="autoTheme" value="auto">
+                                    <label class="form-check-label" for="autoTheme">
+                                        <i class="fas fa-adjust me-2"></i>Auto (System)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Sidebar Style</label>
+                                <select class="form-select">
+                                    <option value="expanded" selected>Always Expanded</option>
+                                    <option value="collapsed">Always Collapsed</option>
+                                    <option value="auto">Auto-collapse on mobile</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="animations" checked>
+                                    <label class="form-check-label" for="animations">
+                                        Enable animations and transitions
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sidebarCollapsed">
+                                    <label class="form-check-label" for="sidebarCollapsed">
+                                        Start with collapsed sidebar
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="compactMode">
+                                    <label class="form-check-label" for="compactMode">
+                                        Enable compact mode
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary" id="testNotificationBtn">
+                                        <i class="fas fa-bell me-2"></i>Test Notifications
+                                    </button>
+                                    <button class="btn btn-outline-info" onclick="location.reload()">
+                                        <i class="fas fa-sync me-2"></i>Preview Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="tab-pane fade" id="system" role="tabpanel">
+                <div class="dashboard-card">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-server text-ethiopia-green me-2"></i>System Information
+                    </h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">System Version</h6>
+                                    <p class="card-text">Ethiopian Hospital ERP v1.0.0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Last Updated</h6>
+                                    <p class="card-text">{{ "now"|date:"F d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Note:</strong> Some system settings require administrator privileges to modify.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced Settings Management System
+class SettingsManager {
+    constructor() {
+        this.settings = this.loadSettings();
+        this.unsavedChanges = false;
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.loadSettingsToForm();
+        this.setupAutoSave();
+        this.setupValidation();
+        this.trackChanges();
+    }
+
+    bindEvents() {
+        // Save all settings
+        document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAllSettings());
+
+        // Export settings
+        document.getElementById('exportBtn')?.addEventListener('click', () => this.exportSettings());
+
+        // Import settings
+        document.getElementById('importBtn')?.addEventListener('click', () => this.importSettings());
+
+        // Reset settings
+        document.getElementById('resetBtn')?.addEventListener('click', () => this.resetSettings());
+
+        // Change password
+        document.getElementById('changePasswordBtn')?.addEventListener('click', () => this.showChangePasswordModal());
+
+        // Enable 2FA
+        document.getElementById('enable2FABtn')?.addEventListener('click', () => this.enable2FA());
+
+        // Test notifications
+        document.getElementById('testNotificationBtn')?.addEventListener('click', () => this.testNotifications());
+    }
+
+    loadSettings() {
+        const defaultSettings = {
+            general: {
+                language: 'en',
+                timezone: 'Africa/Addis_Ababa',
+                dateFormat: 'dd/mm/yyyy',
+                currency: 'ETB',
+                autoSave: true
+            },
+            notifications: {
+                emailAppointments: true,
+                emailPatients: true,
+                emailBilling: false,
+                emailStock: true,
+                systemMaintenance: true,
+                systemUpdates: false
+            },
+            security: {
+                twoFactorEnabled: false,
+                sessionTimeout: 30,
+                passwordExpiry: 90
+            },
+            appearance: {
+                theme: 'light',
+                sidebarCollapsed: false,
+                compactMode: false
+            },
+            system: {
+                autoBackup: true,
+                backupFrequency: 'daily',
+                debugMode: false
+            }
+        };
+
+        const saved = localStorage.getItem('userSettings');
+        return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    }
+
+    saveSettings() {
+        localStorage.setItem('userSettings', JSON.stringify(this.settings));
+        this.unsavedChanges = false;
+        this.updateSaveButton();
+    }
+
+    loadSettingsToForm() {
+        // General settings
+        this.setFormValue('select[name="language"]', this.settings.general.language);
+        this.setFormValue('select[name="timezone"]', this.settings.general.timezone);
+        this.setFormValue('select[name="dateFormat"]', this.settings.general.dateFormat);
+        this.setFormValue('select[name="currency"]', this.settings.general.currency);
+        this.setFormValue('#autoSave', this.settings.general.autoSave);
+
+        // Notification settings
+        this.setFormValue('#emailAppointments', this.settings.notifications.emailAppointments);
+        this.setFormValue('#emailPatients', this.settings.notifications.emailPatients);
+        this.setFormValue('#emailBilling', this.settings.notifications.emailBilling);
+        this.setFormValue('#emailStock', this.settings.notifications.emailStock);
+        this.setFormValue('#systemMaintenance', this.settings.notifications.systemMaintenance);
+        this.setFormValue('#systemUpdates', this.settings.notifications.systemUpdates);
+
+        // Appearance settings
+        this.setFormValue(`input[name="theme"][value="${this.settings.appearance.theme}"]`, true);
+        this.setFormValue('#sidebarCollapsed', this.settings.appearance.sidebarCollapsed);
+        this.setFormValue('#compactMode', this.settings.appearance.compactMode);
+
+        // Apply theme
+        document.documentElement.setAttribute('data-theme', this.settings.appearance.theme);
+    }
+
+    setFormValue(selector, value) {
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        if (element.type === 'checkbox' || element.type === 'radio') {
+            element.checked = value;
+        } else {
+            element.value = value;
+        }
+    }
+
+    getFormValue(selector) {
+        const element = document.querySelector(selector);
+        if (!element) return null;
+
+        if (element.type === 'checkbox' || element.type === 'radio') {
+            return element.checked;
+        }
+        return element.value;
+    }
+
+    collectFormData() {
+        return {
+            general: {
+                language: this.getFormValue('select[name="language"]'),
+                timezone: this.getFormValue('select[name="timezone"]'),
+                dateFormat: this.getFormValue('select[name="dateFormat"]'),
+                currency: this.getFormValue('select[name="currency"]'),
+                autoSave: this.getFormValue('#autoSave')
+            },
+            notifications: {
+                emailAppointments: this.getFormValue('#emailAppointments'),
+                emailPatients: this.getFormValue('#emailPatients'),
+                emailBilling: this.getFormValue('#emailBilling'),
+                emailStock: this.getFormValue('#emailStock'),
+                systemMaintenance: this.getFormValue('#systemMaintenance'),
+                systemUpdates: this.getFormValue('#systemUpdates')
+            },
+            appearance: {
+                theme: document.querySelector('input[name="theme"]:checked')?.value || 'light',
+                sidebarCollapsed: this.getFormValue('#sidebarCollapsed'),
+                compactMode: this.getFormValue('#compactMode')
+            }
+        };
+    }
+
+    trackChanges() {
+        const formElements = document.querySelectorAll('#generalSettingsForm input, #generalSettingsForm select, #notificationSettingsForm input, #appearanceSettingsForm input');
+
+        formElements.forEach(element => {
+            element.addEventListener('change', () => {
+                this.unsavedChanges = true;
+                this.updateSaveButton();
+
+                // Auto-save if enabled
+                if (this.settings.general.autoSave) {
+                    clearTimeout(this.autoSaveTimeout);
+                    this.autoSaveTimeout = setTimeout(() => {
+                        this.saveAllSettings();
+                    }, 2000);
+                }
+            });
+        });
+    }
+
+    updateSaveButton() {
+        const saveBtn = document.querySelector('.btn-primary[onclick="saveAllSettings()"]');
+        if (saveBtn) {
+            if (this.unsavedChanges) {
+                saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes *';
+                saveBtn.classList.add('btn-warning');
+                saveBtn.classList.remove('btn-primary');
+            } else {
+                saveBtn.innerHTML = '<i class="fas fa-check me-2"></i>All Saved';
+                saveBtn.classList.add('btn-success');
+                saveBtn.classList.remove('btn-warning', 'btn-primary');
+
+                setTimeout(() => {
+                    saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save All Changes';
+                    saveBtn.classList.add('btn-primary');
+                    saveBtn.classList.remove('btn-success');
+                }, 2000);
+            }
+        }
+    }
+
+    async saveAllSettings() {
+        try {
+            this.showLoadingState('Saving settings...');
+
+            // Collect form data
+            const formData = this.collectFormData();
+
+            // Merge with existing settings
+            this.settings = { ...this.settings, ...formData };
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Save to localStorage
+            this.saveSettings();
+
+            // Apply theme changes
+            document.documentElement.setAttribute('data-theme', this.settings.appearance.theme);
+
+            this.hideLoadingState();
+            this.showNotification('Settings saved successfully!', 'success');
+
+        } catch (error) {
+            this.hideLoadingState();
+            this.showNotification('Error saving settings: ' + error.message, 'error');
+        }
+    }
+
+    exportSettings() {
+        try {
+            const settingsData = {
+                ...this.settings,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(settingsData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `hospital_erp_settings_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            this.showNotification('Settings exported successfully!', 'success');
+        } catch (error) {
+            this.showNotification('Error exporting settings: ' + error.message, 'error');
+        }
+    }
+
+    importSettings() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedSettings = JSON.parse(e.target.result);
+
+                    // Validate settings structure
+                    if (this.validateSettingsStructure(importedSettings)) {
+                        this.settings = { ...this.settings, ...importedSettings };
+                        this.loadSettingsToForm();
+                        this.saveSettings();
+                        this.showNotification('Settings imported successfully!', 'success');
+                    } else {
+                        this.showNotification('Invalid settings file format', 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Error importing settings: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        input.click();
+    }
+
+    validateSettingsStructure(settings) {
+        const requiredSections = ['general', 'notifications', 'appearance'];
+        return requiredSections.every(section => settings.hasOwnProperty(section));
+    }
+
+    resetSettings() {
+        if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
+            localStorage.removeItem('userSettings');
+            this.settings = this.loadSettings();
+            this.loadSettingsToForm();
+            this.showNotification('Settings reset to default values', 'info');
+        }
+    }
+
+    showLoadingState(message) {
+        const loadingModal = document.createElement('div');
+        loadingModal.id = 'settingsLoadingModal';
+        loadingModal.className = 'modal fade';
+        loadingModal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-center py-4">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="mb-0">${message}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(loadingModal);
+        const modal = new bootstrap.Modal(loadingModal);
+        modal.show();
+    }
+
+    hideLoadingState() {
+        const loadingModal = document.getElementById('settingsLoadingModal');
+        if (loadingModal) {
+            const modal = bootstrap.Modal.getInstance(loadingModal);
+            modal.hide();
+            setTimeout(() => loadingModal.remove(), 300);
+        }
+    }
+
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    setupAutoSave() {
+        // Auto-save functionality is handled in trackChanges()
+    }
+
+    setupValidation() {
+        // Add form validation if needed
+    }
+
+    showChangePasswordModal() {
+        // Implementation for change password modal
+        this.showNotification('Change password functionality will be implemented with backend integration', 'info');
+    }
+
+    enable2FA() {
+        // Implementation for 2FA setup
+        this.showNotification('Two-factor authentication setup will be implemented with backend integration', 'info');
+    }
+
+    testNotifications() {
+        this.showNotification('Test notification sent successfully!', 'success');
+    }
+}
+
+// Initialize settings manager
+let settingsManager;
+
+document.addEventListener('DOMContentLoaded', function() {
+    settingsManager = new SettingsManager();
+});
+
+// Legacy function support
+function saveAllSettings() {
+    if (settingsManager) {
+        settingsManager.saveAllSettings();
+    }
+}
+
+function exportSettings() {
+    if (settingsManager) {
+        settingsManager.exportSettings();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"List" }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">{{ page_title|default:"Items" }}</h1>
+            <p class="text-muted mb-0">{{ page_subtitle|default:"Manage items" }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if add_url %}
+            <a href="{{ add_url }}?mobile=1" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Search -->
+{% if show_search %}
+<div class="mobile-dashboard-card mb-3">
+    <form method="GET" class="d-flex gap-2">
+        <input type="hidden" name="mobile" value="1">
+        <input type="text" name="search" class="form-control" placeholder="Search {{ page_title|lower }}..." value="{{ request.GET.search }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<!-- Mobile Stats -->
+{% if show_stats %}
+<div class="row g-3 mb-4">
+    <div class="col-6">
+        <div class="mobile-dashboard-card mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="{{ stat_icon|default:'fas fa-list' }} text-ethiopia-green"></i>
+            </div>
+            <div class="mobile-stat-number">{{ total_count|default:0 }}</div>
+            <div class="mobile-stat-label">Total {{ page_title }}</div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="mobile-dashboard-card mobile-stat-card">
+            <div class="mobile-stat-icon">
+                <i class="fas fa-plus text-ethiopia-blue"></i>
+            </div>
+            <div class="mobile-stat-number">{{ new_count|default:0 }}</div>
+            <div class="mobile-stat-label">New This Month</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Mobile Content -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">{{ page_title }} List</h6>
+    
+    {% if items %}
+        <div class="mobile-generic-list">
+            {% for item in items %}
+            <div class="mobile-generic-item">
+                <div class="d-flex align-items-center">
+                    <div class="mobile-item-icon">
+                        <i class="{{ item_icon|default:'fas fa-circle' }}"></i>
+                    </div>
+                    <div class="mobile-item-info flex-grow-1">
+                        <div class="mobile-item-title">{{ item.name|default:item.title|default:item }}</div>
+                        <div class="mobile-item-details">
+                            <small class="text-muted">
+                                {% if item.created_at %}
+                                    <i class="fas fa-calendar me-1"></i>{{ item.created_at|date:"M d, Y" }}
+                                {% endif %}
+                                {% if item.status %}
+                                    <span class="mx-2">•</span>
+                                    <span class="badge bg-{% if item.status == 'active' %}success{% else %}secondary{% endif %}">
+                                        {{ item.status|title }}
+                                    </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mobile-item-actions">
+                        {% if detail_url_name %}
+                        <a href="{% url detail_url_name item.pk %}?mobile=1" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Mobile Pagination -->
+        {% if items.has_other_pages %}
+        <div class="mobile-pagination mt-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="mobile-pagination-info">
+                    <small class="text-muted">
+                        Page {{ items.number }} of {{ items.paginator.num_pages }}
+                        ({{ items.paginator.count }} total)
+                    </small>
+                </div>
+                <div class="mobile-pagination-controls">
+                    {% if items.has_previous %}
+                        <a href="?page={{ items.previous_page_number }}&mobile=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% if items.has_next %}
+                        <a href="?page={{ items.next_page_number }}&mobile=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-4">
+            <div class="mobile-empty-state">
+                <i class="{{ empty_icon|default:'fas fa-list' }} fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">No {{ page_title|lower }} found</h6>
+                <p class="text-muted mb-3">
+                    {% if request.GET.search %}
+                        No {{ page_title|lower }} match your search criteria.
+                    {% else %}
+                        Start by adding your first {{ page_title|lower|slice:":1"|lower }}{{ page_title|lower|slice:"1:" }}.
+                    {% endif %}
+                </p>
+                {% if add_url %}
+                <a href="{{ add_url }}?mobile=1" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add {{ page_title|slice:":1"|lower }}{{ page_title|slice:"1:" }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Mobile Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    {% if add_url %}
+    <a href="{{ add_url }}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-plus"></i>
+        <span>Add {{ page_title|slice:":1"|lower }}{{ page_title|slice:"1:" }}</span>
+    </a>
+    {% endif %}
+    <a href="{% url 'patients:patient_add' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user-plus"></i>
+        <span>Add Patient</span>
+    </a>
+    <a href="{% url 'appointments:appointment_add' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-calendar-plus"></i>
+        <span>New Appointment</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-generic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mobile-generic-item {
+    padding: 1rem;
+    background: rgba(0, 150, 57, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid var(--mobile-primary);
+    transition: all var(--mobile-transition-fast);
+}
+
+.mobile-generic-item:hover {
+    background: rgba(0, 150, 57, 0.1);
+    transform: translateY(-1px);
+}
+
+.mobile-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--mobile-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.mobile-item-title {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.mobile-item-details {
+    font-size: 0.875rem;
+}
+
+.mobile-item-actions {
+    flex-shrink: 0;
+}
+
+.mobile-pagination {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-pagination-info {
+    flex: 1;
+}
+
+.mobile-pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mobile-empty-state {
+    padding: 2rem 1rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-generic-item {
+        padding: 0.75rem;
+    }
+    
+    .mobile-item-icon {
+        width: 35px;
+        height: 35px;
+        margin-right: 0.75rem;
+    }
+    
+    .mobile-item-title {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-item-details {
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile generic list loaded');
+    
+    // Only show navigation success message if explicitly requested
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_success') === '1' && window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('{{ page_title }} loaded successfully!', 'success');
+    }
+});
+</script>
+{% endblock %}

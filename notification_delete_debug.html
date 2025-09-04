@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Delete Debug - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .notification-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #009639;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f8ff;
+            border-left: 4px solid #007bff;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .delete-notification {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            z-index: 10 !important;
+            position: relative !important;
+        }
+
+        .delete-notification:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+        }
+
+        .debug-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .test-buttons {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-success mb-4">
+            <i class="fas fa-hospital me-2"></i>
+            Notification Delete Debug
+        </h1>
+
+        <div class="debug-info">
+            <strong>Debug Console:</strong>
+            <div id="debugOutput">Page loaded. Check browser console for detailed logs.</div>
+        </div>
+
+        <div class="test-buttons">
+            <button class="btn btn-primary" onclick="testEventListeners()">Test Event Listeners</button>
+            <button class="btn btn-secondary" onclick="testDirectCall()">Test Direct Function Call</button>
+            <button class="btn btn-info" onclick="clearDebug()">Clear Debug</button>
+        </div>
+
+        <!-- CSRF Token -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="test-csrf-token">
+
+        <!-- Sample Notifications -->
+        <div class="notification-item unread">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="notification-content flex-grow-1">
+                    <div class="notification-title fw-semibold">New Patient Registration</div>
+                    <div class="notification-message text-muted">John Doe has been registered as a new patient</div>
+                    <div class="notification-time text-muted small">2 minutes ago</div>
+                </div>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-sm btn-outline-primary mark-as-read" data-notification-id="1">
+                    <i class="fas fa-check me-1"></i>Mark as Read
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-notification"
+                        data-notification-id="1"
+                        data-notification-title="New Patient Registration"
+                        onclick="handleDeleteClick(this)">
+                    <i class="fas fa-trash me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+
+        <div class="notification-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="notification-content flex-grow-1">
+                    <div class="notification-title fw-semibold">Appointment Scheduled</div>
+                    <div class="notification-message text-muted">Dr. Smith has a new appointment at 3:00 PM</div>
+                    <div class="notification-time text-muted small">15 minutes ago</div>
+                </div>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-sm btn-outline-danger delete-notification"
+                        data-notification-id="2"
+                        data-notification-title="Appointment Scheduled"
+                        onclick="handleDeleteClick(this)">
+                    <i class="fas fa-trash me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('JavaScript file loaded');
+
+        // Debug output function
+        function debugLog(message) {
+            console.log(message);
+            const debugOutput = document.getElementById('debugOutput');
+            debugOutput.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM Content Loaded - Initializing notification handlers');
+            
+            // Test if we can find any notifications
+            const allNotifications = document.querySelectorAll('.notification-item');
+            debugLog('Total notifications found: ' + allNotifications.length);
+            
+            // Mark individual notification as read
+            const markAsReadButtons = document.querySelectorAll('.mark-as-read');
+            debugLog('Found mark-as-read buttons: ' + markAsReadButtons.length);
+            
+            markAsReadButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    debugLog('Mark as read clicked for notification: ' + this.dataset.notificationId);
+                });
+            });
+
+            // Delete individual notification
+            const deleteButtons = document.querySelectorAll('.delete-notification');
+            debugLog('Found delete buttons: ' + deleteButtons.length);
+            
+            deleteButtons.forEach((button, index) => {
+                debugLog('Attaching event listener to delete button ' + (index + 1));
+                button.addEventListener('click', function(e) {
+                    debugLog('Delete button clicked via event listener: ' + this.dataset.notificationId);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const notificationId = this.dataset.notificationId;
+                    const notificationTitle = this.dataset.notificationTitle;
+                    debugLog('Button data: ID=' + notificationId + ', Title=' + notificationTitle);
+                    
+                    deleteNotification(notificationId, this, notificationTitle);
+                });
+            });
+        });
+
+        function deleteNotification(notificationId, button, notificationTitle) {
+            debugLog('Delete function called: ID=' + notificationId + ', Title=' + notificationTitle);
+            
+            if (!confirm('Delete "' + notificationTitle + '"?\n\nThis action cannot be undone.')) {
+                debugLog('User cancelled deletion');
+                return;
+            }
+
+            const notificationItem = button.closest('.notification-item');
+            const wasUnread = notificationItem.classList.contains('unread');
+            const originalContent = button.innerHTML;
+
+            debugLog('Starting deletion process for notification: ' + notificationId);
+
+            // Add loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+            button.disabled = true;
+            notificationItem.style.opacity = '0.6';
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (!csrfToken) {
+                debugLog('ERROR: CSRF token not found');
+                alert('Security token not found. Please refresh the page.');
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                notificationItem.style.opacity = '1';
+                return;
+            }
+
+            debugLog('Making API call to delete notification (simulated)');
+
+            // Simulate API call for testing
+            setTimeout(() => {
+                debugLog('Simulated API call completed successfully');
+                
+                // Animate removal
+                notificationItem.style.transition = 'all 0.3s ease';
+                notificationItem.style.transform = 'translateX(-100%)';
+                notificationItem.style.opacity = '0';
+                
+                setTimeout(() => {
+                    notificationItem.remove();
+                    debugLog('Notification removed from DOM');
+                    alert('Notification "' + notificationTitle + '" deleted successfully (simulated)');
+                }, 300);
+            }, 1000);
+        }
+
+        // Direct onclick handler as fallback
+        function handleDeleteClick(button) {
+            debugLog('Direct onclick handler called for button: ' + button.dataset.notificationId);
+            const notificationId = button.dataset.notificationId;
+            const notificationTitle = button.dataset.notificationTitle;
+            debugLog('Calling deleteNotification with: ID=' + notificationId + ', Title=' + notificationTitle);
+            deleteNotification(notificationId, button, notificationTitle);
+        }
+
+        // Test functions
+        function testEventListeners() {
+            debugLog('Testing event listeners...');
+            const firstDeleteButton = document.querySelector('.delete-notification');
+            if (firstDeleteButton) {
+                debugLog('Found delete button, triggering click event');
+                firstDeleteButton.click();
+            } else {
+                debugLog('No delete button found');
+            }
+        }
+
+        function testDirectCall() {
+            debugLog('Testing direct function call...');
+            const firstDeleteButton = document.querySelector('.delete-notification');
+            if (firstDeleteButton) {
+                debugLog('Found delete button, calling handleDeleteClick directly');
+                handleDeleteClick(firstDeleteButton);
+            } else {
+                debugLog('No delete button found');
+            }
+        }
+
+        function clearDebug() {
+            document.getElementById('debugOutput').innerHTML = 'Debug cleared.';
+        }
+
+        // Make functions available globally for debugging
+        window.deleteNotification = deleteNotification;
+        window.handleDeleteClick = handleDeleteClick;
+        window.testEventListeners = testEventListeners;
+        window.testDirectCall = testDirectCall;
+
+        debugLog('All functions initialized and ready for testing');
+    </script>
+</body>
+</html>

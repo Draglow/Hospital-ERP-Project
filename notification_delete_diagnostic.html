@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Delete Diagnostic - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ethiopia-green: #009639;
+            --ethiopia-green-dark: #007a2e;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .diagnostic-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .diagnostic-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .diagnostic-header {
+            color: var(--ethiopia-green);
+            border-bottom: 2px solid var(--ethiopia-green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-ethiopia-green {
+            background-color: var(--ethiopia-green);
+            border-color: var(--ethiopia-green);
+            color: white;
+        }
+
+        .btn-ethiopia-green:hover {
+            background-color: var(--ethiopia-green-dark);
+            border-color: var(--ethiopia-green-dark);
+            color: white;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .status-info { background-color: #17a2b8; }
+
+        .test-button {
+            margin: 5px;
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagnostic-container">
+        <div class="text-center mb-4">
+            <h1 class="text-ethiopia-green">
+                <i class="fas fa-stethoscope me-2"></i>
+                Notification Delete Diagnostic Tool
+            </h1>
+            <p class="text-muted">Ethiopian Hospital ERP - Debug Delete Functionality Issues</p>
+        </div>
+
+        <!-- Quick Status Check -->
+        <div class="diagnostic-card">
+            <h3 class="diagnostic-header">
+                <i class="fas fa-heartbeat me-2"></i>
+                Quick Status Check
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="jsStatus"></span>
+                        <strong>JavaScript Loaded:</strong> <span id="jsStatusText">Checking...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="csrfStatus"></span>
+                        <strong>CSRF Token:</strong> <span id="csrfStatusText">Checking...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="buttonsStatus"></span>
+                        <strong>Delete Buttons:</strong> <span id="buttonsStatusText">Checking...</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="eventsStatus"></span>
+                        <strong>Event Handlers:</strong> <span id="eventsStatusText">Checking...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="apiStatus"></span>
+                        <strong>API Endpoint:</strong> <span id="apiStatusText">Checking...</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="status-indicator status-info" id="functionsStatus"></span>
+                        <strong>Delete Functions:</strong> <span id="functionsStatusText">Checking...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="diagnostic-card">
+            <h3 class="diagnostic-header">
+                <i class="fas fa-tools me-2"></i>
+                Diagnostic Tests
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Basic Tests</h6>
+                    <button class="btn btn-ethiopia-green test-button" onclick="runBasicTests()">
+                        <i class="fas fa-play me-1"></i>Run Basic Tests
+                    </button>
+                    <button class="btn btn-outline-primary test-button" onclick="testCSRFToken()">
+                        <i class="fas fa-shield-alt me-1"></i>Test CSRF
+                    </button>
+                    <button class="btn btn-outline-success test-button" onclick="testDeleteButtons()">
+                        <i class="fas fa-mouse-pointer me-1"></i>Test Buttons
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h6>Advanced Tests</h6>
+                    <button class="btn btn-outline-warning test-button" onclick="testEventHandlers()">
+                        <i class="fas fa-bolt me-1"></i>Test Events
+                    </button>
+                    <button class="btn btn-outline-info test-button" onclick="testAPIEndpoint()">
+                        <i class="fas fa-server me-1"></i>Test API
+                    </button>
+                    <button class="btn btn-outline-danger test-button" onclick="simulateDelete()">
+                        <i class="fas fa-trash me-1"></i>Simulate Delete
+                    </button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-warning" onclick="clearConsole()">
+                    <i class="fas fa-eraser me-1"></i>Clear Console
+                </button>
+                <button class="btn btn-info" onclick="runAllTests()">
+                    <i class="fas fa-play-circle me-1"></i>Run All Tests
+                </button>
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="diagnostic-card">
+            <h3 class="diagnostic-header">
+                <i class="fas fa-terminal me-2"></i>
+                Console Output
+            </h3>
+            <div id="consoleOutput" class="console-output">
+Notification Delete Diagnostic Tool Initialized
+==============================================
+Ready to run tests. Click "Run All Tests" to start comprehensive diagnosis.
+
+Instructions:
+1. Open your notification list page in another tab
+2. Come back here and run tests
+3. Check the console output for issues
+4. Use the browser's Developer Tools (F12) for additional debugging
+
+</div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="diagnostic-card">
+            <h3 class="diagnostic-header">
+                <i class="fas fa-question-circle me-2"></i>
+                Troubleshooting Instructions
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-success">If Delete Buttons Don't Work:</h6>
+                    <ol>
+                        <li>Open browser Developer Tools (F12)</li>
+                        <li>Go to Console tab</li>
+                        <li>Look for JavaScript errors</li>
+                        <li>Try typing: <code>testDeleteButtons()</code></li>
+                        <li>Check if functions exist: <code>typeof deleteNotification</code></li>
+                    </ol>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-info">Common Issues & Solutions:</h6>
+                    <ul>
+                        <li><strong>No console output:</strong> JavaScript not loading</li>
+                        <li><strong>CSRF errors:</strong> Page needs refresh</li>
+                        <li><strong>404 errors:</strong> Wrong URL or routing issue</li>
+                        <li><strong>403 errors:</strong> Permission or authentication issue</li>
+                        <li><strong>No buttons found:</strong> Wrong page or selector issue</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden CSRF Token for Testing -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="diagnostic-csrf-token-12345">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Console logging function
+        function log(message, type = 'info') {
+            const console = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type.toUpperCase().padEnd(7);
+            console.textContent += `[${timestamp}] ${prefix}: ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleOutput').textContent = 'Console cleared.\n';
+        }
+
+        function updateStatus(elementId, status, text) {
+            const indicator = document.getElementById(elementId);
+            const textElement = document.getElementById(elementId + 'Text');
+            
+            indicator.className = `status-indicator status-${status}`;
+            textElement.textContent = text;
+        }
+
+        // Test functions
+        function runBasicTests() {
+            log('Running basic diagnostic tests...', 'info');
+            testCSRFToken();
+            testDeleteButtons();
+            testFunctions();
+        }
+
+        function testCSRFToken() {
+            log('Testing CSRF Token...', 'info');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken && csrfToken.value) {
+                log(`✓ CSRF Token found: ${csrfToken.value.substring(0, 10)}...`, 'success');
+                updateStatus('csrf', 'success', 'Found');
+            } else {
+                log('✗ CSRF Token not found!', 'error');
+                updateStatus('csrf', 'error', 'Missing');
+            }
+        }
+
+        function testDeleteButtons() {
+            log('Testing Delete Buttons...', 'info');
+            
+            // Test desktop buttons
+            const desktopButtons = document.querySelectorAll('.delete-notification');
+            log(`Desktop delete buttons found: ${desktopButtons.length}`, 'info');
+            
+            // Test mobile buttons
+            const mobileButtons = document.querySelectorAll('.mobile-delete-notification');
+            log(`Mobile delete buttons found: ${mobileButtons.length}`, 'info');
+            
+            const totalButtons = desktopButtons.length + mobileButtons.length;
+            if (totalButtons > 0) {
+                updateStatus('buttons', 'success', `${totalButtons} found`);
+                log(`✓ Total delete buttons found: ${totalButtons}`, 'success');
+            } else {
+                updateStatus('buttons', 'warning', 'None found');
+                log('⚠ No delete buttons found - make sure you\'re on the notifications page', 'warning');
+            }
+        }
+
+        function testFunctions() {
+            log('Testing Delete Functions...', 'info');
+            
+            const functions = [
+                'deleteNotification',
+                'testDeleteButtons',
+                'testMobileDeleteButtons',
+                'deleteNotificationById',
+                'deleteMobileNotificationById'
+            ];
+            
+            let foundFunctions = 0;
+            functions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    log(`✓ Function ${funcName} exists`, 'success');
+                    foundFunctions++;
+                } else {
+                    log(`✗ Function ${funcName} missing`, 'error');
+                }
+            });
+            
+            if (foundFunctions > 0) {
+                updateStatus('functions', 'success', `${foundFunctions}/${functions.length} found`);
+            } else {
+                updateStatus('functions', 'error', 'Missing');
+            }
+        }
+
+        function testEventHandlers() {
+            log('Testing Event Handlers...', 'info');
+            
+            if (typeof window.testDeleteButtons === 'function') {
+                log('Calling testDeleteButtons()...', 'info');
+                const result = window.testDeleteButtons();
+                log(`testDeleteButtons() returned: ${result}`, 'info');
+                updateStatus('events', 'success', 'Available');
+            } else {
+                log('testDeleteButtons() function not available', 'error');
+                updateStatus('events', 'error', 'Not available');
+            }
+        }
+
+        function testAPIEndpoint() {
+            log('Testing API Endpoint...', 'info');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            
+            if (!csrfToken) {
+                log('Cannot test API - CSRF token missing', 'error');
+                updateStatus('api', 'error', 'Cannot test');
+                return;
+            }
+
+            fetch('/notifications/delete/999999/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken.value,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                log(`API Response Status: ${response.status}`, 'info');
+                if (response.status === 404) {
+                    log('✓ API endpoint exists (404 expected for test ID)', 'success');
+                    updateStatus('api', 'success', 'Working');
+                } else if (response.status === 403) {
+                    log('⚠ Permission denied - check authentication', 'warning');
+                    updateStatus('api', 'warning', 'Auth issue');
+                } else {
+                    log(`Unexpected status: ${response.status}`, 'warning');
+                    updateStatus('api', 'warning', `Status ${response.status}`);
+                }
+            })
+            .catch(error => {
+                log(`✗ API Error: ${error.message}`, 'error');
+                updateStatus('api', 'error', 'Error');
+            });
+        }
+
+        function simulateDelete() {
+            log('Simulating Delete Operation...', 'info');
+            
+            if (typeof window.deleteNotificationById === 'function') {
+                log('Attempting to delete test notification...', 'info');
+                window.deleteNotificationById('test-123');
+            } else if (typeof window.testDeleteButtons === 'function') {
+                log('Attempting to test delete buttons...', 'info');
+                window.testDeleteButtons();
+            } else {
+                log('No delete functions available for simulation', 'error');
+            }
+        }
+
+        function runAllTests() {
+            log('=== RUNNING COMPREHENSIVE DIAGNOSTIC ===', 'info');
+            clearConsole();
+            setTimeout(() => log('Starting comprehensive diagnostic...', 'info'), 100);
+            setTimeout(() => testCSRFToken(), 200);
+            setTimeout(() => testDeleteButtons(), 400);
+            setTimeout(() => testFunctions(), 600);
+            setTimeout(() => testEventHandlers(), 800);
+            setTimeout(() => testAPIEndpoint(), 1000);
+            setTimeout(() => log('=== DIAGNOSTIC COMPLETE ===', 'info'), 1200);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Diagnostic tool loaded successfully', 'success');
+            updateStatus('js', 'success', 'Loaded');
+            
+            // Run initial status check
+            setTimeout(() => {
+                testCSRFToken();
+                testDeleteButtons();
+                testFunctions();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

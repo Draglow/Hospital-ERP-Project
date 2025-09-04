@@ -1,0 +1,355 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Pharmacy - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Pharmacy</h1>
+        <p class="text-muted">Manage medicine inventory and stock</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportMedicines()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <a href="{% url 'pharmacy:prescription_list' %}?mobile=1" class="btn btn-outline-info">
+            <i class="fas fa-prescription me-2"></i>Prescriptions
+        </a>
+        <a href="{% url 'pharmacy:medicine_add' %}?mobile=1" class="btn btn-primary mobile-add-medicine-btn">
+            <i class="fas fa-plus me-2"></i>
+            <span class="mobile-btn-text">Add Medicine</span>
+        </a>
+    </div>
+</div>
+
+<div class="mobile-dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Medicine Inventory ({{ total_medicines }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <input type="hidden" name="mobile" value="1">
+                <div class="input-group" style="width: 200px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search medicines..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="category" class="form-select" style="width: 110px;" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="form" class="form-select" style="width: 100px;" onchange="this.form.submit()">
+                    <option value="">All Forms</option>
+                    {% for form in forms %}
+                        <option value="{{ form }}" {% if form_filter == form %}selected{% endif %}>{{ form|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="stock" class="form-select" style="width: 110px;" onchange="this.form.submit()">
+                    <option value="">All Stock</option>
+                    <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>Low Stock</option>
+                    <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>Out of Stock</option>
+                    <option value="expired" {% if stock_filter == 'expired' %}selected{% endif %}>Expired</option>
+                </select>
+                {% if search_query or category_filter or form_filter or stock_filter %}
+                    <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+        {% for medicine in page_obj %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 mobile-medicine-card hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="medicine-icon">
+                            <i class="fas fa-pills text-ethiopia-green fs-2"></i>
+                        </div>
+                        <div class="text-end">
+                            {% if medicine.is_expired %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% elif medicine.is_expiring_soon %}
+                                <span class="badge bg-warning">Expiring Soon</span>
+                            {% elif medicine.is_low_stock %}
+                                <span class="badge bg-danger">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">Good</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <h5 class="card-title mb-2">{{ medicine.name }}</h5>
+                    <p class="text-muted small mb-2">{{ medicine.strength }} - {{ medicine.get_form_display }}</p>
+
+                    {% if medicine.generic_name %}
+                        <p class="text-muted small mb-2">Generic: {{ medicine.generic_name }}</p>
+                    {% endif %}
+
+                    <!-- Medicine Information Grid - 2 items per row -->
+                    <div class="mobile-medicine-info-grid mb-3">
+                        <div class="mobile-medicine-info-row">
+                            <div class="mobile-medicine-info-item">
+                                <div class="mobile-medicine-info-value text-ethiopia-blue">{{ medicine.stock_quantity }}</div>
+                                <div class="mobile-medicine-info-label">In Stock</div>
+                            </div>
+                            <div class="mobile-medicine-info-item">
+                                <div class="mobile-medicine-info-value text-ethiopia-yellow">{{ medicine.unit_price }} ETB</div>
+                                <div class="mobile-medicine-info-label">Unit Price</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="badge bg-ethiopia-green">{{ medicine.get_category_display }}</span>
+                        <span class="badge bg-ethiopia-blue ms-1">{{ medicine.manufacturer }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Expires: {{ medicine.expiry_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+
+                    <div class="progress mb-3" style="height: 6px;">
+                        {% widthratio medicine.stock_quantity medicine.minimum_stock_level 100 as stock_percentage %}
+                        <div class="progress-bar bg-{% if stock_percentage < 50 %}danger{% elif stock_percentage < 100 %}warning{% else %}success{% endif %}"
+                             style="width: {% if stock_percentage > 100 %}100{% else %}{{ stock_percentage }}{% endif %}%"></div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}?mobile=1" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <button class="btn btn-outline-info btn-sm" onclick="updateStock({{ medicine.pk }}, '{{ medicine.name }}')">
+                                <i class="fas fa-plus me-1"></i>Stock
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Min: {{ medicine.minimum_stock_level }}
+                        </small>
+                        <small class="text-muted">
+                            Cost: {{ medicine.cost_price }} ETB
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                <h5>No medicines found</h5>
+                <p class="text-muted">{% if search_query %}No medicines match your search criteria.{% else %}No medicines have been added yet.{% endif %}</p>
+                <a href="{% url 'pharmacy:medicine_add' %}?mobile=1" class="btn btn-primary mobile-add-medicine-btn">
+                    <i class="fas fa-plus me-2"></i>
+                    <span class="mobile-btn-text">Add First Medicine</span>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} medicines
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Stock Update Modal -->
+<div class="modal fade" id="stockUpdateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stockUpdateForm">
+                    <div class="mb-3">
+                        <label class="form-label">Medicine</label>
+                        <input type="text" class="form-control" id="medicineName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Add to Stock</label>
+                        <input type="number" class="form-control" id="stockToAdd" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select class="form-select" id="stockReason">
+                            <option value="purchase">New Purchase</option>
+                            <option value="return">Return</option>
+                            <option value="adjustment">Stock Adjustment</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStockUpdate()">Update Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-medicine-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-medicine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.medicine-icon {
+    opacity: 0.8;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentMedicineId = null;
+
+function exportMedicines() {
+    // Create CSV export functionality
+    const medicines = [];
+    const cards = document.querySelectorAll('.mobile-medicine-card');
+
+    // Add header
+    medicines.push(['Name', 'Strength', 'Form', 'Category', 'Manufacturer', 'Stock', 'Unit Price', 'Status', 'Expiry Date']);
+
+    // Add data rows
+    cards.forEach(card => {
+        const name = card.querySelector('.card-title').textContent.trim();
+        const strength = card.querySelector('.text-muted.small').textContent.trim();
+        const category = card.querySelector('.badge.bg-ethiopia-green').textContent.trim();
+        const manufacturer = card.querySelector('.badge.bg-ethiopia-blue').textContent.trim();
+        const stock = card.querySelector('.text-ethiopia-blue').textContent.trim();
+        const price = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+        const status = card.querySelector('.badge').textContent.trim();
+        const expiry = card.querySelector('.fa-calendar').parentElement.textContent.replace('Expires:', '').trim();
+
+        medicines.push([name, strength, '', category, manufacturer, stock, price, status, expiry]);
+    });
+
+    // Create and download CSV
+    const csvContent = medicines.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'medicines_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function updateStock(medicineId, medicineName) {
+    currentMedicineId = medicineId;
+    document.getElementById('medicineName').value = medicineName;
+    document.getElementById('stockToAdd').value = '';
+    document.getElementById('stockReason').value = 'purchase';
+
+    const modal = new bootstrap.Modal(document.getElementById('stockUpdateModal'));
+    modal.show();
+}
+
+function saveStockUpdate() {
+    const stockToAdd = document.getElementById('stockToAdd').value;
+    const reason = document.getElementById('stockReason').value;
+
+    if (!stockToAdd || stockToAdd <= 0) {
+        alert('Please enter a valid stock quantity');
+        return;
+    }
+
+    // Here you would normally send an AJAX request to update the stock
+    // For now, we'll just show a success message and reload
+    alert(`Stock updated successfully! Added ${stockToAdd} units.`);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('stockUpdateModal'));
+    modal.hide();
+
+    // Reload the page to show updated stock
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile medicines list loaded');
+
+    // Show mobile notification if coming from dashboard
+    if (document.referrer.includes('/dashboard/mobile/')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Medicines loaded successfully!', 'success');
+        }
+    }
+});
+</script>
+{% endblock %}

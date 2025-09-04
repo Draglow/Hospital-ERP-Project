@@ -1,0 +1,240 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}New Appointment - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Schedule New Appointment</h1>
+        <p class="text-muted">Book an appointment for a patient with a doctor</p>
+    </div>
+    <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Appointment Information</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user text-ethiopia-green me-2"></i>
+                            Patient Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Patient *</label>
+                            <select class="form-select" name="patient" required>
+                                <option value="">Select Patient</option>
+                                {% for patient in patients %}
+                                    <option value="{{ patient.id }}">{{ patient.get_full_name }} - {{ patient.patient_id }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a patient.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Date *</label>
+                            <input type="date" class="form-control" name="appointment_date" required>
+                            <div class="invalid-feedback">Please select an appointment date.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Time *</label>
+                            <input type="time" class="form-control" name="appointment_time" required>
+                            <div class="invalid-feedback">Please select an appointment time.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user-md text-ethiopia-blue me-2"></i>
+                            Doctor Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Doctor *</label>
+                            <select class="form-select" name="doctor" required>
+                                <option value="">Select Doctor</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name }} - {{ doctor.specialization }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a doctor.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Type *</label>
+                            <select class="form-select" name="appointment_type" required>
+                                <option value="">Select Type</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="follow_up">Follow-up</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="routine_checkup">Routine Checkup</option>
+                                <option value="vaccination">Vaccination</option>
+                                <option value="surgery">Surgery</option>
+                            </select>
+                            <div class="invalid-feedback">Please select appointment type.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" name="priority">
+                                <option value="normal">Normal</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="emergency">Emergency</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="mb-3">
+                            <i class="fas fa-notes-medical text-ethiopia-yellow me-2"></i>
+                            Additional Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Chief Complaint</label>
+                            <textarea class="form-control" name="chief_complaint" rows="3" placeholder="Brief description of the patient's main concern..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="2" placeholder="Additional notes or special instructions..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                Scheduling Tips
+            </h6>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Check doctor availability before scheduling</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Emergency appointments take priority</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Allow 30 minutes between appointments</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Confirm patient contact information</li>
+            </ul>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-clock text-ethiopia-blue me-2"></i>
+                Working Hours
+            </h6>
+            <div class="small">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Monday - Friday:</span>
+                    <span>8:00 AM - 6:00 PM</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Saturday:</span>
+                    <span>9:00 AM - 4:00 PM</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Sunday:</span>
+                    <span>Emergency Only</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set minimum date to today and add availability checking
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[name="appointment_date"]');
+    const timeInput = document.querySelector('input[name="appointment_time"]');
+    const doctorSelect = document.querySelector('select[name="doctor"]');
+    const availabilityDiv = document.createElement('div');
+    availabilityDiv.id = 'availability-status';
+    availabilityDiv.className = 'mt-2';
+
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+
+        // Add availability status div after time input
+        if (timeInput) {
+            timeInput.parentNode.appendChild(availabilityDiv);
+        }
+    }
+
+    // Check availability when date, time, or doctor changes
+    function checkAvailability() {
+        const doctor = doctorSelect.value;
+        const date = dateInput.value;
+        const time = timeInput.value;
+
+        if (doctor && date && time) {
+            availabilityDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>Checking availability...';
+
+            fetch(`/appointments/check-availability/?doctor_id=${doctor}&appointment_date=${date}&appointment_time=${time}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        availabilityDiv.innerHTML = `<div class="text-success"><i class="fas fa-check-circle me-2"></i>${data.message}</div>`;
+                        document.querySelector('button[type="submit"]').disabled = false;
+                    } else {
+                        availabilityDiv.innerHTML = `<div class="text-danger"><i class="fas fa-times-circle me-2"></i>${data.message}</div>`;
+                        document.querySelector('button[type="submit"]').disabled = true;
+                    }
+                })
+                .catch(error => {
+                    availabilityDiv.innerHTML = '<div class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Error checking availability</div>';
+                    console.error('Error:', error);
+                });
+        } else {
+            availabilityDiv.innerHTML = '';
+            document.querySelector('button[type="submit"]').disabled = false;
+        }
+    }
+
+    if (doctorSelect && dateInput && timeInput) {
+        doctorSelect.addEventListener('change', checkAvailability);
+        dateInput.addEventListener('change', checkAvailability);
+        timeInput.addEventListener('change', checkAvailability);
+    }
+});
+</script>
+{% endblock %}

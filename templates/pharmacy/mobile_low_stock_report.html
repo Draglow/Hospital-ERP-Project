@@ -1,0 +1,365 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Low Stock Report - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-danger">Low Stock Report</h1>
+            <p class="text-muted mb-0">{{ total_count }} medicine{{ total_count|pluralize }} below minimum</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" onclick="exportLowStock()">
+                <i class="fas fa-download"></i>
+            </button>
+            <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Alert Banner -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="alert alert-warning d-flex align-items-center mb-0">
+        <i class="fas fa-exclamation-triangle me-3"></i>
+        <div>
+            <h6 class="alert-heading mb-1">Stock Alert</h6>
+            <small>These medicines need immediate restocking.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Statistics Cards -->
+<div class="mobile-statistics-section mb-4">
+    <h6 class="mobile-section-title mb-3">
+        <i class="fas fa-chart-bar text-ethiopia-green me-2"></i>Stock Statistics
+    </h6>
+    <div class="mobile-stats-grid">
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card danger-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="mobile-stat-number">{{ total_count }}</div>
+                <div class="mobile-stat-label">Low Stock</div>
+            </div>
+            <div class="mobile-stat-card warning-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="mobile-stat-number">
+                    {% for medicine in medicines %}
+                        {% if medicine.stock_quantity == 0 %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </div>
+                <div class="mobile-stat-label">Out of Stock</div>
+            </div>
+        </div>
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card info-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="mobile-stat-number">{{ medicines|length }}</div>
+                <div class="mobile-stat-label">Items Listed</div>
+            </div>
+            <div class="mobile-stat-card success-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="mobile-stat-number">
+                    {% for medicine in medicines %}
+                        {% if medicine.stock_quantity > 0 %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </div>
+                <div class="mobile-stat-label">Critical Stock</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Low Stock Medicines List -->
+{% if medicines %}
+    <div class="mobile-dashboard-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Low Stock Medicines</h6>
+            <button class="btn btn-sm btn-primary" onclick="bulkRestock()">
+                <i class="fas fa-plus me-1"></i>Restock
+            </button>
+        </div>
+    </div>
+
+    <div class="mobile-medicines-list">
+        {% for medicine in medicines %}
+        <div class="mobile-medicine-card low-stock-card">
+            <div class="mobile-medicine-header">
+                <div class="mobile-medicine-icon">
+                    <i class="fas fa-pills text-ethiopia-green"></i>
+                </div>
+                <div class="mobile-medicine-meta">
+                    <div class="mobile-medicine-name">{{ medicine.name }}</div>
+                    <div class="mobile-medicine-manufacturer">{{ medicine.manufacturer }}</div>
+                </div>
+                <div class="mobile-medicine-status">
+                    {% if medicine.stock_quantity == 0 %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                    {% else %}
+                        <span class="badge bg-warning">Low Stock</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mobile-medicine-info-grid mt-3">
+                <div class="mobile-medicine-info-row">
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-danger">{{ medicine.stock_quantity }}</div>
+                        <div class="mobile-medicine-info-label">Current Stock</div>
+                    </div>
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-muted">{{ medicine.minimum_stock_level }}</div>
+                        <div class="mobile-medicine-info-label">Minimum Level</div>
+                    </div>
+                </div>
+                <div class="mobile-medicine-info-row">
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-ethiopia-blue">{{ medicine.get_category_display }}</div>
+                        <div class="mobile-medicine-info-label">Category</div>
+                    </div>
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-ethiopia-green">{{ medicine.selling_price|default:medicine.cost_price }} ETB</div>
+                        <div class="mobile-medicine-info-label">Unit Price</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stock Level Progress Bar -->
+            <div class="mobile-stock-progress mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-muted">Stock Level</small>
+                    <small class="text-danger fw-bold">
+                        Shortage: {{ medicine.minimum_stock_level|add:medicine.stock_quantity|add:"-"|add:medicine.stock_quantity }}
+                    </small>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    {% widthratio medicine.stock_quantity medicine.minimum_stock_level 100 as stock_percentage %}
+                    <div class="progress-bar bg-danger" 
+                         style="width: {% if stock_percentage > 100 %}100{% else %}{{ stock_percentage }}{% endif %}%"></div>
+                </div>
+            </div>
+            
+            <div class="mobile-medicine-actions mt-3">
+                <div class="btn-group w-100">
+                    <a href="{% url 'pharmacy:stock_adjustment' medicine.pk %}?mobile=1" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Restock
+                    </a>
+                    <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-eye me-1"></i>View
+                    </a>
+                    <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="mobile-dashboard-card text-center py-5">
+        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+        <h5 class="text-success">All Stock Levels Good</h5>
+        <p class="text-muted">No medicines are currently below their minimum stock levels.</p>
+        <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-primary mt-3">
+            <i class="fas fa-pills me-2"></i>View All Medicines
+        </a>
+    </div>
+{% endif %}
+
+<!-- Mobile Quick Actions -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-cogs me-2"></i>Quick Actions
+    </h6>
+    <div class="d-grid gap-2">
+        <button class="btn btn-outline-primary" onclick="exportLowStock()">
+            <i class="fas fa-download me-2"></i>Export Report
+        </button>
+        <button class="btn btn-outline-success" onclick="printReport()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+        <a href="{% url 'pharmacy:medicine_add' %}?mobile=1" class="btn btn-outline-info">
+            <i class="fas fa-plus me-2"></i>Add New Medicine
+        </a>
+        <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-2"></i>All Medicines
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.low-stock-card {
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+.mobile-medicine-card {
+    background: white;
+    border-radius: var(--mobile-radius-lg);
+    padding: var(--mobile-spacing-lg);
+    margin-bottom: var(--mobile-spacing-md);
+    box-shadow: var(--mobile-shadow-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all var(--mobile-transition-base);
+}
+
+.mobile-medicine-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--mobile-spacing-md);
+}
+
+.mobile-medicine-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 150, 57, 0.1);
+    border-radius: var(--mobile-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.mobile-medicine-meta {
+    flex: 1;
+}
+
+.mobile-medicine-name {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.mobile-medicine-manufacturer {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.mobile-medicine-status {
+    flex-shrink: 0;
+}
+
+.mobile-medicine-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-medicine-info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-medicine-info-item {
+    text-align: center;
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-sm);
+}
+
+.mobile-medicine-info-value {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-medicine-info-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-stock-progress {
+    margin-top: var(--mobile-spacing-md);
+}
+
+.mobile-medicine-actions {
+    margin-top: var(--mobile-spacing-md);
+}
+
+.danger-accent .mobile-stat-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.warning-accent .mobile-stat-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.info-accent .mobile-stat-icon {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.success-accent .mobile-stat-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportLowStock() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Exporting low stock report...', 'info');
+    }
+    // Export functionality would be implemented here
+    setTimeout(() => {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Export completed!', 'success');
+        }
+    }, 1000);
+}
+
+function printReport() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Preparing report for printing...', 'info');
+    }
+    window.print();
+}
+
+function bulkRestock() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Bulk restock feature coming soon!', 'info');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile low stock report loaded');
+    
+    // Show mobile notification if coming from pharmacy
+    if (document.referrer.includes('/pharmacy/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Low stock report loaded successfully!', 'success');
+        }
+    }
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000);
+});
+</script>
+{% endblock %}

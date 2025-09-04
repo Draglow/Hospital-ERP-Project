@@ -1,0 +1,281 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dr. {{ doctor.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dr. {{ doctor.get_full_name }}</h1>
+        <p class="text-muted">{{ doctor.specialization }} - {{ doctor.department }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'doctors:doctor_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Doctors
+        </a>
+        <a href="{% url 'doctors:doctor_edit' doctor.pk %}" class="btn btn-outline-primary">
+            <i class="fas fa-edit me-2"></i>Edit Profile
+        </a>
+        <a href="{% url 'doctors:doctor_schedule' doctor.pk %}" class="btn btn-primary">
+            <i class="fas fa-calendar me-2"></i>View Schedule
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-ethiopia-green rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-user-md text-white fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1">Dr. {{ doctor.get_full_name }}</h5>
+                    <p class="text-muted mb-1">{{ doctor.specialization }}</p>
+                    <span class="badge bg-{% if doctor.is_available %}success{% else %}secondary{% endif %}">
+                        {% if doctor.is_available %}Available{% else %}Unavailable{% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-id-card text-ethiopia-green me-2"></i>
+                        Personal Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Full Name</label>
+                        <div class="fw-semibold">{{ doctor.get_full_name }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Doctor ID</label>
+                        <div>{{ doctor.doctor_id }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Gender</label>
+                        <div>{{ doctor.get_gender_display }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Date of Birth</label>
+                        <div>{{ doctor.date_of_birth|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-phone text-ethiopia-blue me-2"></i>
+                        Contact Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Phone Number</label>
+                        <div>{{ doctor.phone_number }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <div>{{ doctor.email|default:"Not provided" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Emergency Contact</label>
+                        <div>{{ doctor.emergency_contact|default:"Not provided" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Address</label>
+                        <div>{{ doctor.address|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-graduation-cap text-ethiopia-yellow me-2"></i>
+                        Professional Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Specialization</label>
+                        <div class="fw-semibold">{{ doctor.specialization }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Department</label>
+                        <div>{{ doctor.department }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">License Number</label>
+                        <div>{{ doctor.license_number|default:"Not provided" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Years of Experience</label>
+                        <div>{{ doctor.years_of_experience|default:"Not specified" }} years</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-briefcase text-ethiopia-red me-2"></i>
+                        Employment Details
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Employment Type</label>
+                        <div>{{ doctor.get_employment_type_display|default:"Not specified" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Join Date</label>
+                        <div>{{ doctor.join_date|date:"F d, Y"|default:"Not specified" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Consultation Fee</label>
+                        <div>{{ doctor.consultation_fee|default:"Not set" }} ETB</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Status</label>
+                        <span class="badge bg-{% if doctor.is_active %}success{% else %}secondary{% endif %}">
+                            {% if doctor.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if doctor.qualifications %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <i class="fas fa-certificate text-ethiopia-green me-2"></i>
+                        Qualifications
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ doctor.qualifications }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if doctor.bio %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user text-ethiopia-blue me-2"></i>
+                        Biography
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ doctor.bio }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-chart-bar text-ethiopia-green me-2"></i>
+                Statistics
+            </h6>
+            <div class="row text-center">
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-green">{{ total_appointments|default:0 }}</div>
+                    <div class="stat-label">Total Appointments</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-blue">{{ today_appointments|default:0 }}</div>
+                    <div class="stat-label">Today's Appointments</div>
+                </div>
+            </div>
+            <hr>
+            <div class="row text-center">
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-yellow">{{ completed_appointments|default:0 }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-red">{{ cancelled_appointments|default:0 }}</div>
+                    <div class="stat-label">Cancelled</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-calendar-check text-ethiopia-blue me-2"></i>
+                Today's Schedule
+            </h6>
+            {% if todays_appointments %}
+                {% for appointment in todays_appointments %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div>
+                        <div class="fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                        <div class="small text-muted">{{ appointment.patient.get_full_name }}</div>
+                    </div>
+                    <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                        {{ appointment.get_status_display }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No appointments scheduled for today.</p>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-cogs text-ethiopia-yellow me-2"></i>
+                Quick Actions
+            </h6>
+            <div class="d-grid gap-2">
+                <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+                </a>
+                <a href="{% url 'doctors:doctor_schedule' doctor.pk %}" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-calendar me-2"></i>View Full Schedule
+                </a>
+                <button class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-chart-line me-2"></i>Performance Report
+                </button>
+                <button class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-bell me-2"></i>Send Notification
+                </button>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-star text-ethiopia-red me-2"></i>
+                Patient Feedback
+            </h6>
+            <div class="text-center">
+                <div class="display-6 text-ethiopia-green">4.8</div>
+                <div class="text-muted">Average Rating</div>
+                <div class="mt-2">
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                </div>
+                <div class="small text-muted mt-1">Based on {{ total_reviews|default:0 }} reviews</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

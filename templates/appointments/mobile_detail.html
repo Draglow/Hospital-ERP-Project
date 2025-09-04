@@ -1,0 +1,380 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Appointment Details - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Appointment Details</h1>
+        <p class="text-muted">View and manage appointment information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+        {% if appointment.status != 'cancelled' %}
+            <a href="{% url 'appointments:appointment_edit' appointment.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-edit me-1"></i>Edit
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <!-- Appointment Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Appointment Information</h5>
+                <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %} fs-6">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+            
+            <!-- Patient Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-user text-ethiopia-green me-2"></i>
+                    Patient Information
+                </h6>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Patient Name</label>
+                        <div class="fw-semibold">{{ appointment.patient.get_full_name }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Patient ID</label>
+                        <div>{{ appointment.patient.patient_id }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Age</label>
+                        <div>{{ appointment.patient.age }} years</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Phone</label>
+                        <div>{{ appointment.patient.phone_number }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Doctor Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-user-md text-ethiopia-blue me-2"></i>
+                    Doctor Information
+                </h6>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Doctor Name</label>
+                        <div class="fw-semibold">Dr. {{ appointment.doctor.get_full_name }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Specialization</label>
+                        <div>{{ appointment.doctor.get_specialty_display }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Sub-Specialty</label>
+                        <div>{{ appointment.doctor.sub_specialty|default:"General Practice" }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Contact</label>
+                        <div>{{ appointment.doctor.user.phone|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <!-- Appointment Schedule Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-calendar-alt text-ethiopia-yellow me-2"></i>
+                    Appointment Schedule
+                </h6>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Date</label>
+                        <div class="fw-semibold">{{ appointment.appointment_date|date:"l, F d, Y" }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Time</label>
+                        <div class="fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Duration</label>
+                        <div>{{ appointment.duration|default:"30" }} minutes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Appointment Details Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                    Appointment Details
+                </h6>
+                
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Type</label>
+                        <div>{{ appointment.get_appointment_type_display }}</div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Priority</label>
+                        <span class="badge bg-{% if appointment.priority == 'urgent' %}danger{% elif appointment.priority == 'high' %}warning{% elif appointment.priority == 'normal' %}success{% else %}secondary{% endif %}">
+                            {{ appointment.get_priority_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Created</label>
+                        <div>{{ appointment.created_at|date:"M d, Y g:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if appointment.reason %}
+            <hr>
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-notes-medical text-ethiopia-green me-2"></i>
+                    Reason for Visit
+                </h6>
+                <div class="bg-light p-3 rounded">
+                    {{ appointment.reason }}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if appointment.notes %}
+            <hr>
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-sticky-note text-ethiopia-blue me-2"></i>
+                    Notes
+                </h6>
+                <div class="bg-light p-3 rounded">
+                    {{ appointment.notes }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-cogs text-ethiopia-green me-2"></i>
+                Quick Actions
+            </h6>
+            <div class="d-grid gap-2">
+                {% if appointment.status == 'scheduled' %}
+                    <button class="btn btn-success btn-sm" onclick="updateStatus('in_progress')">
+                        <i class="fas fa-play me-2"></i>Start Appointment
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="updateStatus('cancelled')">
+                        <i class="fas fa-times me-2"></i>Cancel Appointment
+                    </button>
+                {% elif appointment.status == 'in_progress' %}
+                    <button class="btn btn-success btn-sm" onclick="updateStatus('completed')">
+                        <i class="fas fa-check me-2"></i>Complete Appointment
+                    </button>
+                {% endif %}
+                
+                <a href="{% url 'patients:patient_detail' appointment.patient.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-user me-2"></i>View Patient Profile
+                </a>
+                
+                <a href="{% url 'doctors:doctor_detail' appointment.doctor.pk %}?mobile=1" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-user-md me-2"></i>View Doctor Profile
+                </a>
+                
+                {% if appointment.status == 'completed' %}
+                    <button class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-medical me-2"></i>Generate Report
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient History -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-blue me-2"></i>
+                Patient History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Previous Appointments:</strong> {{ patient_appointments_count|default:0 }}
+                </div>
+                <div class="mb-2">
+                    <strong>Last Visit:</strong> 
+                    {% if last_appointment %}
+                        {{ last_appointment.appointment_date|date:"M d, Y" }}
+                    {% else %}
+                        First visit
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <strong>Blood Type:</strong> {{ appointment.patient.blood_type|default:"Not specified" }}
+                </div>
+                <div class="mb-2">
+                    <strong>Allergies:</strong> 
+                    {% if appointment.patient.allergies %}
+                        {{ appointment.patient.allergies }}
+                    {% else %}
+                        None recorded
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if appointment.status == 'scheduled' %}
+    <!-- Reminder -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-clock text-ethiopia-yellow me-2"></i>
+                Reminder
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">Appointment scheduled for {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</p>
+                <p class="mb-0">Please ensure the patient arrives 15 minutes early for check-in.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-dashboard-card h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.badge.fs-6 {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+    
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateStatus(newStatus) {
+    const statusText = newStatus.replace('_', ' ');
+    if (confirm(`Are you sure you want to ${statusText} this appointment?`)) {
+        let endpoint;
+
+        // Map status to correct endpoint
+        switch(newStatus) {
+            case 'in_progress':
+                endpoint = `/appointments/{{ appointment.pk }}/start/`;
+                break;
+            case 'completed':
+                endpoint = `/appointments/{{ appointment.pk }}/complete/`;
+                break;
+            case 'cancelled':
+                endpoint = `/appointments/{{ appointment.pk }}/cancel-ajax/`;
+                break;
+            default:
+                console.error('Unknown status:', newStatus);
+                return;
+        }
+
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification(data.message || 'Appointment status updated successfully!', 'success');
+                }
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification(data.message || 'Error updating appointment status', 'danger');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Error updating appointment status', 'danger');
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile appointment detail loaded');
+    
+    // Show mobile notification if coming from list
+    if (document.referrer.includes('/appointments/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Appointment details loaded successfully!', 'success');
+        }
+    }
+    
+    // Handle report generation button
+    const reportButton = document.querySelector('.btn-outline-success');
+    if (reportButton && reportButton.textContent.includes('Generate Report')) {
+        reportButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Report generation feature coming soon!');
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Add Medicine - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Add New Medicine</h1>
+            <p class="text-muted mb-0">Register new medicine</p>
+        </div>
+        <div>
+            <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Form -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">Medicine Information</h6>
+    
+    <form method="post" class="mobile-form needs-validation" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="mobile" value="1">
+        
+        <!-- Basic Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Basic Information</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="name" class="form-label">Medicine Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <div class="invalid-feedback">Please enter medicine name.</div>
+                </div>
+                <div class="col-12">
+                    <label for="generic_name" class="form-label">Generic Name</label>
+                    <input type="text" class="form-control" id="generic_name" name="generic_name">
+                </div>
+                <div class="col-12">
+                    <label for="brand_name" class="form-label">Brand Name</label>
+                    <input type="text" class="form-control" id="brand_name" name="brand_name">
+                </div>
+                <div class="col-12">
+                    <label for="manufacturer" class="form-label">Manufacturer *</label>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" required>
+                    <div class="invalid-feedback">Please enter manufacturer.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classification -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Classification</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="category" class="form-label">Category *</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        {% for value, label in categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a category.</div>
+                </div>
+                <div class="col-12">
+                    <label for="form" class="form-label">Form *</label>
+                    <select class="form-select" id="form" name="form" required>
+                        <option value="">Select Form</option>
+                        {% for value, label in forms %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a form.</div>
+                </div>
+                <div class="col-12">
+                    <label for="strength" class="form-label">Strength *</label>
+                    <input type="text" class="form-control" id="strength" name="strength" required placeholder="e.g., 500mg, 10ml">
+                    <div class="invalid-feedback">Please enter strength.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Stock Information</h6>
+            <div class="row g-3">
+                <div class="col-6">
+                    <label for="stock_quantity" class="form-label">Stock Quantity</label>
+                    <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" min="0" value="0">
+                </div>
+                <div class="col-6">
+                    <label for="minimum_stock_level" class="form-label">Min Stock Level</label>
+                    <input type="number" class="form-control" id="minimum_stock_level" name="minimum_stock_level" min="0" value="10">
+                </div>
+                <div class="col-6">
+                    <label for="unit_price" class="form-label">Unit Price (ETB)</label>
+                    <input type="number" class="form-control" id="unit_price" name="unit_price" min="0" step="0.01">
+                </div>
+                <div class="col-6">
+                    <label for="cost_price" class="form-label">Cost Price (ETB)</label>
+                    <input type="number" class="form-control" id="cost_price" name="cost_price" min="0" step="0.01">
+                </div>
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Important Dates</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="manufacture_date" class="form-label">Manufacture Date</label>
+                    <input type="date" class="form-control" id="manufacture_date" name="manufacture_date">
+                </div>
+                <div class="col-12">
+                    <label for="expiry_date" class="form-label">Expiry Date</label>
+                    <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Medical Information</h6>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Medicine description and usage"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="side_effects" class="form-label">Side Effects</label>
+                <textarea class="form-control" id="side_effects" name="side_effects" rows="2" placeholder="Known side effects"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="contraindications" class="form-label">Contraindications</label>
+                <textarea class="form-control" id="contraindications" name="contraindications" rows="2" placeholder="When not to use"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="storage_instructions" class="form-label">Storage Instructions</label>
+                <textarea class="form-control" id="storage_instructions" name="storage_instructions" rows="2" placeholder="How to store the medicine"></textarea>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mobile-form-actions">
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-pills me-2"></i>Add Medicine
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-pills"></i>
+        <span>All Medicines</span>
+    </a>
+    <a href="{% url 'patients:patient_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-users"></i>
+        <span>Patients</span>
+    </a>
+    <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-calendar"></i>
+        <span>Appointments</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1rem;
+}
+
+.mobile-form-section-title {
+    color: #009639;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.2);
+}
+
+.mobile-form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(0, 150, 57, 0.1);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #009639;
+    box-shadow: 0 0 0 0.2rem rgba(0, 150, 57, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #009639, #0F47AF);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 150, 57, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 375px) {
+    .mobile-form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+    
+    .mobile-form-section-title {
+        font-size: 0.9rem;
+    }
+    
+    .form-control,
+    .form-select {
+        padding: 10px 14px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Show mobile notification
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification('Please fill in all required fields', 'danger');
+                }
+            }
+            form.classList.add('was-validated');
+        }, false);
+    }
+    
+    // Set minimum expiry date to today
+    const expiryInput = document.getElementById('expiry_date');
+    if (expiryInput) {
+        const today = new Date().toISOString().split('T')[0];
+        expiryInput.min = today;
+    }
+    
+    // Set maximum manufacture date to today
+    const manufactureInput = document.getElementById('manufacture_date');
+    if (manufactureInput) {
+        const today = new Date().toISOString().split('T')[0];
+        manufactureInput.max = today;
+    }
+    
+    // Auto-calculate profit margin
+    const costPriceInput = document.getElementById('cost_price');
+    const unitPriceInput = document.getElementById('unit_price');
+    
+    function calculateMargin() {
+        const costPrice = parseFloat(costPriceInput.value) || 0;
+        const unitPrice = parseFloat(unitPriceInput.value) || 0;
+        
+        if (costPrice > 0 && unitPrice > 0) {
+            const margin = ((unitPrice - costPrice) / costPrice * 100).toFixed(1);
+            console.log(`Profit margin: ${margin}%`);
+        }
+    }
+    
+    if (costPriceInput && unitPriceInput) {
+        costPriceInput.addEventListener('blur', calculateMargin);
+        unitPriceInput.addEventListener('blur', calculateMargin);
+    }
+    
+    // Show success notification on form load
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Medicine form loaded successfully!', 'info');
+    }
+});
+</script>
+{% endblock %}

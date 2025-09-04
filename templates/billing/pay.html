@@ -1,0 +1,270 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Process Payment - Invoice {{ invoice.invoice_number }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Process Payment</h1>
+        <p class="text-muted">Invoice {{ invoice.invoice_number }} - {{ invoice.patient.get_full_name }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Invoice
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Payment Information</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-credit-card text-ethiopia-green me-2"></i>
+                            Payment Details
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Amount (ETB) *</label>
+                            <input type="number" class="form-control" name="payment_amount" min="0" step="0.01" max="{{ invoice.balance_due }}" value="{{ invoice.balance_due }}" required>
+                            <div class="form-text">Maximum: {{ invoice.balance_due|floatformat:2 }} ETB (Outstanding balance)</div>
+                            <div class="invalid-feedback">Please enter a valid payment amount.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method *</label>
+                            <select class="form-select" name="payment_method" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="mobile_money">Mobile Money (M-Birr, HelloCash)</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="debit_card">Debit Card</option>
+                                <option value="check">Check</option>
+                                <option value="insurance">Insurance</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a payment method.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Date *</label>
+                            <input type="date" class="form-control" name="payment_date" required>
+                            <div class="invalid-feedback">Please select payment date.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-info-circle text-ethiopia-blue me-2"></i>
+                            Transaction Details
+                        </h6>
+                        
+                        <div class="mb-3" id="reference-field" style="display: none;">
+                            <label class="form-label">Reference Number</label>
+                            <input type="text" class="form-control" name="reference_number" placeholder="e.g., Transaction ID, Check Number">
+                            <div class="form-text">Enter transaction reference for non-cash payments</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Received By *</label>
+                            <input type="text" class="form-control" name="received_by" value="{{ user.get_full_name }}" required>
+                            <div class="invalid-feedback">Please enter who received the payment.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="3" placeholder="Additional payment notes or instructions..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Payment Summary</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Invoice Total:</span>
+                                        <span>{{ invoice.total_amount|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Previously Paid:</span>
+                                        <span>{{ invoice.amount_paid|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Outstanding Balance:</span>
+                                        <span>{{ invoice.balance_due|floatformat:2 }} ETB</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Payment Amount:</span>
+                                        <span id="payment-display">{{ invoice.balance_due|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between fw-bold text-success">
+                                        <span>Remaining Balance:</span>
+                                        <span id="remaining-balance">0.00 ETB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-credit-card me-2"></i>Process Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-file-invoice text-ethiopia-green me-2"></i>
+                Invoice Summary
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Invoice #:</strong> {{ invoice.invoice_number }}
+                </div>
+                <div class="mb-2">
+                    <strong>Patient:</strong> {{ invoice.patient.get_full_name }}
+                </div>
+                <div class="mb-2">
+                    <strong>Issue Date:</strong> {{ invoice.issue_date|date:"M d, Y" }}
+                </div>
+                <div class="mb-2">
+                    <strong>Due Date:</strong> {{ invoice.due_date|date:"M d, Y" }}
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'partially_paid' %}warning{% elif invoice.status == 'pending' %}primary{% else %}danger{% endif %}">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-money-bill-wave text-ethiopia-blue me-2"></i>
+                Payment Methods
+            </h6>
+            <div class="small">
+                <div class="mb-2"><strong>Cash:</strong> Immediate payment, no reference needed</div>
+                <div class="mb-2"><strong>Bank Transfer:</strong> Requires transaction reference</div>
+                <div class="mb-2"><strong>Mobile Money:</strong> M-Birr, HelloCash, etc.</div>
+                <div class="mb-2"><strong>Cards:</strong> Credit/Debit card payments</div>
+                <div class="mb-2"><strong>Insurance:</strong> Insurance claim payments</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-yellow me-2"></i>
+                Payment History
+            </h6>
+            {% if invoice.payments.all %}
+                {% for payment in invoice.payments.all %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div>
+                        <div class="fw-semibold">{{ payment.amount|floatformat:2 }} ETB</div>
+                        <div class="small text-muted">{{ payment.payment_date|date:"M d, Y" }}</div>
+                    </div>
+                    <span class="badge bg-success">{{ payment.get_method_display }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No payments recorded yet.</p>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-shield-alt text-ethiopia-red me-2"></i>
+                Security Notes
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">• Verify payment amount before processing</p>
+                <p class="mb-2">• Keep transaction references for records</p>
+                <p class="mb-2">• Issue receipt after payment confirmation</p>
+                <p class="mb-0">• Report any discrepancies immediately</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide reference field based on payment method
+document.querySelector('select[name="payment_method"]').addEventListener('change', function() {
+    const referenceField = document.getElementById('reference-field');
+    const referenceInput = document.querySelector('input[name="reference_number"]');
+    
+    if (this.value === 'cash') {
+        referenceField.style.display = 'none';
+        referenceInput.required = false;
+    } else if (this.value !== '') {
+        referenceField.style.display = 'block';
+        referenceInput.required = true;
+    } else {
+        referenceField.style.display = 'none';
+        referenceInput.required = false;
+    }
+});
+
+// Update payment display and remaining balance
+document.querySelector('input[name="payment_amount"]').addEventListener('input', function() {
+    const paymentAmount = parseFloat(this.value) || 0;
+    const outstandingBalance = {{ invoice.balance_due }};
+    const remainingBalance = Math.max(0, outstandingBalance - paymentAmount);
+    
+    document.getElementById('payment-display').textContent = paymentAmount.toFixed(2) + ' ETB';
+    document.getElementById('remaining-balance').textContent = remainingBalance.toFixed(2) + ' ETB';
+    
+    // Update remaining balance color
+    const remainingElement = document.getElementById('remaining-balance');
+    if (remainingBalance === 0) {
+        remainingElement.className = 'text-success fw-bold';
+    } else {
+        remainingElement.className = 'text-warning fw-bold';
+    }
+});
+
+// Set default payment date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="payment_date"]').value = today;
+});
+
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

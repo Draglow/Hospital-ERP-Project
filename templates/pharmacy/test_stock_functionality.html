@@ -1,0 +1,194 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Test Pharmacy Stock Functionality - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h5 class="card-title">Test Pharmacy Stock Functionality</h5>
+                <p class="text-muted">This page is for testing the pharmacy stock management functionality.</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Available Medicines</h6>
+                        <div id="medicines-list">
+                            {% for medicine in medicines %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ medicine.name }}</h6>
+                                    <p class="card-text">
+                                        <strong>Generic:</strong> {{ medicine.generic_name|default:"N/A" }}<br>
+                                        <strong>Strength:</strong> {{ medicine.strength }}<br>
+                                        <strong>Current Stock:</strong> 
+                                        <span class="badge bg-{% if medicine.is_low_stock %}danger{% else %}success{% endif %}">
+                                            {{ medicine.stock_quantity }} units
+                                        </span><br>
+                                        <strong>Minimum Level:</strong> {{ medicine.minimum_stock_level }} units<br>
+                                        <strong>Status:</strong> 
+                                        {% if medicine.is_low_stock %}
+                                            <span class="badge bg-danger">Low Stock</span>
+                                        {% elif medicine.is_expiring_soon %}
+                                            <span class="badge bg-warning">Expiring Soon</span>
+                                        {% elif medicine.is_expired %}
+                                            <span class="badge bg-danger">Expired</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Good</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success btn-sm" onclick="testAddStock({{ medicine.pk }}, '{{ medicine.name }}')">
+                                            <i class="fas fa-plus me-1"></i>Add Stock
+                                        </button>
+                                        
+                                        {% if medicine.stock_quantity > 0 %}
+                                            <button class="btn btn-warning btn-sm" onclick="testRemoveStock({{ medicine.pk }}, '{{ medicine.name }}')">
+                                                <i class="fas fa-minus me-1"></i>Remove Stock
+                                            </button>
+                                        {% endif %}
+                                        
+                                        <button class="btn btn-info btn-sm" onclick="testSetStock({{ medicine.pk }}, '{{ medicine.name }}')">
+                                            <i class="fas fa-edit me-1"></i>Set Stock
+                                        </button>
+                                        
+                                        <button class="btn btn-outline-primary btn-sm" onclick="testGetStockInfo({{ medicine.pk }})">
+                                            <i class="fas fa-info me-1"></i>Info
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Test Results</h6>
+                        <div id="test-results" class="border p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                            <p class="text-muted">Test results will appear here...</p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear Results</button>
+                            <button class="btn btn-info btn-sm" onclick="location.reload()">Refresh Page</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function logResult(message, type = 'info') {
+    const resultsDiv = document.getElementById('test-results');
+    const timestamp = new Date().toLocaleTimeString();
+    const typeClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+    
+    resultsDiv.innerHTML += `<div class="${typeClass}"><strong>[${timestamp}]</strong> ${message}</div>`;
+    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+}
+
+function clearResults() {
+    document.getElementById('test-results').innerHTML = '<p class="text-muted">Test results will appear here...</p>';
+}
+
+function testAddStock(medicineId, medicineName) {
+    const quantity = prompt(`Enter quantity to ADD to ${medicineName}:`, '10');
+    if (!quantity || parseInt(quantity) <= 0) return;
+    
+    logResult(`🧪 Testing ADD STOCK for ${medicineName} (ID: ${medicineId}) - Quantity: ${quantity}`);
+    
+    testStockAdjustment(medicineId, 'add', parseInt(quantity), 'Test add stock');
+}
+
+function testRemoveStock(medicineId, medicineName) {
+    const quantity = prompt(`Enter quantity to REMOVE from ${medicineName}:`, '5');
+    if (!quantity || parseInt(quantity) <= 0) return;
+    
+    logResult(`🧪 Testing REMOVE STOCK for ${medicineName} (ID: ${medicineId}) - Quantity: ${quantity}`);
+    
+    testStockAdjustment(medicineId, 'remove', parseInt(quantity), 'Test remove stock');
+}
+
+function testSetStock(medicineId, medicineName) {
+    const quantity = prompt(`Enter new stock level for ${medicineName}:`, '50');
+    if (!quantity || parseInt(quantity) < 0) return;
+    
+    logResult(`🧪 Testing SET STOCK for ${medicineName} (ID: ${medicineId}) - New Level: ${quantity}`);
+    
+    testStockAdjustment(medicineId, 'set', parseInt(quantity), 'Test set stock level');
+}
+
+function testStockAdjustment(medicineId, adjustmentType, quantity, reason) {
+    const url = `/pharmacy/${medicineId}/adjust-stock-ajax/`;
+    logResult(`📡 Making request to: ${url}`);
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            adjustment_type: adjustmentType,
+            quantity: quantity,
+            reason: reason,
+            notes: 'Test adjustment from test page'
+        })
+    })
+    .then(response => {
+        logResult(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        logResult(`📦 Response data: ${JSON.stringify(data)}`);
+        if (data.success) {
+            logResult(`✅ SUCCESS: ${data.message}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            logResult(`❌ ERROR: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        logResult(`💥 FETCH ERROR: ${error.message}`, 'error');
+        console.error('Error:', error);
+    });
+}
+
+function testGetStockInfo(medicineId) {
+    logResult(`🧪 Testing GET STOCK INFO for medicine ID: ${medicineId}`);
+    
+    const url = `/pharmacy/${medicineId}/stock-info-ajax/`;
+    logResult(`📡 Making request to: ${url}`);
+    
+    fetch(url)
+    .then(response => {
+        logResult(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        logResult(`📦 Stock Info: ${JSON.stringify(data, null, 2)}`);
+        if (data.success) {
+            logResult(`✅ Stock info retrieved successfully`, 'success');
+        } else {
+            logResult(`❌ ERROR getting stock info`, 'error');
+        }
+    })
+    .catch(error => {
+        logResult(`💥 FETCH ERROR: ${error.message}`, 'error');
+        console.error('Error:', error);
+    });
+}
+
+// Log initial page load
+document.addEventListener('DOMContentLoaded', function() {
+    logResult('🚀 Pharmacy test page loaded successfully');
+    logResult('📋 CSRF Token found: ' + (document.querySelector('[name=csrfmiddlewaretoken]') ? 'Yes' : 'No'));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="test-csrf-token">
+    <title>Desktop Notification Dropdown Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* Notification Badge Styles */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: notificationPulse 2s infinite;
+        }
+        
+        .notification-badge.large-count {
+            min-width: 28px;
+            height: 24px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            padding: 0 4px;
+        }
+        
+        @keyframes notificationPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Dropdown Styles */
+        .dropdown-menu {
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item.unread {
+            background-color: #f8f9ff;
+            border-left: 4px solid #0d6efd;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            position: relative;
+        }
+        
+        .notification-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 150, 57, 0.1);
+            color: #009639;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        
+        .notification-item:hover .notification-action-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .notification-action-btn:hover {
+            background: rgba(0, 150, 57, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .notification-unread-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+        }
+        
+        .notification-unread-indicator i {
+            color: #0d6efd !important;
+        }
+        
+        .test-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .count-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #009639;
+        }
+        
+        .test-log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-center mb-4">
+            <i class="fas fa-bell me-2 text-primary"></i>
+            Desktop Notification Dropdown Test
+        </h1>
+        
+        <div class="test-controls">
+            <h5>Test Controls</h5>
+            <div class="row">
+                <div class="col-md-8">
+                    <button class="btn btn-primary me-2" onclick="addTestNotification()">
+                        <i class="fas fa-plus me-1"></i>Add Notification
+                    </button>
+                    <button class="btn btn-success me-2" onclick="simulateMarkAllRead()">
+                        <i class="fas fa-check-double me-1"></i>Simulate Mark All Read
+                    </button>
+                    <button class="btn btn-info me-2" onclick="reloadDropdown()">
+                        <i class="fas fa-refresh me-1"></i>Reload Dropdown
+                    </button>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="count-display">
+                        Count: <span id="currentCount">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mock Desktop Header with Notification Dropdown -->
+        <div class="bg-light p-3 rounded mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Mock Desktop Header</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown position-relative">
+                        <button class="btn btn-outline-success position-relative" 
+                                data-bs-toggle="dropdown" 
+                                id="notificationDropdown" 
+                                aria-label="Notifications" 
+                                style="border-color: #009639; color: #009639; overflow: visible;">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="notificationDropdownMenu">
+                            <!-- Dynamic content will be loaded here -->
+                            <li class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Log -->
+        <div class="mb-3">
+            <h6>Test Log:</h6>
+            <div id="testLog" class="test-log"></div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle me-2"></i>Test Instructions:</h6>
+            <ol class="mb-0">
+                <li>Click the notification bell icon to open the dropdown</li>
+                <li>Try clicking "Mark as read" buttons on individual notifications</li>
+                <li>Try clicking "Delete" buttons on individual notifications</li>
+                <li>Try clicking "Mark All Read" button if available</li>
+                <li>Observe the notification count badge updates</li>
+                <li>Check the test log for detailed feedback</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let notificationCounter = 3;
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationMenu = document.getElementById('notificationDropdownMenu');
+        
+        function log(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // Mock notification data
+        const mockNotifications = [
+            {
+                id: 1,
+                title: 'New Patient Registration',
+                message: 'John Doe has been registered as a new patient',
+                time: '2 minutes ago',
+                icon: 'fas fa-user-plus',
+                color: 'text-success',
+                unread: true
+            },
+            {
+                id: 2,
+                title: 'Appointment Scheduled',
+                message: 'New appointment for tomorrow at 10:00 AM',
+                time: '5 minutes ago',
+                icon: 'fas fa-calendar-alt',
+                color: 'text-info',
+                unread: true
+            },
+            {
+                id: 3,
+                title: 'Prescription Ready',
+                message: 'Medication ready for pickup at pharmacy',
+                time: '10 minutes ago',
+                icon: 'fas fa-pills',
+                color: 'text-warning',
+                unread: true
+            }
+        ];
+        
+        function generateNotificationHTML(notifications) {
+            const unreadCount = notifications.filter(n => n.unread).length;
+            
+            let html = `
+                <li><h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                    <span>Notifications</span>
+                    ${unreadCount > 0 ? `<span class="badge bg-danger">${unreadCount}</span>` : ''}
+                </h6></li>
+            `;
+            
+            if (unreadCount > 0) {
+                html += `
+                    <li class="notification-top-actions">
+                        <div class="d-flex gap-1 p-2">
+                            <button class="btn btn-sm flex-fill" id="markAllAsReadTop" style="background-color: #009639; border-color: #009639; color: white;">
+                                <i class="fas fa-check-double me-1"></i>Mark All Read
+                            </button>
+                            <button class="btn btn-outline-success btn-sm flex-fill" style="border-color: #009639; color: #009639;">
+                                <i class="fas fa-list me-1"></i>View All
+                            </button>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                `;
+            }
+            
+            if (notifications.length > 0) {
+                notifications.forEach(notification => {
+                    html += `
+                        <li>
+                            <div class="dropdown-item notification-item ${notification.unread ? 'unread' : ''}"
+                                 data-notification-id="${notification.id}">
+                                <div class="d-flex align-items-start">
+                                    <div class="notification-icon me-3">
+                                        <i class="${notification.icon} ${notification.color}"></i>
+                                    </div>
+                                    <div class="notification-content flex-grow-1">
+                                        <div class="notification-title fw-semibold">${notification.title}</div>
+                                        <div class="notification-message text-muted small">${notification.message}</div>
+                                        <div class="notification-time text-muted small">${notification.time}</div>
+                                    </div>
+                                    <div class="notification-actions">
+                                        ${notification.unread ? `
+                                            <button class="notification-action-btn mark-as-read"
+                                                    data-notification-id="${notification.id}"
+                                                    title="Mark as read">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        ` : ''}
+                                        <button class="notification-action-btn delete-notification"
+                                                data-notification-id="${notification.id}"
+                                                title="Delete notification">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        ${notification.unread ? `
+                                            <div class="notification-unread-indicator">
+                                                <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            } else {
+                html += `
+                    <li class="text-center py-3">
+                        <div class="text-muted">
+                            <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                            <div>No notifications</div>
+                        </div>
+                    </li>
+                `;
+            }
+            
+            return html;
+        }
+        
+        function loadNotifications() {
+            log('Loading notifications...');
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                const html = generateNotificationHTML(mockNotifications);
+                notificationMenu.innerHTML = html;
+                
+                // Attach event listeners to the newly loaded content
+                attachNotificationEventListeners();
+                
+                log('Notifications loaded and event listeners attached');
+            }, 500);
+        }
+        
+        function attachNotificationEventListeners() {
+            log('Attaching event listeners to notification elements...');
+            
+            // Handle mark as read button clicks
+            notificationMenu.querySelectorAll('.mark-as-read').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const notificationId = parseInt(this.dataset.notificationId);
+                    log(`Mark as read clicked for notification ${notificationId}`);
+                    markNotificationAsRead(notificationId, this);
+                });
+            });
+
+            // Handle delete button clicks
+            notificationMenu.querySelectorAll('.delete-notification').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const notificationId = parseInt(this.dataset.notificationId);
+                    log(`Delete clicked for notification ${notificationId}`);
+                    deleteDropdownNotification(notificationId, this);
+                });
+            });
+
+            // Handle mark all as read button
+            const markAllBtn = notificationMenu.querySelector('#markAllAsReadTop');
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    log('Mark all as read clicked');
+                    markAllNotificationsAsRead(this);
+                });
+            }
+
+            // Handle notification content clicks (mark as read)
+            notificationMenu.querySelectorAll('.notification-content').forEach(content => {
+                content.addEventListener('click', function(e) {
+                    const notificationItem = this.closest('.notification-item');
+                    const notificationId = parseInt(notificationItem.dataset.notificationId);
+                    if (notificationItem.classList.contains('unread')) {
+                        log(`Content clicked for unread notification ${notificationId}`);
+                        markNotificationAsRead(notificationId, null, true);
+                    }
+                });
+            });
+            
+            log(`Event listeners attached to ${notificationMenu.querySelectorAll('.mark-as-read').length} mark-as-read buttons and ${notificationMenu.querySelectorAll('.delete-notification').length} delete buttons`);
+        }
+        
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            const countDisplay = document.getElementById('currentCount');
+            
+            log(`Updating badge count to: ${count}`);
+            
+            if (!badge) {
+                log('ERROR: Badge element not found');
+                return;
+            }
+
+            if (count === 0) {
+                badge.style.display = 'none';
+                badge.classList.remove('large-count');
+                log('Badge hidden (count = 0)');
+            } else {
+                badge.style.display = 'flex';
+
+                // Handle different count ranges
+                if (count > 99) {
+                    badge.textContent = '99+';
+                    badge.classList.add('large-count');
+                    log('Badge set to 99+ (large count)');
+                } else if (count > 9) {
+                    badge.textContent = count;
+                    badge.classList.add('large-count');
+                    log(`Badge set to ${count} (large count)`);
+                } else {
+                    badge.textContent = count;
+                    badge.classList.remove('large-count');
+                    log(`Badge set to ${count} (normal size)`);
+                }
+            }
+            
+            countDisplay.textContent = count;
+        }
+        
+        function markNotificationAsRead(notificationId, button, isContentClick = false) {
+            log(`Marking notification ${notificationId} as read...`);
+            
+            // Find and update the notification in mock data
+            const notification = mockNotifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.unread = false;
+            }
+            
+            // Update UI
+            const notificationItem = notificationMenu.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (notificationItem) {
+                notificationItem.classList.remove('unread');
+
+                // Remove the unread indicator
+                const unreadIndicator = notificationItem.querySelector('.notification-unread-indicator');
+                if (unreadIndicator) {
+                    unreadIndicator.style.transition = 'all 0.3s ease';
+                    unreadIndicator.style.transform = 'scale(0)';
+                    unreadIndicator.style.opacity = '0';
+                    setTimeout(() => unreadIndicator.remove(), 300);
+                }
+
+                // Remove the mark as read button
+                if (button) {
+                    button.style.transition = 'all 0.3s ease';
+                    button.style.transform = 'scale(0)';
+                    button.style.opacity = '0';
+                    setTimeout(() => button.remove(), 300);
+                } else {
+                    // If content click, remove the mark as read button
+                    const markBtn = notificationItem.querySelector('.mark-as-read');
+                    if (markBtn) {
+                        markBtn.style.transition = 'all 0.3s ease';
+                        markBtn.style.transform = 'scale(0)';
+                        markBtn.style.opacity = '0';
+                        setTimeout(() => markBtn.remove(), 300);
+                    }
+                }
+            }
+
+            // Update notification count
+            const unreadCount = mockNotifications.filter(n => n.unread).length;
+            updateNotificationBadge(unreadCount);
+            
+            log(`Notification ${notificationId} marked as read successfully`);
+            showNotificationFeedback('Notification marked as read', 'success');
+        }
+        
+        function deleteDropdownNotification(notificationId, button) {
+            const notificationItem = button.closest('.notification-item');
+            const notificationTitle = notificationItem.querySelector('.notification-title')?.textContent || 'this notification';
+
+            if (!confirm(`Delete "${notificationTitle}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            log(`Deleting notification ${notificationId}...`);
+
+            const listItem = notificationItem.parentElement;
+
+            // Remove from mock data
+            const index = mockNotifications.findIndex(n => n.id === notificationId);
+            if (index > -1) {
+                mockNotifications.splice(index, 1);
+            }
+
+            // Add loading state
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            notificationItem.style.opacity = '0.6';
+
+            // Simulate API delay
+            setTimeout(() => {
+                // Animate removal
+                listItem.style.transition = 'all 0.3s ease';
+                listItem.style.transform = 'translateX(100%)';
+                listItem.style.opacity = '0';
+
+                setTimeout(() => {
+                    listItem.remove();
+
+                    // Check if dropdown is empty
+                    const remainingItems = notificationMenu.querySelectorAll('.notification-item');
+                    if (remainingItems.length === 0) {
+                        notificationMenu.innerHTML = `
+                            <li class="text-center py-3">
+                                <div class="text-muted">
+                                    <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                                    <div>No notifications</div>
+                                </div>
+                            </li>
+                        `;
+                    }
+
+                    // Update notification count
+                    const unreadCount = mockNotifications.filter(n => n.unread).length;
+                    updateNotificationBadge(unreadCount);
+
+                    log(`Notification ${notificationId} deleted successfully`);
+                    showNotificationFeedback(`Notification "${notificationTitle}" deleted successfully`, 'success');
+                }, 300);
+            }, 1000);
+        }
+        
+        function markAllNotificationsAsRead(button) {
+            log('Marking all notifications as read...');
+            
+            // Add loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Marking...';
+            button.disabled = true;
+
+            // Simulate API delay
+            setTimeout(() => {
+                // Update mock data
+                mockNotifications.forEach(n => n.unread = false);
+                
+                // Update UI immediately
+                notificationMenu.querySelectorAll('.notification-item.unread').forEach(item => {
+                    item.classList.remove('unread');
+                    
+                    // Remove unread indicator
+                    const unreadIndicator = item.querySelector('.notification-unread-indicator');
+                    if (unreadIndicator) {
+                        unreadIndicator.style.transition = 'all 0.3s ease';
+                        unreadIndicator.style.transform = 'scale(0)';
+                        unreadIndicator.style.opacity = '0';
+                        setTimeout(() => unreadIndicator.remove(), 300);
+                    }
+                    
+                    // Remove mark as read button
+                    const markBtn = item.querySelector('.mark-as-read');
+                    if (markBtn) {
+                        markBtn.style.transition = 'all 0.3s ease';
+                        markBtn.style.transform = 'scale(0)';
+                        markBtn.style.opacity = '0';
+                        setTimeout(() => markBtn.remove(), 300);
+                    }
+                });
+
+                // Update notification count
+                updateNotificationBadge(0);
+
+                // Hide the mark all button
+                button.style.transition = 'all 0.3s ease';
+                button.style.transform = 'scale(0)';
+                button.style.opacity = '0';
+                setTimeout(() => button.remove(), 300);
+
+                log('All notifications marked as read successfully');
+                showNotificationFeedback('All notifications marked as read!', 'success');
+            }, 1000);
+        }
+        
+        function showNotificationFeedback(message, type = 'info') {
+            // Create feedback element
+            const feedback = document.createElement('div');
+            feedback.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+            feedback.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border: none;
+                border-radius: 8px;
+            `;
+
+            feedback.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(feedback);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.classList.remove('show');
+                    setTimeout(() => {
+                        if (feedback.parentNode) {
+                            feedback.parentNode.removeChild(feedback);
+                        }
+                    }, 150);
+                }
+            }, 3000);
+        }
+        
+        // Test control functions
+        function addTestNotification() {
+            notificationCounter++;
+            mockNotifications.push({
+                id: notificationCounter,
+                title: `Test Notification ${notificationCounter}`,
+                message: 'This is a test notification',
+                time: 'Just now',
+                icon: 'fas fa-info-circle',
+                color: 'text-primary',
+                unread: true
+            });
+            
+            const unreadCount = mockNotifications.filter(n => n.unread).length;
+            updateNotificationBadge(unreadCount);
+            
+            log(`Added test notification ${notificationCounter}`);
+            
+            // Reload dropdown if it's open
+            if (notificationMenu.innerHTML.includes('notification-item')) {
+                reloadDropdown();
+            }
+        }
+        
+        function simulateMarkAllRead() {
+            mockNotifications.forEach(n => n.unread = false);
+            updateNotificationBadge(0);
+            log('Simulated mark all as read');
+            
+            // Reload dropdown if it's open
+            if (notificationMenu.innerHTML.includes('notification-item')) {
+                reloadDropdown();
+            }
+        }
+        
+        function reloadDropdown() {
+            log('Reloading dropdown content...');
+            loadNotifications();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Desktop notification dropdown test loaded');
+            
+            // Attach dropdown click handler
+            if (notificationDropdown && notificationMenu) {
+                notificationDropdown.addEventListener('click', function() {
+                    log('Notification dropdown clicked - loading notifications...');
+                    loadNotifications();
+                });
+            }
+            
+            log('Event listeners attached to dropdown trigger');
+            updateNotificationBadge(3);
+        });
+        
+        // Make updateNotificationBadge available globally
+        window.updateNotificationBadge = updateNotificationBadge;
+    </script>
+</body>
+</html>

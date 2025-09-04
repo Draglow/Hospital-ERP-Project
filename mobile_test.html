@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#009639">
+    <title>Mobile Responsiveness Test - Ethiopian Hospital ERP</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="static/css/main.css" rel="stylesheet">
+    <link href="static/css/homepage.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    
+    <style>
+        /* Test-specific styles */
+        .test-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .test-title {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .screen-size-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 150, 57, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .breakpoint-info {
+            background: rgba(255, 205, 0, 0.1);
+            border: 2px solid var(--primary-yellow);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Screen Size Indicator -->
+    <div class="screen-size-indicator" id="screenSize">
+        Screen: <span id="screenWidth"></span>px
+    </div>
+    
+    <div class="container">
+        <div class="text-center py-4">
+            <h1 class="text-ethiopia-green">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Mobile Responsiveness Test
+            </h1>
+            <p class="lead">Ethiopian Hospital ERP - Mobile Optimization Validation</p>
+        </div>
+        
+        <!-- Breakpoint Information -->
+        <div class="breakpoint-info">
+            <h5 class="text-ethiopia-green mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                Responsive Breakpoints
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <strong>Mobile:</strong><br>
+                    ≤ 767px
+                </div>
+                <div class="col-md-3">
+                    <strong>Small Mobile:</strong><br>
+                    ≤ 480px
+                </div>
+                <div class="col-md-3">
+                    <strong>Tablet:</strong><br>
+                    768px - 1024px
+                </div>
+                <div class="col-md-3">
+                    <strong>Desktop:</strong><br>
+                    ≥ 1025px
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards Test - Exactly 2 per row on mobile -->
+        <div class="test-section stats-section">
+            <h3 class="test-title">
+                <i class="fas fa-chart-bar me-2"></i>
+                Stats Cards - 2 Cards Per Row Mobile
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stats-card-3d card-3d">
+                        <div class="card-3d-inner">
+                            <span class="counter-3d" data-target="15000">15,000</span>
+                            <h5 class="text-muted">Patients Served</h5>
+                            <div class="float-gentle">
+                                <i class="fas fa-users text-ethiopia-green fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card-3d card-3d">
+                        <div class="card-3d-inner">
+                            <span class="counter-3d" data-target="50">50</span>
+                            <h5 class="text-muted">Expert Doctors</h5>
+                            <div class="float-gentle">
+                                <i class="fas fa-user-md text-ethiopia-blue fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card-3d card-3d">
+                        <div class="card-3d-inner">
+                            <span class="counter-3d" data-target="12">12</span>
+                            <h5 class="text-muted">Departments</h5>
+                            <div class="float-gentle">
+                                <i class="fas fa-hospital text-ethiopia-red fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card-3d card-3d">
+                        <div class="card-3d-inner">
+                            <span class="counter-3d" data-target="150">150</span>
+                            <h5 class="text-muted">Daily Appointments</h5>
+                            <div class="float-gentle">
+                                <i class="fas fa-calendar-check text-ethiopia-yellow fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Cards Test -->
+        <div class="test-section services-section">
+            <h3 class="test-title">
+                <i class="fas fa-th-large me-2"></i>
+                Service Cards Layout Test
+            </h3>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card-enhanced card-3d">
+                        <div class="card-3d-inner">
+                            <div class="service-icon-3d">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h4 class="text-white mb-3">Appointments</h4>
+                            <p class="text-light">Mobile-optimized appointment booking system.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card-enhanced card-3d">
+                        <div class="card-3d-inner">
+                            <div class="service-icon-3d">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <h4 class="text-white mb-3">Doctors</h4>
+                            <p class="text-light">Expert medical consultation services.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card-enhanced card-3d">
+                        <div class="card-3d-inner">
+                            <div class="service-icon-3d">
+                                <i class="fas fa-pills"></i>
+                            </div>
+                            <h4 class="text-white mb-3">Pharmacy</h4>
+                            <p class="text-light">Complete pharmacy management system.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Cards Test -->
+        <div class="test-section departments-section">
+            <h3 class="test-title">
+                <i class="fas fa-hospital me-2"></i>
+                Department Cards Layout Test
+            </h3>
+            <div class="row g-4">
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-heart department-icon text-ethiopia-red" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Cardiology</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-baby department-icon text-ethiopia-blue" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Pediatrics</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-x-ray department-icon text-ethiopia-green" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Radiology</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-bone department-icon text-ethiopia-yellow" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Orthopedics</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-brain department-icon text-ethiopia-red" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Neurology</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="department-card text-center p-3 card-3d">
+                        <div class="card-3d-inner">
+                            <div class="mb-3">
+                                <i class="fas fa-procedures department-icon text-ethiopia-blue" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold">Surgery</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Button Test -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-hand-pointer me-2"></i>
+                Touch-Friendly Buttons Test
+            </h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <button class="btn btn-primary w-100">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        Book Appointment
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-outline-primary w-100">
+                        <i class="fas fa-phone me-2"></i>
+                        Contact Us
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form Test -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-edit me-2"></i>
+                Mobile Form Test
+            </h3>
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="testName" placeholder="Full Name">
+                            <label for="testName">Full Name</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="testEmail" placeholder="Email">
+                            <label for="testEmail">Email Address</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea class="form-control" id="testMessage" placeholder="Message" style="height: 100px"></textarea>
+                            <label for="testMessage">Message</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Send Message
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Typography Test -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-font me-2"></i>
+                Mobile Typography Test
+            </h3>
+            <h1>Heading 1 - Mobile Optimized</h1>
+            <h2>Heading 2 - Responsive Text</h2>
+            <h3>Heading 3 - Touch Friendly</h3>
+            <h4>Heading 4 - Ethiopian Design</h4>
+            <p class="lead">Lead paragraph with optimized line height and spacing for mobile reading experience.</p>
+            <p>Regular paragraph text that should be easily readable on mobile devices with proper font size and line spacing.</p>
+            <small class="text-muted">Small text that remains legible on mobile screens.</small>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Screen size indicator
+        function updateScreenSize() {
+            const width = window.innerWidth;
+            document.getElementById('screenWidth').textContent = width;
+            
+            const indicator = document.getElementById('screenSize');
+            if (width <= 480) {
+                indicator.style.background = 'rgba(218, 2, 14, 0.9)'; // Red for small mobile
+                indicator.innerHTML = `Small Mobile: ${width}px`;
+            } else if (width <= 767) {
+                indicator.style.background = 'rgba(255, 205, 0, 0.9)'; // Yellow for mobile
+                indicator.innerHTML = `Mobile: ${width}px`;
+            } else if (width <= 1024) {
+                indicator.style.background = 'rgba(15, 71, 175, 0.9)'; // Blue for tablet
+                indicator.innerHTML = `Tablet: ${width}px`;
+            } else {
+                indicator.style.background = 'rgba(0, 150, 57, 0.9)'; // Green for desktop
+                indicator.innerHTML = `Desktop: ${width}px`;
+            }
+        }
+        
+        // Update on load and resize
+        updateScreenSize();
+        window.addEventListener('resize', updateScreenSize);
+        
+        // Add touch feedback
+        document.querySelectorAll('.btn, .service-card-enhanced, .department-card, .stats-card-3d').forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+            
+            element.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        console.log('Mobile test page loaded successfully');
+    </script>
+</body>
+</html>

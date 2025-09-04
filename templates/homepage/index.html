@@ -1,0 +1,2244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ethiopian Hospital ERP - Advanced Healthcare Management System{% endblock %}
+
+{% block description %}Leading Ethiopian hospital ERP system providing comprehensive healthcare management, patient care, appointment scheduling, billing, and pharmacy services with cutting-edge technology and 24/7 emergency care.{% endblock %}
+
+{% block keywords %}Ethiopian hospital ERP, healthcare management system, patient management, appointment booking, medical billing, pharmacy management, emergency care, Addis Ababa hospital, Ethiopian healthcare technology{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Hospital",
+  "name": "Ethiopian Hospital ERP",
+  "description": "Advanced healthcare management system providing comprehensive medical services in Ethiopia",
+  "url": "{{ request.build_absolute_uri }}",
+  "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Bole Road",
+    "addressLocality": "Addis Ababa",
+    "addressCountry": "Ethiopia",
+    "postalCode": "1000"
+  },
+  "telephone": "+251-11-123-4567",
+  "email": "info@ethiopianhospital.com",
+  "openingHours": "Mo-Su 00:00-23:59",
+  "medicalSpecialty": ["Cardiology", "Pediatrics", "Orthopedics", "Neurology", "Surgery", "Emergency Medicine"],
+  "availableService": [
+    {
+      "@type": "MedicalProcedure",
+      "name": "Emergency Care"
+    },
+    {
+      "@type": "MedicalProcedure",
+      "name": "Surgery"
+    },
+    {
+      "@type": "MedicalProcedure",
+      "name": "Cardiology"
+    },
+    {
+      "@type": "MedicalProcedure",
+      "name": "Pediatrics"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Mobile-optimized viewport -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#009639">
+
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="{% static 'css/homepage.css' %}" rel="stylesheet">
+<style>
+    /* Floating Action Button - Homepage Override */
+    .floating-action-btn {
+        position: fixed !important;
+        bottom: 30px !important;
+        right: 30px !important;
+        width: 180px !important;
+        height: 60px !important;
+        background: linear-gradient(135deg, #009639, #0F47AF) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 30px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
+        z-index: 9999 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        overflow: hidden !important;
+        animation: floatingGlow 3s ease-in-out infinite, floatingPulse 1.5s ease-in-out infinite alternate, breathingGlow 4s ease-in-out infinite !important;
+    }
+
+    .floating-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .floating-action-btn:hover::before {
+        left: 100%;
+    }
+
+    /* This hover style is replaced below with enhanced glow */
+
+    .floating-action-btn:active {
+        transform: translateY(-1px) scale(1.02) !important;
+    }
+
+    .floating-action-btn i {
+        font-size: 16px !important;
+    }
+
+    @keyframes floatingGlow {
+        0% {
+            box-shadow:
+                0 0 20px rgba(0, 150, 57, 0.4),
+                0 0 30px rgba(0, 150, 57, 0.3),
+                0 0 40px rgba(0, 150, 57, 0.2),
+                0 0 60px rgba(0, 150, 57, 0.1) !important;
+        }
+        25% {
+            box-shadow:
+                0 0 25px rgba(0, 150, 57, 0.5),
+                0 0 35px rgba(0, 150, 57, 0.4),
+                0 0 50px rgba(0, 150, 57, 0.3),
+                0 0 70px rgba(0, 150, 57, 0.15) !important;
+        }
+        50% {
+            box-shadow:
+                0 0 30px rgba(0, 150, 57, 0.6),
+                0 0 40px rgba(0, 150, 57, 0.5),
+                0 0 60px rgba(0, 150, 57, 0.4),
+                0 0 80px rgba(0, 150, 57, 0.2) !important;
+        }
+        75% {
+            box-shadow:
+                0 0 35px rgba(0, 150, 57, 0.7),
+                0 0 45px rgba(0, 150, 57, 0.6),
+                0 0 70px rgba(0, 150, 57, 0.5),
+                0 0 90px rgba(0, 150, 57, 0.25) !important;
+        }
+        100% {
+            box-shadow:
+                0 0 40px rgba(0, 150, 57, 0.8),
+                0 0 50px rgba(0, 150, 57, 0.7),
+                0 0 80px rgba(0, 150, 57, 0.6),
+                0 0 100px rgba(0, 150, 57, 0.3) !important;
+        }
+    }
+
+    /* Breathing glow animation for continuous effect */
+    @keyframes breathingGlow {
+        0% {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 30px rgba(0, 150, 57, 0.3),
+                0 0 50px rgba(0, 150, 57, 0.2),
+                0 0 80px rgba(0, 150, 57, 0.1) !important;
+        }
+        25% {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 40px rgba(0, 150, 57, 0.4),
+                0 0 70px rgba(0, 150, 57, 0.3),
+                0 0 100px rgba(0, 150, 57, 0.15) !important;
+        }
+        50% {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 50px rgba(0, 150, 57, 0.5),
+                0 0 90px rgba(0, 150, 57, 0.4),
+                0 0 120px rgba(0, 150, 57, 0.2) !important;
+        }
+        75% {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 40px rgba(0, 150, 57, 0.4),
+                0 0 70px rgba(0, 150, 57, 0.3),
+                0 0 100px rgba(0, 150, 57, 0.15) !important;
+        }
+        100% {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 30px rgba(0, 150, 57, 0.3),
+                0 0 50px rgba(0, 150, 57, 0.2),
+                0 0 80px rgba(0, 150, 57, 0.1) !important;
+        }
+    }
+
+    /* Additional pulsing animation for continuous glow */
+    @keyframes floatingPulse {
+        0% {
+            transform: scale(1) !important;
+            filter: brightness(1) !important;
+        }
+        50% {
+            transform: scale(1.02) !important;
+            filter: brightness(1.1) !important;
+        }
+        100% {
+            transform: scale(1.05) !important;
+            filter: brightness(1.2) !important;
+        }
+    }
+
+    /* Enhanced glow on hover */
+    .floating-action-btn:hover {
+        transform: translateY(-3px) scale(1.08) !important;
+        box-shadow:
+            0 15px 35px rgba(0, 0, 0, 0.2),
+            0 0 50px rgba(0, 150, 57, 0.8),
+            0 0 70px rgba(0, 150, 57, 0.6),
+            0 0 100px rgba(0, 150, 57, 0.4),
+            0 0 120px rgba(0, 150, 57, 0.2) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        animation: floatingGlow 1s ease-in-out infinite, floatingPulse 0.8s ease-in-out infinite alternate !important;
+    }
+
+    /* Responsive Design for Floating Button */
+    @media (max-width: 768px) {
+        .floating-action-btn {
+            width: 180px !important;
+            height: 52px !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+        }
+
+        .floating-action-btn i {
+            font-size: 14px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .floating-action-btn {
+            width: 170px !important;
+            height: 48px !important;
+            bottom: 15px !important;
+            right: 15px !important;
+            font-size: 12px !important;
+            white-space: nowrap !important;
+            gap: 6px !important;
+        }
+
+        .floating-action-btn i {
+            font-size: 12px !important;
+        }
+    }
+
+    /* Extra small screens - stack text or use shorter text */
+    @media (max-width: 360px) {
+        .floating-action-btn {
+            width: 160px !important;
+            height: 46px !important;
+            font-size: 11px !important;
+        }
+
+        .floating-action-btn span {
+            display: block !important;
+            line-height: 1.2 !important;
+        }
+    }
+
+    /* Accessibility */
+    .floating-action-btn:focus {
+        outline: 3px solid #FFCD00 !important;
+        outline-offset: 2px !important;
+    }
+
+    .floating-action-btn:focus:not(:focus-visible) {
+        outline: none !important;
+    }
+
+    /* Reduced motion support for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+        .floating-action-btn {
+            animation: none !important;
+        }
+
+        .floating-action-btn::before {
+            transition: none !important;
+        }
+
+        .floating-action-btn:hover {
+            transform: none !important;
+            animation: none !important;
+        }
+
+        .floating-action-btn:hover {
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.15),
+                0 0 30px rgba(0, 150, 57, 0.5) !important;
+        }
+    }
+
+    /* Navbar Brand Text Styling */
+    .navbar-brand-text {
+        color: #2E8B57 !important; /* Medical green - represents health, healing, and trust */
+        font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif !important; /* Professional serif font for medical credibility */
+        font-weight: 600 !important;
+        font-size: 1.6rem !important;
+        letter-spacing: 0.02em !important;
+        text-shadow: 0 1px 2px rgba(46, 139, 87, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .navbar-brand-modern:hover .navbar-brand-text {
+        color: #228B22 !important; /* Darker medical green on hover */
+        transform: translateY(-1px) scale(1.02) !important;
+        text-shadow: 0 2px 4px rgba(34, 139, 34, 0.3) !important;
+    }
+
+    /* Homepage Specific Styles */
+    .hero-section {
+        min-height: 100vh;
+        background: linear-gradient(135deg, rgba(0, 150, 57, 0.9), rgba(15, 71, 175, 0.9));
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .typing-text {
+        border-right: 2px solid var(--primary-yellow);
+        animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        white-space: nowrap;
+        overflow: hidden;
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    /* Ensure typing text doesn't get cut off on large screens */
+    @media (min-width: 1200px) {
+        .typing-text {
+            white-space: normal;
+            overflow: visible;
+            animation: blink-caret 0.75s step-end infinite;
+        }
+    }
+    
+    @keyframes typing {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+    
+    @keyframes blink-caret {
+        from, to { border-color: transparent; }
+        50% { border-color: var(--primary-yellow); }
+    }
+    
+    .service-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-10px) rotateY(5deg);
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .service-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stats-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .counter {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-green);
+        display: block;
+    }
+    
+    .doctor-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .doctor-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .doctor-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin: 1rem auto;
+        display: block;
+        width: 150px;
+        height: 150px;
+    }
+    
+    .testimonial-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Doctor Card Styles */
+    .doctor-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+    }
+
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 150, 57, 0.15);
+    }
+
+    .doctor-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .doctor-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary-green);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .doctor-badge {
+        position: absolute;
+        bottom: 10px;
+        right: calc(50% - 60px + 15px);
+        background: var(--primary-green);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .doctor-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-green);
+        margin-bottom: 0.5rem;
+    }
+
+    .doctor-specialty {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    .doctor-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .doctor-credentials {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .credential {
+        background: rgba(0, 150, 57, 0.1);
+        color: var(--primary-green);
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .experience {
+        background: rgba(15, 71, 175, 0.1);
+        color: var(--primary-blue);
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Mobile Responsive Styles for Doctor Cards */
+    @media (max-width: 768px) {
+        .doctor-card {
+            padding: 1.5rem;
+            margin: 0.5rem;
+        }
+
+        .doctor-image {
+            width: 100px;
+            height: 100px;
+        }
+
+        .doctor-badge {
+            right: calc(50% - 50px + 12px);
+            width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
+        }
+
+        .doctor-name {
+            font-size: 1.1rem;
+        }
+
+        .doctor-specialty {
+            font-size: 0.9rem;
+        }
+
+        .doctor-description {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .doctor-credentials {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
+        }
+
+        .credential, .experience {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body_class %}homepage{% endblock %}
+
+{% block content %}
+<!-- Skip Link for Accessibility -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Messages Display - Custom Elegant Design -->
+{% if messages %}
+<div class="homepage-messages-container">
+    <div class="container">
+        {% for message in messages %}
+            <div class="homepage-message homepage-message-{{ message.tags }}">
+                <div class="homepage-message-content">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    <span class="homepage-message-text">{{ message }}</span>
+                    <button type="button" class="homepage-message-close" onclick="this.parentElement.parentElement.style.display='none'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.homepage-messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.homepage-message {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideInRight 0.5s ease-out;
+}
+
+.homepage-message-success {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.95), rgba(25, 135, 84, 0.95));
+    color: white;
+}
+
+.homepage-message-error {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.95), rgba(176, 42, 55, 0.95));
+    color: white;
+}
+
+.homepage-message-warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(255, 158, 0, 0.95));
+    color: #212529;
+}
+
+.homepage-message-info {
+    background: linear-gradient(135deg, rgba(13, 202, 240, 0.95), rgba(11, 172, 204, 0.95));
+    color: white;
+}
+
+.homepage-message-content {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.homepage-message-content i:first-child {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.homepage-message-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.homepage-message-close {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.homepage-message-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .homepage-messages-container {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+
+    .homepage-message-content {
+        padding: 14px 16px;
+        font-size: 13px;
+    }
+
+    .homepage-message-content i:first-child {
+        font-size: 16px;
+    }
+}
+
+/* Auto-hide after 5 seconds */
+.homepage-message {
+    animation: slideInRight 0.5s ease-out, fadeOut 0.5s ease-out 4.5s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+</style>
+{% endif %}
+
+<!-- Modern Mobile-First Responsive Navigation -->
+<nav class="navbar navbar-expand-lg fixed-top navbar-modern" id="mainNavbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold navbar-brand-modern" href="/" aria-label="Ethiopian Hospital ERP Home">
+            <div class="brand-icon-wrapper mt-2 mb-0">
+                <img src="{% static 'images/logo.png' %}" alt="TenaERP Logo" class="brand-logo me-2 mb-0" style="height: 55px; width: auto;">
+                <span class="brand-text navbar-brand-text ml-0 mb-0">TenaERP</span>
+            </div>
+            <!-- <span class="brand-text navbar-brand-text ml-0 ">TenaERP</span> -->
+        </a>
+
+        <!-- Mobile Hamburger Menu Button -->
+        <button class="navbar-toggler hamburger-menu"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Navigation Menu -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto" role="menubar">
+                <li class="nav-item" role="none">
+                    <a class="nav-link nav-link-modern" href="#about" role="menuitem" tabindex="0">
+                        <span class="nav-text">About</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a class="nav-link nav-link-modern" href="#services" role="menuitem" tabindex="0">
+                        <span class="nav-text">Services</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a class="nav-link nav-link-modern" href="#doctors" role="menuitem" tabindex="0">
+                        <span class="nav-text">Doctors</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a class="nav-link nav-link-modern" href="#contact" role="menuitem" tabindex="0">
+                        <span class="nav-text">Contact</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-item-cta" role="none">
+                    <a href="/accounts/login/"
+                       class="btn btn-login-modern"
+                       role="menuitem"
+                       tabindex="0"
+                       aria-label="Login to dashboard">
+                        <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>
+                        <span class="btn-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Enhanced Hero Section with Local Images -->
+<section class="hero-enhanced" id="main-content">
+    <div class="hero-background" data-parallax="0.5">
+        <img src="{% static 'images/system.png' %}" alt="Ethiopian Hospital Hero" class="hero-bg-image">
+    </div>
+    <div class="hero-particles"></div>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content-3d">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
+                <div class="hero-title-3d">
+                    <h1 class="display-3 fw-bold text-white mb-4 hero-main-title">
+                        Advanced Healthcare
+                        <span class="typing-text text-ethiopia-yellow d-block hero-subtitle">Management System</span>
+                    </h1>
+                </div>
+                <div class="hero-subtitle-3d">
+                    <p class="lead text-white mb-5 hero-description">
+                        Revolutionizing Ethiopian healthcare with cutting-edge technology,
+                        seamless patient management, and world-class medical services.
+                    </p>
+                </div>
+                <div class="hero-buttons-3d">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="/accounts/login/" class="btn-3d pulse-glow hero-btn-primary">
+                            <i class="fas fa-tachometer-alt me-2 icon-3d"></i>Login to Dashboard
+                        </a>
+                        <a href="#contact" class="btn-3d-outline hero-btn-secondary">
+                            <i class="fas fa-phone me-2 icon-3d"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                <div class="text-center hero-image-container">
+                    <div class="hero-image-wrapper float-medium">
+                        <img src="{% static 'images/hero.jfif' %}" alt="Ethiopian Hospital ERP System" class="hero-lead-image img-3d">
+                        <div class="hero-image-glow"></div>
+                    </div>
+                    <div class="hero-floating-elements">
+                        <div class="floating-icon float-gentle" style="top: 10%; left: 10%;">
+                            <i class="fas fa-heartbeat text-ethiopia-red icon-3d"></i>
+                        </div>
+                        <div class="floating-icon float-strong" style="top: 20%; right: 15%;">
+                            <i class="fas fa-user-md text-ethiopia-blue icon-3d"></i>
+                        </div>
+                        <div class="floating-icon float-medium" style="bottom: 30%; left: 5%;">
+                            <i class="fas fa-hospital text-ethiopia-green icon-3d"></i>
+                        </div>
+                        <div class="floating-icon float-gentle" style="bottom: 15%; right: 10%;">
+                            <i class="fas fa-pills text-ethiopia-yellow icon-3d"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Stats Section -->
+<section class="stats-section py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="stats-card-3d card-3d">
+                    <div class="card-3d-inner">
+                        <span class="counter-3d" data-target="15000">0</span>
+                        <h5 class="text-muted">Patients Served</h5>
+                        <div class="float-gentle">
+                            <i class="fas fa-users text-ethiopia-green fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="stats-card-3d card-3d">
+                    <div class="card-3d-inner">
+                        <span class="counter-3d" data-target="50">0</span>
+                        <h5 class="text-muted">Expert Doctors</h5>
+                        <div class="float-gentle">
+                            <i class="fas fa-user-md text-ethiopia-blue fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
+                <div class="stats-card-3d card-3d">
+                    <div class="card-3d-inner">
+                        <span class="counter-3d" data-target="12">0</span>
+                        <h5 class="text-muted">Departments</h5>
+                        <div class="float-gentle">
+                            <i class="fas fa-hospital text-ethiopia-red fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
+                <div class="stats-card-3d card-3d">
+                    <div class="card-3d-inner">
+                        <span class="counter-3d" data-target="150">0</span>
+                        <h5 class="text-muted">Daily Appointments</h5>
+                        <div class="float-gentle">
+                            <i class="fas fa-calendar-check text-ethiopia-yellow fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced About Section with Local Images -->
+<section id="about" class="py-5 about-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+                <div class="about-image-container">
+                    <img src="{% static 'images/system.JFIF' %}"
+                         alt="Ethiopian Hospital ERP System" class="img-fluid img-3d about-main-image">
+                    <div class="about-image-overlay">
+                        <div class="overlay-content">
+                            <div class="stat-badge float-gentle">
+                                <i class="fas fa-award text-ethiopia-yellow"></i>
+                                <span>ISO Certified</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                <div class="about-content">
+                    <h2 class="section-title about-title">Leading Healthcare Innovation in Ethiopia</h2>
+                    <p class="lead mb-4 about-description">
+                        Our state-of-the-art Hospital ERP system combines traditional Ethiopian
+                        healthcare values with cutting-edge technology to deliver exceptional
+                        patient care and streamlined hospital operations.
+                    </p>
+                    <div class="row g-4">
+                        <div class="col-6">
+                            <div class="feature-item card-3d">
+                                <div class="card-3d-inner">
+                                    <div class="feature-icon float-gentle">
+                                        <i class="fas fa-check-circle text-ethiopia-green fs-4 icon-3d"></i>
+                                    </div>
+                                    <span class="feature-text">24/7 Emergency Care</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-item card-3d">
+                                <div class="card-3d-inner">
+                                    <div class="feature-icon float-medium">
+                                        <i class="fas fa-check-circle text-ethiopia-green fs-4 icon-3d"></i>
+                                    </div>
+                                    <span class="feature-text">Digital Health Records</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-item card-3d">
+                                <div class="card-3d-inner">
+                                    <div class="feature-icon float-strong">
+                                        <i class="fas fa-check-circle text-ethiopia-green fs-4 icon-3d"></i>
+                                    </div>
+                                    <span class="feature-text">Telemedicine Services</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-item card-3d">
+                                <div class="card-3d-inner">
+                                    <div class="feature-icon float-gentle">
+                                        <i class="fas fa-check-circle text-ethiopia-green fs-4 icon-3d"></i>
+                                    </div>
+                                    <span class="feature-text">Insurance Integration</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Services Section -->
+<section id="services" class="services-section py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Our Services</h2>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Appointment Management</h4>
+                        <p class="text-light">Seamless online booking and scheduling system with real-time availability.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Doctor Consultation</h4>
+                        <p class="text-light">Expert medical consultation with specialized doctors across all departments.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Pharmacy Services</h4>
+                        <p class="text-light">Complete pharmacy management with prescription tracking and inventory control.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Laboratory Tests</h4>
+                        <p class="text-light">Advanced diagnostic services with quick and accurate test results.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Billing & Insurance</h4>
+                        <p class="text-light">Transparent billing system with insurance claim processing and payment tracking.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="service-card-enhanced card-3d">
+                    <div class="card-3d-inner">
+                        <div class="service-icon-3d float-gentle">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                        <h4 class="text-white mb-3">Emergency Care</h4>
+                        <p class="text-light">24/7 emergency services with rapid response and critical care facilities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Enhanced Why Choose Ethiopian Hospital ERP Section -->
+<section class="why-choose-section">
+    <div class="why-choose-background">
+        <div class="why-choose-particles"></div>
+        <div class="why-choose-gradient"></div>
+    </div>
+
+    <div class="container">
+        <!-- Section Header -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <div class="why-choose-header">
+                    <span class="section-badge-modern">Why Choose Us</span>
+                    <h2 class="section-title-enhanced">Why Choose Ethiopian Hospital ERP?</h2>
+                    <p class="section-subtitle-enhanced">
+                        Experience the future of healthcare management with our cutting-edge ERP system
+                        designed specifically for Ethiopian healthcare providers.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-center g-5">
+            <!-- Benefits Column -->
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+                <div class="benefits-container">
+                    <!-- Benefit Item 1 -->
+                    <div class="benefit-item" data-aos="fade-up" data-aos-delay="100">
+                        <div class="benefit-icon-wrapper">
+                            <div class="benefit-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="benefit-progress">
+                                <div class="progress-circle" data-progress="98">
+                                    <span class="progress-text">98%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="benefit-content">
+                            <h4 class="benefit-title">Advanced Security</h4>
+                            <p class="benefit-description">
+                                State-of-the-art data encryption and HIPAA-compliant security measures
+                                protect your medical information with 98% threat prevention rate.
+                            </p>
+                            <div class="benefit-features">
+                                <span class="feature-tag">End-to-End Encryption</span>
+                                <span class="feature-tag">HIPAA Compliant</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Item 2 -->
+                    <div class="benefit-item" data-aos="fade-up" data-aos-delay="200">
+                        <div class="benefit-icon-wrapper">
+                            <div class="benefit-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="benefit-progress">
+                                <div class="progress-circle" data-progress="100">
+                                    <span class="progress-text">24/7</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="benefit-content">
+                            <h4 class="benefit-title">24/7 Availability</h4>
+                            <p class="benefit-description">
+                                Round-the-clock emergency services and online access to your health
+                                records anytime, anywhere with 99.9% uptime guarantee.
+                            </p>
+                            <div class="benefit-features">
+                                <span class="feature-tag">Emergency Access</span>
+                                <span class="feature-tag">Cloud-Based</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Item 3 -->
+                    <div class="benefit-item" data-aos="fade-up" data-aos-delay="300">
+                        <div class="benefit-icon-wrapper">
+                            <div class="benefit-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="benefit-progress">
+                                <div class="progress-circle" data-progress="95">
+                                    <span class="progress-text">95%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="benefit-content">
+                            <h4 class="benefit-title">Expert Medical Team</h4>
+                            <p class="benefit-description">
+                                Highly qualified doctors and medical professionals with years of
+                                experience, achieving 95% patient satisfaction rate.
+                            </p>
+                            <div class="benefit-features">
+                                <span class="feature-tag">Certified Specialists</span>
+                                <span class="feature-tag">Continuous Training</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Item 4 -->
+                    <div class="benefit-item" data-aos="fade-up" data-aos-delay="400">
+                        <div class="benefit-icon-wrapper">
+                            <div class="benefit-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="benefit-progress">
+                                <div class="progress-circle" data-progress="92">
+                                    <span class="progress-text">92%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="benefit-content">
+                            <h4 class="benefit-title">Mobile-First Design</h4>
+                            <p class="benefit-description">
+                                Seamless experience across all devices with our responsive,
+                                mobile-optimized platform achieving 92% mobile user satisfaction.
+                            </p>
+                            <div class="benefit-features">
+                                <span class="feature-tag">Responsive Design</span>
+                                <span class="feature-tag">Native Apps</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Awards & Certifications Column -->
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                <div class="awards-container">
+                    <div class="awards-header">
+                        <div class="awards-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h3 class="awards-title">Award-Winning Healthcare</h3>
+                        <p class="awards-subtitle">
+                            Recognized for excellence in patient care and innovative healthcare technology solutions.
+                        </p>
+                    </div>
+
+                    <!-- Certifications Grid -->
+                    <div class="certifications-grid">
+                        <div class="certification-card" data-aos="zoom-in" data-aos-delay="300">
+                            <div class="cert-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h4 class="cert-title">ISO 9001</h4>
+                            <p class="cert-subtitle">Quality Management</p>
+                            <div class="cert-badge">Certified</div>
+                        </div>
+
+                        <div class="certification-card" data-aos="zoom-in" data-aos-delay="400">
+                            <div class="cert-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h4 class="cert-title">HIPAA</h4>
+                            <p class="cert-subtitle">Privacy Compliant</p>
+                            <div class="cert-badge">Verified</div>
+                        </div>
+
+                        <div class="certification-card" data-aos="zoom-in" data-aos-delay="500">
+                            <div class="cert-icon">
+                                <i class="fas fa-globe-africa"></i>
+                            </div>
+                            <h4 class="cert-title">Ethiopian FDA</h4>
+                            <p class="cert-subtitle">Approved System</p>
+                            <div class="cert-badge">Licensed</div>
+                        </div>
+
+                        <div class="certification-card" data-aos="zoom-in" data-aos-delay="600">
+                            <div class="cert-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h4 class="cert-title">5-Star</h4>
+                            <p class="cert-subtitle">User Rating</p>
+                            <div class="cert-badge">Rated</div>
+                        </div>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div class="trust-indicators">
+                        <div class="trust-item">
+                            <div class="trust-number" data-counter="500">0</div>
+                            <div class="trust-label">Hospitals Trust Us</div>
+                        </div>
+                        <div class="trust-item">
+                            <div class="trust-number" data-counter="1000000">0</div>
+                            <div class="trust-label">Patients Served</div>
+                        </div>
+                        <div class="trust-item">
+                            <div class="trust-number" data-counter="99.9">0</div>
+                            <div class="trust-label">% System Uptime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Doctors Section -->
+<div class="doctors-container mb-5 ml-3" data-aos="fade-up" data-aos-delay="200" id="doctors">
+    <!-- Responsive Grid Layout -->
+    <div class="row g-4 doctors-desktop">
+        <!-- Doctor 1 -->
+        <div class="col-lg-4 col-md-6 col-12">
+            <div class="doctor-card card-3d">
+                <div class="card-3d-inner">
+                    <div class="doctor-header">
+                        <img src="{% static 'images/doctor2.jfif' %}"
+                             alt="Dr. Alemayehu Tadesse" class="doctor-image">
+                        <div class="doctor-badge">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                    </div>
+                    <div class="doctor-content">
+                        <div class="doctor-info">
+                            <h5 class="doctor-name">Dr. Alemayehu Tadesse</h5>
+                            <p class="doctor-specialty">Chief of Cardiology</p>
+                            <p class="doctor-description">
+                                Our experienced and dedicated medical professionals are committed to providing exceptional healthcare services
+                            </p>
+                            <div class="doctor-credentials">
+                                <span class="credential">MD, FACC</span>
+                                <span class="experience">15+ Years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor 2 -->
+        <div class="col-lg-4 col-md-6 col-12">
+            <div class="doctor-card card-3d">
+                <div class="card-3d-inner">
+                    <div class="doctor-header">
+                        <img src="{% static 'images/doctor1.jfif' %}"
+                             alt="Dr. Tigist Bekele" class="doctor-image">
+                        <div class="doctor-badge">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                    </div>
+                    <div class="doctor-content">
+                        <div class="doctor-info">
+                            <h5 class="doctor-name">Dr. Tigist Bekele</h5>
+                            <p class="doctor-specialty">Pediatric Specialist</p>
+                            <p class="doctor-description">
+                                Dedicated pediatrician focusing on child development and preventive care. Specialized in neonatal care and childhood immunizations.
+                            </p>
+                            <div class="doctor-credentials">
+                                <span class="credential">MD, FAAP</span>
+                                <span class="experience">12+ Years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor 3 -->
+        <div class="col-lg-4 col-md-6 col-12">
+            <div class="doctor-card card-3d">
+                <div class="card-3d-inner">
+                    <div class="doctor-header">
+                        <img src="{% static 'images/doctor3.jfif' %}"
+                             alt="Dr. Dawit Haile" class="doctor-image">
+                        <div class="doctor-badge">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                    </div>
+                    <div class="doctor-content">
+                        <div class="doctor-info">
+                            <h5 class="doctor-name">Dr. Dawit Haile</h5>
+                            <p class="doctor-specialty">Emergency Medicine</p>
+                            <p class="doctor-description">
+                                Emergency medicine physician with expertise in trauma care and critical care medicine. Available 24/7 for emergency medical situations.
+                            </p>
+                            <div class="doctor-credentials">
+                                <span class="credential">MD, FACEP</span>
+                                <span class="experience">10+ Years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Responsive Grid -->
+</div>
+
+
+<!-- Mobile-First Medical Departments Section -->
+<section class="departments-section-mobile py-4 bg-light" id="departments">
+    <div class="container-fluid px-3">
+        <!-- Section Header -->
+        <div class="text-center mb-4" data-aos="fade-up">
+            <h2 class="departments-title">Medical Departments</h2>
+            <p class="departments-subtitle">Comprehensive healthcare services with specialized medical expertise</p>
+        </div>
+
+        <!-- Mobile-Optimized Department Grid -->
+        <div class="departments-grid">
+            <!-- Row 1 -->
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="100">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Cardiology</h6>
+                        <p class="dept-desc">Heart & Vascular</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="200">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-child" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Pediatrics</h6>
+                        <p class="dept-desc">Children's Care</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="300">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-x-ray" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Radiology</h6>
+                        <p class="dept-desc">Medical Imaging</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="400">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-bone" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Orthopedics</h6>
+                        <p class="dept-desc">Bone & Joint</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="500">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-brain" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Neurology</h6>
+                        <p class="dept-desc">Brain & Nervous</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="department-item" data-aos="zoom-in" data-aos-delay="600">
+                <div class="dept-card">
+                    <div class="dept-icon">
+                        <i class="fas fa-user-md" aria-hidden="true"></i>
+                    </div>
+                    <div class="dept-info">
+                        <h6 class="dept-name">Surgery</h6>
+                        <p class="dept-desc">Surgical Care</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modern Contact & Demo Section -->
+<section id="contact" class="contact-demo-section">
+    <div class="contact-background">
+        <div class="contact-particles"></div>
+        <div class="contact-gradient-overlay"></div>
+    </div>
+
+    <div class="container">
+        <!-- Section Header -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <div class="section-header-modern">
+                    <span class="section-badge">Get Started Today</span>
+                    <h2 class="section-title-modern">Contact Us & Experience Our System</h2>
+                    <p class="section-subtitle-modern">
+                        Connect with our healthcare technology experts and discover how our ERP system
+                        can transform your medical practice with cutting-edge solutions.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="row g-5 align-items-stretch">
+            <!-- Contact Form Column -->
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+                <div class="contact-form-container">
+                    <div class="contact-form-header">
+                        <div class="form-icon-wrapper">
+                            <i class="fas fa-comments-medical"></i>
+                        </div>
+                        <h3 class="form-title">Get in Touch</h3>
+                        <p class="form-subtitle">Send us a message and we'll respond within 24 hours</p>
+                    </div>
+
+                    <form id="modern-contact-form" class="modern-contact-form" novalidate>
+                        <!-- Name Fields Row -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="modern-form-group">
+                                    <input type="text" id="contactFirstName" class="modern-form-input" required>
+                                    <label for="contactFirstName" class="modern-form-label">First Name</label>
+                                    <div class="form-field-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="form-validation-feedback"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="modern-form-group">
+                                    <input type="text" id="contactLastName" class="modern-form-input" required>
+                                    <label for="contactLastName" class="modern-form-label">Last Name</label>
+                                    <div class="form-field-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="form-validation-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="modern-form-group">
+                            <input type="email" id="contactEmail" class="modern-form-input" required>
+                            <label for="contactEmail" class="modern-form-label">Email Address</label>
+                            <div class="form-field-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="form-validation-feedback"></div>
+                        </div>
+
+                        <!-- Phone Field -->
+                        <div class="modern-form-group">
+                            <input type="tel" id="contactPhone" class="modern-form-input" required>
+                            <label for="contactPhone" class="modern-form-label">Phone Number</label>
+                            <div class="form-field-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="form-validation-feedback"></div>
+                        </div>
+
+                        <!-- Inquiry Type Dropdown -->
+                        <div class="modern-form-group">
+                            <select id="contactInquiryType" class="modern-form-select" required>
+                                <option value="">Select Inquiry Type</option>
+                                <option value="general">General Information</option>
+                                <option value="appointment">Book Appointment</option>
+                                <option value="demo">Request System Demo</option>
+                                <option value="emergency">Emergency Support</option>
+                                <option value="billing">Billing Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                            </select>
+                            <label for="contactInquiryType" class="modern-form-label">Inquiry Type</label>
+                            <div class="form-field-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div class="form-validation-feedback"></div>
+                        </div>
+
+                        <!-- Message Field -->
+                        <div class="modern-form-group">
+                            <textarea id="contactMessage" class="modern-form-textarea" rows="4" required></textarea>
+                            <label for="contactMessage" class="modern-form-label">Your Message</label>
+                            <div class="form-field-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <div class="form-validation-feedback"></div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="modern-form-group">
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="contactAttachment" class="file-upload-input" accept=".pdf,.doc,.docx,.jpg,.png">
+                                <label for="contactAttachment" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span class="file-upload-text">Attach Documents (Optional)</span>
+                                    <span class="file-upload-hint">PDF, DOC, or Images up to 10MB</span>
+                                </label>
+                                <div class="file-upload-progress">
+                                    <div class="progress-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-submit-wrapper">
+                            <button type="submit" class="modern-submit-btn">
+                                <span class="btn-text">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Message
+                                </span>
+                                <span class="btn-loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    Sending...
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Form Status Messages -->
+                        <div class="form-status-messages">
+                            <div class="status-success">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Message sent successfully! We'll get back to you soon.</span>
+                            </div>
+                            <div class="status-error">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>There was an error sending your message. Please try again.</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Demo & Features Column -->
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                <div class="demo-container">
+                    <!-- Demo Header -->
+                    <div class="demo-header">
+                        <div class="demo-icon-wrapper">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <h3 class="demo-title">Experience Our System</h3>
+                        <p class="demo-subtitle">See how our ERP transforms healthcare operations</p>
+                    </div>
+
+                    <!-- Interactive Demo Preview -->
+                    <div class="demo-preview-container">
+                        <div class="demo-video-wrapper">
+                            <div class="demo-video-placeholder">
+                                <img src="{% static 'images/system.png' %}" alt="Hospital ERP Demo Preview" class="demo-preview-image">
+                                <div class="demo-play-overlay">
+                                    <button class="demo-play-btn" type="button" data-demo-trigger>
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                                <div class="demo-duration-badge">
+                                    <i class="fas fa-clock"></i>
+                                    <span>15 min demo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Highlights -->
+                    <div class="demo-features">
+                        <h4 class="features-title">What You'll See in the Demo</h4>
+                        <div class="features-grid">
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+                                <div class="feature-icon">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Patient Management</h5>
+                                    <p>Complete patient records and history tracking</p>
+                                </div>
+                                <div class="feature-progress">
+                                    <div class="progress-bar" data-progress="95"></div>
+                                </div>
+                            </div>
+
+                            <!-- <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+                                <div class="feature-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Appointment Scheduling</h5>
+                                    <p>Smart scheduling with automated reminders</p>
+                                </div>
+                                <div class="feature-progress">
+                                    <div class="progress-bar" data-progress="88"></div>
+                                </div>
+                            </div> -->
+<!-- 
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                                <div class="feature-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Analytics Dashboard</h5>
+                                    <p>Real-time insights and reporting tools</p>
+                                </div>
+                                <div class="feature-progress">
+                                    <div class="progress-bar" data-progress="92"></div>
+                                </div>
+                            </div>
+
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="400">
+                                <div class="feature-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Security & Compliance</h5>
+                                    <p>HIPAA compliant with advanced security</p>
+                                </div>
+                                <div class="feature-progress">
+                                    <div class="progress-bar" data-progress="98"></div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+
+                    <!-- Demo Action Buttons -->
+                    <div class="demo-actions">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <button type="button" class="demo-action-btn primary" data-demo-request>
+                                    <i class="fas fa-video"></i>
+                                    <span>Schedule Live Demo</span>
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="demo-action-btn secondary" data-brochure-download>
+                                    <i class="fas fa-download"></i>
+                                    <span>Download Brochure</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="demo-stats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" data-counter="500">0</div>
+                                <div class="stat-label">Hospitals Using</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-counter="99.9">0</div>
+                                <div class="stat-label">% Uptime</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-counter="24">0</div>
+                                <div class="stat-label">Hour Support</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Contact Information Cards -->
+        <div class="row g-4 mt-5 contact-cards-row">
+            <div class="col-lg-3 col-md-6 col-sm-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="contact-info-card-enhanced">
+                    <div class="contact-card-icon-enhanced">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                    </div>
+                    <div class="contact-card-content">
+                        <h4 class="contact-card-title">Visit Us</h4>
+                        <p class="contact-card-text">Bole Road, Addis Ababa<br>Ethiopia, 1000</p>
+                        <a href="#" class="contact-card-link-enhanced" role="button" aria-label="Get directions to Ethiopian Hospital">
+                            <i class="fas fa-arrow-right me-2" aria-hidden="true"></i>Get Directions
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="contact-info-card-enhanced">
+                    <div class="contact-card-icon-enhanced">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                    </div>
+                    <div class="contact-card-content">
+                        <h4 class="contact-card-title">Call Us</h4>
+                        <p class="contact-card-text">+251 11 123 4567<br>+251 91 234 5678</p>
+                        <a href="tel:+251111234567" class="contact-card-link-enhanced" role="button" aria-label="Call Ethiopian Hospital">
+                            <i class="fas fa-phone me-2" aria-hidden="true"></i>Call Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="contact-info-card-enhanced">
+                    <div class="contact-card-icon-enhanced">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                    </div>
+                    <div class="contact-card-content">
+                        <h4 class="contact-card-title">Email Us</h4>
+                        <p class="contact-card-text">info@ethiopianhospital.com<br>support@ethiopianhospital.com</p>
+                        <a href="mailto:info@ethiopianhospital.com" class="contact-card-link-enhanced" role="button" aria-label="Send email to Ethiopian Hospital">
+                            <i class="fas fa-envelope me-2" aria-hidden="true"></i>Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="contact-info-card-enhanced">
+                    <div class="contact-card-icon-enhanced">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                    </div>
+                    <div class="contact-card-content">
+                        <h4 class="contact-card-title">Hours</h4>
+                        <p class="contact-card-text">24/7 Emergency<br>8:00 AM - 6:00 PM Regular</p>
+                        <a href="#" class="contact-card-link-enhanced" role="button" aria-label="View Ethiopian Hospital schedule">
+                            <i class="fas fa-calendar-alt me-2" aria-hidden="true"></i>View Schedule
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Modern Footer Section -->
+<footer class="modern-footer">
+    <div class="footer-background">
+        <div class="footer-particles"></div>
+        <div class="footer-gradient"></div>
+    </div>
+
+    <div class="container">
+        <!-- Main Footer Content -->
+        <div class="footer-main">
+            <div class="row g-5">
+                <!-- Company Info Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand">
+                        <a class="navbar-brand fw-bold navbar-brand-modern" href="/" aria-label="Ethiopian Hospital ERP Home">
+                            <div class="brand-icon-wrapper mt-2 ">
+                                <img src="{% static 'images/logo.png' %}" alt="TenaERP Logo" class="brand-logo me-2 " style="height: 50px; width: auto;">
+                                <span class="brand-text navbar-brand-text ml-0 ">TenaERP</span>
+                            </div>
+                            <!-- <span class="brand-text navbar-brand-text ml-0 ">TenaERP</span> -->
+                        </a>
+                        <p class="brand-description">
+                            Leading healthcare innovation in Ethiopia with cutting-edge technology,
+                            compassionate care, and commitment to improving patient outcomes.
+                        </p>
+
+                        <!-- Social Media Links -->
+                        <div class="social-links">
+                            <h6 class="social-title">Connect With Us</h6>
+                            <div class="social-icons">
+                                <a href="#" class="social-link facebook" aria-label="Facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="social-link twitter" aria-label="Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="social-link linkedin" aria-label="LinkedIn">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="social-link instagram" aria-label="Instagram">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="social-link youtube" aria-label="YouTube">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links Column -->
+                <!-- <div class="col-lg-2 col-md-6">
+                    <div class="footer-section">
+                        <h6 class="footer-title">Quick Links</h6>
+                        <ul class="footer-links">
+                            <li><a href="#about" class="footer-link">About Us</a></li>
+                            <li><a href="#services" class="footer-link">Our Services</a></li>
+                            <li><a href="#doctors" class="footer-link">Medical Team</a></li>
+                            <li><a href="#contact" class="footer-link">Contact</a></li>
+                            <li><a href="#" class="footer-link">Careers</a></li>
+                            <li><a href="#" class="footer-link">News & Updates</a></li>
+                        </ul>
+                    </div>
+                </div> -->
+
+                <!-- Services Column -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-section">
+                        <h6 class="footer-title">Medical Services</h6>
+                        <ul class="footer-links">
+                            <li><a href="#" class="footer-link">Emergency Care</a></li>
+                            <li><a href="#" class="footer-link">Surgical Services</a></li>
+                            <li><a href="#" class="footer-link">Cardiology</a></li>
+                            <li><a href="#" class="footer-link">Pediatrics</a></li>
+                            <li><a href="#" class="footer-link">Radiology</a></li>
+                            <li><a href="#" class="footer-link">Laboratory</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact & Newsletter Column -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-section">
+                        <h6 class="footer-title">Get In Touch</h6>
+
+                        <!-- Contact Information -->
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div class="contact-details">
+                                    <span class="contact-label">Emergency</span>
+                                    <span class="contact-value">+251 965709659</span>
+                                </div>
+                            </div>
+
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="contact-details">
+                                    <span class="contact-label">Email</span>
+                                    <span class="contact-value">devdereje21@gmail.com</span>
+                                </div>
+                            </div>
+
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="contact-details">
+                                    <span class="contact-label">Address</span>
+                                    <span class="contact-value">Bole Road, Addis Ababa, Ethiopia</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter Signup -->
+                        <!-- <div class="newsletter-signup">
+                            <h6 class="newsletter-title">Stay Updated</h6>
+                            <p class="newsletter-description">Get health tips and system updates</p>
+                            <form class="newsletter-form">
+                                <div class="newsletter-input-group">
+                                    <input type="email" class="newsletter-input" placeholder="Enter your email" required>
+                                    <button type="submit" class="newsletter-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="footer-divider"></div>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="copyright">
+                        <p>&copy; 2025 Tena. All rights reserved.</p>
+                        <div class="legal-links">
+                            <a href="#" class="legal-link">Privacy Policy</a>
+                            <a href="#" class="legal-link">Terms of Service</a>
+                            <a href="#" class="legal-link">Cookie Policy</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="footer-credits">
+                        <!-- <div class="made-with-love">
+                            <span>Made with</span>
+                            <i class="fas fa-heart"></i>
+                            <span>in Ethiopia</span>
+                        </div> -->
+                        <div class="certifications">
+                            <span class="cert-badge">ISO 9001</span>
+                            <span class="cert-badge">HIPAA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Floating Action Button -->
+<a href="https://dereje-portfolio-bcoy.onrender.com" target="_blank" class="floating-action-btn" role="button" aria-label="Contact Developer - Learn more about the developer">
+    <i class="fas fa-user-tie" aria-hidden="true"></i>
+    <span>Contact Developer</span>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/homepage.js' %}"></script>
+<script>
+// Initialize homepage enhancements when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== MODERN NAVBAR FUNCTIONALITY =====
+
+    // Navbar scroll behavior
+    const navbar = document.getElementById('mainNavbar');
+    const navbarToggler = document.querySelector('.hamburger-menu');
+    const navbarCollapse = document.getElementById('navbarNav');
+
+    // Handle navbar scroll state
+    function handleNavbarScroll() {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+
+    // Throttled scroll handler for performance
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+        }
+        scrollTimeout = setTimeout(handleNavbarScroll, 10);
+    }, { passive: true });
+
+    // Initial navbar state
+    handleNavbarScroll();
+
+    // Enhanced hamburger menu functionality with proper state management
+    if (navbarToggler && navbarCollapse) {
+        // Listen to Bootstrap collapse events to sync button state
+        navbarCollapse.addEventListener('show.bs.collapse', function() {
+            navbarToggler.setAttribute('aria-expanded', 'true');
+            navbarToggler.classList.add('active');
+        });
+
+        navbarCollapse.addEventListener('hide.bs.collapse', function() {
+            navbarToggler.setAttribute('aria-expanded', 'false');
+            navbarToggler.classList.remove('active');
+        });
+
+        // Add smooth transition animation
+        navbarToggler.addEventListener('click', function() {
+            // Add animation class for smooth transition
+            navbarCollapse.classList.add('transitioning');
+            setTimeout(() => {
+                navbarCollapse.classList.remove('transitioning');
+            }, 300);
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navbar.contains(e.target) && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                    toggle: false
+                });
+                bsCollapse.hide();
+            }
+        });
+
+        // Close mobile menu when pressing Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                    toggle: false
+                });
+                bsCollapse.hide();
+                navbarToggler.focus();
+            }
+        });
+
+        // Ensure proper initial state
+        const isInitiallyExpanded = navbarCollapse.classList.contains('show');
+        navbarToggler.setAttribute('aria-expanded', isInitiallyExpanded.toString());
+        if (isInitiallyExpanded) {
+            navbarToggler.classList.add('active');
+        }
+    }
+
+    // Enhanced navigation link behavior
+    document.querySelectorAll('.nav-link-modern').forEach(link => {
+        // Add touch feedback for mobile
+        link.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        }, { passive: true });
+
+        link.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        }, { passive: true });
+
+        // Close mobile menu when nav link is clicked
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                    toggle: false
+                });
+                bsCollapse.hide();
+                navbarToggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const navbarHeight = navbar.offsetHeight;
+                const targetPosition = target.offsetTop - navbarHeight - 20;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Add loading animation to demo buttons
+    document.querySelectorAll('a[href="#contact"]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.textContent.includes('Request Demo')) {
+                e.preventDefault();
+
+                // Scroll to contact form
+                const contactForm = document.getElementById('contact-form');
+                if (contactForm) {
+                    contactForm.scrollIntoView({ behavior: 'smooth' });
+
+                    // Pre-select demo option
+                    setTimeout(() => {
+                        const inquiryType = document.getElementById('inquiryType');
+                        if (inquiryType) {
+                            inquiryType.value = 'demo';
+                            inquiryType.dispatchEvent(new Event('change'));
+                        }
+                    }, 500);
+                }
+            }
+        });
+    });
+
+    // Add intersection observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-up');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards and sections
+    document.querySelectorAll('.card-3d, .stats-card-3d, .service-card-enhanced').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Enhanced mobile optimization
+    const isMobile = window.innerWidth <= 767 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // Add mobile class for styling
+        document.body.classList.add('mobile-optimized', 'mobile-device');
+
+        // Optimize animations for mobile performance
+        document.querySelectorAll('[data-parallax]').forEach(el => {
+            el.removeAttribute('data-parallax');
+        });
+
+        // Mobile-optimized AOS settings
+        AOS.init({
+            duration: 400,
+            once: true,
+            offset: 50,
+            disable: false,
+            easing: 'ease-out-cubic'
+        });
+
+        // Add touch feedback to interactive elements
+        const interactiveElements = document.querySelectorAll('.service-card-enhanced, .department-card, .btn, .card-3d');
+        interactiveElements.forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+
+            element.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Optimize scroll performance
+        let ticking = false;
+        function updateScrollPosition() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', updateScrollPosition, { passive: true });
+
+    } else {
+        // Full animations for desktop
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+    }
+
+    // Add focus management for accessibility
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            document.body.classList.add('keyboard-navigation');
+        }
+    });
+
+    document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-navigation');
+    });
+});
+
+// Add custom cursor effect for interactive elements
+document.addEventListener('mousemove', function(e) {
+    const interactiveElements = document.querySelectorAll('.card-3d, .btn-3d, .service-card-enhanced');
+
+    interactiveElements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+            element.style.setProperty('--mouse-x', x + 'px');
+            element.style.setProperty('--mouse-y', y + 'px');
+        }
+    });
+});
+</script>
+{% endblock %}

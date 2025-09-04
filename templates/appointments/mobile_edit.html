@@ -1,0 +1,294 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Edit Appointment - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Edit Appointment</h1>
+        <p class="text-muted">Modify appointment details and schedule</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'appointments:appointment_detail' appointment.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Appointment Information</h5>
+                <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %} fs-6">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+            
+            <form method="post" class="mobile-form needs-validation" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="mobile" value="1">
+                
+                <!-- Patient Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user text-ethiopia-green me-2"></i>
+                        Patient Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Patient <span class="text-danger">*</span></label>
+                        <select class="form-select" name="patient" required>
+                            {% for patient in patients %}
+                                <option value="{{ patient.id }}" {% if patient.id == appointment.patient.id %}selected{% endif %}>
+                                    {{ patient.get_full_name }} - {{ patient.patient_id }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a patient.</div>
+                    </div>
+                </div>
+                
+                <!-- Doctor Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user-md text-ethiopia-blue me-2"></i>
+                        Doctor Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Doctor <span class="text-danger">*</span></label>
+                        <select class="form-select" name="doctor" required>
+                            {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}" {% if doctor.id == appointment.doctor.id %}selected{% endif %}>
+                                    Dr. {{ doctor.get_full_name }} - {{ doctor.get_specialty_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a doctor.</div>
+                    </div>
+                </div>
+                
+                <!-- Appointment Schedule -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-calendar-alt text-ethiopia-yellow me-2"></i>
+                        Appointment Schedule
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="appointment_date" value="{{ appointment.appointment_date|date:'Y-m-d' }}" required>
+                        <div class="invalid-feedback">Please select an appointment date.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Time <span class="text-danger">*</span></label>
+                        <input type="time" class="form-control" name="appointment_time" value="{{ appointment.appointment_time|time:'H:i' }}" required>
+                        <div class="invalid-feedback">Please select an appointment time.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Duration (minutes)</label>
+                        <select class="form-select" name="duration">
+                            <option value="15" {% if appointment.duration == 15 %}selected{% endif %}>15 minutes</option>
+                            <option value="30" {% if appointment.duration == 30 or not appointment.duration %}selected{% endif %}>30 minutes</option>
+                            <option value="45" {% if appointment.duration == 45 %}selected{% endif %}>45 minutes</option>
+                            <option value="60" {% if appointment.duration == 60 %}selected{% endif %}>1 hour</option>
+                            <option value="90" {% if appointment.duration == 90 %}selected{% endif %}>1.5 hours</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Appointment Details -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                        Appointment Details
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Appointment Type <span class="text-danger">*</span></label>
+                        <select class="form-select" name="appointment_type" required>
+                            <option value="">Select Type</option>
+                            <option value="consultation" {% if appointment.appointment_type == 'consultation' %}selected{% endif %}>Consultation</option>
+                            <option value="follow_up" {% if appointment.appointment_type == 'follow_up' %}selected{% endif %}>Follow-up</option>
+                            <option value="emergency" {% if appointment.appointment_type == 'emergency' %}selected{% endif %}>Emergency</option>
+                            <option value="routine_checkup" {% if appointment.appointment_type == 'routine_checkup' %}selected{% endif %}>Routine Checkup</option>
+                            <option value="procedure" {% if appointment.appointment_type == 'procedure' %}selected{% endif %}>Procedure</option>
+                        </select>
+                        <div class="invalid-feedback">Please select appointment type.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" name="priority">
+                            <option value="normal" {% if appointment.priority == 'normal' or not appointment.priority %}selected{% endif %}>Normal</option>
+                            <option value="high" {% if appointment.priority == 'high' %}selected{% endif %}>High</option>
+                            <option value="urgent" {% if appointment.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="scheduled" {% if appointment.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                            <option value="confirmed" {% if appointment.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                            <option value="in_progress" {% if appointment.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if appointment.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if appointment.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            <option value="no_show" {% if appointment.status == 'no_show' %}selected{% endif %}>No Show</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Visit</label>
+                        <textarea class="form-control" name="reason" rows="3" placeholder="Describe the reason for this appointment...">{{ appointment.reason|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="Additional notes or special instructions...">{{ appointment.notes|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update Appointment
+                    </button>
+                    <a href="{% url 'appointments:appointment_detail' appointment.pk %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Current Status -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="text-ethiopia-green mb-3">
+                <i class="fas fa-info-circle me-2"></i>Current Status
+            </h6>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <small class="text-muted">Current Status</small>
+                    <div>
+                        <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                            {{ appointment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Priority</small>
+                    <div>
+                        <span class="badge bg-{% if appointment.priority == 'urgent' %}danger{% elif appointment.priority == 'high' %}warning{% else %}success{% endif %}">
+                            {{ appointment.get_priority_display|default:"Normal" }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Created</small>
+                    <div class="fw-bold">{{ appointment.created_at|date:"M d, Y" }}</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Last Updated</small>
+                    <div class="fw-bold">{{ appointment.updated_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form .form-control,
+.mobile-form .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+}
+
+.mobile-form .form-label {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form .invalid-feedback {
+    font-size: 0.875rem;
+}
+
+.mobile-form h6 {
+    color: var(--mobile-primary);
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.badge.fs-6 {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-form .form-control,
+    .mobile-form .form-select {
+        padding: 0.625rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile appointment edit form loaded');
+    
+    // Show mobile notification if coming from detail page
+    if (document.referrer.includes('/appointments/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Edit mode activated!', 'info');
+        }
+    }
+    
+    // Date validation - prevent past dates for new appointments
+    const dateInput = document.querySelector('input[name="appointment_date"]');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+    }
+});
+</script>
+{% endblock %}

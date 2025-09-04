@@ -1,0 +1,1123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dereje Amare - Developer{% endblock %}
+
+{% block description %}Full-stack web developer passionate about creating elegant solutions. Specializing in modern web technologies and user-centered design.{% endblock %}
+
+{% block keywords %}developer, full-stack, web development, UI/UX, modern design, minimalist, Django, Python{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        /* Enhanced Vercel Design System with 3D Support */
+        --geist-foreground: #000;
+        --geist-background: #fff;
+        --accents-1: #fafafa;
+        --accents-2: #eaeaea;
+        --accents-3: #999;
+        --accents-4: #888;
+        --accents-5: #666;
+        --accents-6: #444;
+        --accents-7: #333;
+        --accents-8: #111;
+        --geist-success: #0070f3;
+        --geist-error: #ee0000;
+        --geist-warning: #f5a623;
+
+        /* 3D & Advanced Effects */
+        --perspective: 1000px;
+        --rotate-x: 0deg;
+        --rotate-y: 0deg;
+        --translate-z: 0px;
+
+        /* Enhanced Shadows for 3D */
+        --shadow-3d-small: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.08);
+        --shadow-3d-medium: 0 4px 16px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.08), 0 16px 64px rgba(0, 0, 0, 0.12);
+        --shadow-3d-large: 0 8px 32px rgba(0, 0, 0, 0.08), 0 16px 64px rgba(0, 0, 0, 0.12), 0 32px 128px rgba(0, 0, 0, 0.16);
+        --shadow-3d-floating: 0 12px 48px rgba(0, 0, 0, 0.12), 0 24px 96px rgba(0, 0, 0, 0.16);
+
+        /* Glassmorphism */
+        --glass-bg: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-blur: blur(20px);
+
+        /* Typography with Enhanced Spacing */
+        --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+        /* Perfect Spacing Scale */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --space-10: 2.5rem;
+        --space-12: 3rem;
+        --space-16: 4rem;
+        --space-20: 5rem;
+        --space-24: 6rem;
+        --space-32: 8rem;
+
+        /* Enhanced Radius System */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+        --radius-2xl: 24px;
+        --radius-full: 9999px;
+
+        /* Advanced Transitions */
+        --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: var(--font-sans);
+        background: var(--geist-background);
+        color: var(--geist-foreground);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        perspective: var(--perspective);
+    }
+
+    /* Enhanced Layout with 3D Context */
+    .page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transform-style: preserve-3d;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--space-6);
+        position: relative;
+    }
+
+    .section {
+        padding: var(--space-32) 0;
+        position: relative;
+        transform-style: preserve-3d;
+    }
+
+    .section-sm {
+        padding: var(--space-24) 0;
+    }
+
+    /* World-Class Typography System */
+    h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+        margin: 0 0 var(--space-8) 0;
+        background: linear-gradient(135deg, var(--geist-foreground) 0%, var(--accents-6) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        transform-style: preserve-3d;
+    }
+
+    h2 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        margin: 0 0 var(--space-6) 0;
+        color: var(--geist-foreground);
+        position: relative;
+    }
+
+    h3 {
+        font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        margin: 0 0 var(--space-4) 0;
+        color: var(--geist-foreground);
+    }
+
+    p {
+        font-size: clamp(0.9rem, 2vw, 1.125rem);
+        line-height: 1.7;
+        color: var(--accents-5);
+        margin: 0 0 var(--space-4) 0;
+        font-weight: 400;
+    }
+
+    .text-large {
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+        line-height: 1.6;
+        color: var(--accents-5);
+        font-weight: 400;
+    }
+
+    .text-small {
+        font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+        color: var(--accents-4);
+        font-weight: 400;
+    }
+
+    /* Advanced 3D Button System */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-3) var(--space-6);
+        height: 48px;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left var(--transition-slow);
+        z-index: 1;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: var(--geist-foreground);
+        color: var(--geist-background);
+        border-color: var(--geist-foreground);
+        box-shadow: var(--shadow-3d-small);
+    }
+
+    .btn-primary:hover {
+        background: var(--accents-8);
+        border-color: var(--accents-8);
+        color: var(--geist-background);
+        text-decoration: none;
+        transform: translateY(-2px) translateZ(10px);
+        box-shadow: var(--shadow-3d-medium);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0) translateZ(0);
+        box-shadow: var(--shadow-3d-small);
+    }
+
+    .btn-secondary {
+        background: var(--glass-bg);
+        color: var(--geist-foreground);
+        border-color: var(--accents-2);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-3d-small);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: var(--geist-foreground);
+        color: var(--geist-foreground);
+        text-decoration: none;
+        transform: translateY(-2px) translateZ(10px);
+        box-shadow: var(--shadow-3d-medium);
+    }
+
+    .btn-secondary:active {
+        transform: translateY(0) translateZ(0);
+        box-shadow: var(--shadow-3d-small);
+    }
+    /* Advanced 3D Card System */
+    .card {
+        background: var(--glass-bg);
+        border: 1px solid var(--accents-2);
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-3d-small);
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--accents-3), transparent);
+        opacity: 0;
+        transition: opacity var(--transition-medium);
+    }
+
+    .card:hover {
+        border-color: var(--accents-3);
+        box-shadow: var(--shadow-3d-medium);
+        transform: translateY(-4px) translateZ(20px);
+    }
+
+    .card:hover::before {
+        opacity: 1;
+    }
+
+    .project-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--accents-2);
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-3d-small);
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .project-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0, 112, 243, 0.02) 0%, rgba(0, 112, 243, 0.05) 100%);
+        opacity: 0;
+        transition: opacity var(--transition-medium);
+        z-index: 0;
+    }
+
+    .project-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .project-card:hover {
+        border-color: var(--geist-success);
+        box-shadow: var(--shadow-3d-floating);
+        transform: translateY(-8px) translateZ(30px) rotateX(2deg);
+    }
+
+    .project-card:hover::before {
+        opacity: 1;
+    }
+
+    .project-card:active {
+        transform: translateY(-4px) translateZ(15px) rotateX(1deg);
+        box-shadow: var(--shadow-3d-medium);
+    }
+
+    /* Clean Skills Section */
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .skill-item {
+        background: var(--accents-1);
+        color: var(--geist-foreground);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid var(--accents-2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .skill-item:hover {
+        background: var(--geist-foreground);
+        color: var(--geist-background);
+        border-color: var(--geist-foreground);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Enhanced 3D Avatar */
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--accents-2);
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        box-shadow: var(--shadow-3d-medium);
+        background: var(--accents-1);
+    }
+
+    .avatar:hover {
+        transform: translateY(-4px) translateZ(20px) rotateY(5deg);
+        box-shadow: var(--shadow-3d-floating);
+        border-color: var(--geist-success);
+    }
+
+    /* Links */
+    .link {
+        color: var(--geist-success);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .link:hover {
+        color: var(--geist-foreground);
+        text-decoration: underline;
+    }
+
+    /* Enhanced Utility Classes */
+    .flex {
+        display: flex;
+    }
+
+    .flex-col {
+        flex-direction: column;
+    }
+
+    .items-center {
+        align-items: center;
+    }
+
+    .justify-center {
+        justify-content: center;
+    }
+
+    .justify-between {
+        justify-content: space-between;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .gap-2 { gap: var(--space-2); }
+    .gap-4 { gap: var(--space-4); }
+    .gap-6 { gap: var(--space-6); }
+    .gap-8 { gap: var(--space-8); }
+
+    .mb-2 { margin-bottom: var(--space-2); }
+    .mb-4 { margin-bottom: var(--space-4); }
+    .mb-6 { margin-bottom: var(--space-6); }
+    .mb-8 { margin-bottom: var(--space-8); }
+    .mb-12 { margin-bottom: var(--space-12); }
+
+    .mt-4 { margin-top: var(--space-4); }
+    .mt-8 { margin-top: var(--space-8); }
+
+    /* Enhanced Grid System */
+    .grid {
+        display: grid;
+        gap: var(--space-8);
+    }
+
+    .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    /* Links */
+    .link {
+        color: var(--geist-success);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .link:hover {
+        color: var(--accents-8);
+        transform: translateZ(5px);
+    }
+
+    .link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: currentColor;
+        transition: width var(--transition-medium);
+    }
+
+    .link:hover::after {
+        width: 100%;
+    }
+
+    /* Parallax & Floating Effects */
+    .parallax-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--accents-1) 0%, rgba(250, 250, 250, 0.5) 100%);
+        transform: translateZ(-100px) scale(1.1);
+        z-index: -1;
+    }
+
+    /* Floating animations removed to prevent blur */
+
+    .hero-bg-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        z-index: -1;
+    }
+
+    .hero-bg-elements::before {
+        content: '';
+        position: absolute;
+        top: 20%;
+        right: 10%;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(0, 112, 243, 0.03), rgba(0, 112, 243, 0.08));
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .hero-bg-elements::after {
+        content: '';
+        position: absolute;
+        bottom: 20%;
+        left: 10%;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, rgba(0, 112, 243, 0.02), rgba(0, 112, 243, 0.06));
+        border-radius: 50%;
+        filter: blur(30px);
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 var(--space-4);
+        }
+
+        .section {
+            padding: var(--space-20) 0;
+        }
+
+        .nav {
+            height: 64px;
+        }
+
+        .main {
+            padding-top: 64px;
+        }
+
+        .nav-links {
+            gap: var(--space-6);
+        }
+
+        .grid-2,
+        .grid-3 {
+            grid-template-columns: 1fr;
+            gap: var(--space-8);
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px) translateZ(15px);
+        }
+
+        /* Mobile FAB adjustments */
+        .fab {
+            min-width: 160px;
+            height: 48px;
+            bottom: 16px;
+            right: 16px;
+            font-size: 12px;
+            padding: 0 16px;
+            border-radius: 24px;
+        }
+
+        .fab-text {
+            font-size: 12px;
+        }
+
+        .developer-icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        .developer-icon svg {
+            width: 50px;
+            height: 50px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 0 var(--space-3);
+        }
+
+        .section {
+            padding: var(--space-16) 0;
+        }
+
+        .nav-links {
+            gap: var(--space-4);
+        }
+
+        .card,
+        .project-card {
+            padding: var(--space-6);
+        }
+    }
+
+    /* Enhanced Dark Mode with 3D Support */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --geist-foreground: #fff;
+            --geist-background: #000;
+            --accents-1: #111;
+            --accents-2: #333;
+            --accents-3: #444;
+            --accents-4: #666;
+            --accents-5: #888;
+            --accents-6: #999;
+            --accents-7: #eaeaea;
+            --accents-8: #fafafa;
+            --glass-bg: rgba(17, 17, 17, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-bg-elements::before {
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.08), rgba(0, 112, 243, 0.15));
+        }
+
+        .hero-bg-elements::after {
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.05), rgba(0, 112, 243, 0.12));
+        }
+    }
+
+    /* Back to Home Button */
+    .back-to-home {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        z-index: 1000;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--accents-2);
+        border-radius: var(--radius-lg);
+        color: var(--geist-foreground);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all var(--transition-medium);
+        box-shadow: var(--shadow-3d-small);
+    }
+
+    .back-btn:hover {
+        background: var(--accents-1);
+        border-color: var(--accents-3);
+        color: var(--geist-foreground);
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-3d-medium);
+    }
+
+    .back-btn svg {
+        transition: transform var(--transition-fast);
+    }
+
+    .back-btn:hover svg {
+        transform: translateX(-2px);
+    }
+
+    /* Remove main padding since no fixed nav */
+    .main {
+        padding-top: 0;
+    }
+
+
+
+    /* Focus states for accessibility */
+    .btn:focus,
+    .back-btn:focus,
+    .link:focus {
+        outline: 2px solid var(--geist-success);
+        outline-offset: 2px;
+        transform: translateY(-2px) scale(1.05);
+    }
+
+    /* Floating Action Button */
+    .fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        min-width: 180px;
+        height: 56px;
+        border-radius: 28px;
+        background: var(--geist-foreground);
+        color: var(--geist-background);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: var(--shadow-3d-large);
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        z-index: 1000;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .fab::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left var(--transition-slow);
+        z-index: 1;
+    }
+
+    .fab:hover::before {
+        left: 100%;
+    }
+
+    .fab:hover {
+        background: var(--accents-8);
+        color: var(--geist-background);
+        text-decoration: none;
+        transform: translateY(-4px) translateZ(20px) scale(1.05);
+        box-shadow: var(--shadow-3d-floating);
+    }
+
+    .fab:active {
+        transform: translateY(-2px) translateZ(10px) scale(1.02);
+        box-shadow: var(--shadow-3d-medium);
+    }
+
+    .fab-text {
+        color: var(--geist-background);
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Developer Icon Styles */
+    .developer-icon {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--geist-foreground), var(--accents-7));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all var(--transition-medium);
+        box-shadow: var(--shadow-3d-medium);
+        border: 3px solid var(--accents-2);
+    }
+
+    .developer-icon:hover {
+        transform: translateY(-4px) translateZ(20px) rotateY(5deg);
+        box-shadow: var(--shadow-3d-floating);
+        border-color: var(--geist-success);
+    }
+
+    .developer-icon svg {
+        width: 60px;
+        height: 60px;
+        color: var(--geist-background);
+        transition: all var(--transition-medium);
+    }
+
+    .developer-icon:hover svg {
+        transform: scale(1.1) rotateZ(5deg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <!-- Back to Home Button -->
+    <div class="back-to-home">
+        <a href="{% url 'homepage' %}" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="section" style="position: relative; min-height: 90vh; display: flex; align-items: center;">
+            <div class="hero-bg-elements"></div>
+            <div class="parallax-bg"></div>
+            <div class="container">
+                <div class="text-center">
+                    <div style="margin-bottom: var(--space-4);">
+                        <h2 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 400; color: var(--accents-5); margin-bottom: var(--space-2);">Hi, I'm</h2>
+                        <h1 style="margin-bottom: var(--space-2); font-size: clamp(2.5rem, 5vw, 3.5rem);">Dereje Amare</h1>
+                        <h2 style="font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 500; color: var(--accents-6); margin-bottom: var(--space-6);">Full-Stack Web Developer</h2>
+                    </div>
+                    <p class="text-large mb-12" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+                        I design and build web applications with Django and modern frontend technologies,
+                        focusing on clean code, performance, and exceptional user experiences.
+                    </p>
+                    <div class="flex gap-6 justify-center" style="flex-wrap: wrap;">
+                        <a href="#work" class="btn btn-primary">
+                            View Work
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                            </svg>
+                        </a>
+                        <a href="#contact" class="btn btn-secondary">
+                            Get in Touch
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section" style="background: var(--accents-1); position: relative;">
+            <div class="parallax-bg" style="background: linear-gradient(135deg, var(--accents-1) 0%, rgba(250, 250, 250, 0.8) 100%);"></div>
+            <div class="container">
+                <div class="card" style="max-width: 1000px; margin: 0 auto;">
+                    <div class="grid grid-2" style="align-items: center; gap: var(--space-12);">
+                        <div>
+                            <h2 style="margin-bottom: var(--space-6);">About</h2>
+                            <p class="mb-6">
+                                I'm Dereje Amare, a passionate full-stack web developer with 4+ years of experience
+                                crafting robust web applications. I specialize in Django backend development,
+                                React frontend frameworks, and creating seamless user experiences that solve real-world problems.
+                            </p>
+                            <!-- <p class="mb-6">
+                                My development philosophy centers on writing clean, maintainable code and building
+                                scalable applications. I believe in the power of technology to transform businesses
+                                and improve people's lives, which drives me to continuously learn and adapt to new technologies.
+                            </p> -->
+                            <!-- <p class="mb-6">
+                                When I'm not coding, you'll find me exploring new frameworks, contributing to open-source
+                                projects, or mentoring aspiring developers in my community.
+                            </p> -->
+                            <a href="mailto:dereje.amare@example.com" class="link">
+                                Get in touch
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="text-center">
+                            <div class="developer-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="section">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 3rem;">Skills & Tools</h2>
+                <div class="skills-container">
+                    <div class="skill-item">React</div>
+                    <div class="skill-item">TypeScript</div>
+                    <div class="skill-item">Python</div>
+                    <div class="skill-item">Django</div>
+                    <div class="skill-item">PostgreSQL</div>
+                    <div class="skill-item">MongoDB</div>
+                    <div class="skill-item">AWS</div>
+                    <div class="skill-item">Docker</div>
+                    <div class="skill-item">Git</div>
+                    <div class="skill-item">Figma</div>
+                    <div class="skill-item">Tailwind CSS</div>
+                    <div class="skill-item">GraphQL</div>
+                    <div class="skill-item">Vercel</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Work Section -->
+        <section id="work" class="section" style="background: var(--accents-1); position: relative;">
+            <div class="parallax-bg" style="background: linear-gradient(135deg, var(--accents-1) 0%, rgba(250, 250, 250, 0.9) 100%);"></div>
+            <div class="container">
+                <h2 class="text-center mb-12">Selected Work</h2>
+                <div class="grid grid-3">
+                    <div class="project-card">
+                        <h3>E-Commerce Platform</h3>
+                        <p class="mb-6">
+                            Full-stack e-commerce solution with React frontend and Django backend.
+                            Features product catalog, shopping cart, payment integration, order management,
+                            and comprehensive admin dashboard for inventory control.
+                        </p>
+                        <div class="mb-6" style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">SQLite</span>
+                        </div>
+                        <div class="flex gap-4" style="margin-top: auto;">
+                            <a href="https://github.com/derejearame/ecommerce" class="link" target="_blank" rel="noopener">
+                                GitHub
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <h3>Food Delivery Website</h3>
+                        <p class="mb-6">
+                            Modern food delivery platform with restaurant listings, menu management,
+                            real-time order tracking, and payment processing. Features customer reviews,
+                            delivery scheduling, and restaurant dashboard.
+                        </p>
+                        <div class="mb-6" style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">SQLite</span>
+                        </div>
+                        <div class="flex gap-4" style="margin-top: auto;">
+                            <a href="https://github.com/derejearame/food-delivery" class="link" target="_blank" rel="noopener">
+                                GitHub
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <h3>Car Selling Website</h3>
+                        <p class="mb-6">
+                            Comprehensive automotive marketplace with advanced search filters,
+                            car listings management, image galleries, seller profiles, and secure
+                            messaging system between buyers and sellers.
+                        </p>
+                        <div class="mb-6" style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">SQLite</span>
+                        </div>
+                        <div class="flex gap-4" style="margin-top: auto;">
+                            <a href="https://github.com/derejearame/car-marketplace" class="link" target="_blank" rel="noopener">
+                                GitHub
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section" style="position: relative;">
+            <div class="container">
+                <div class="card text-center" style="max-width: 700px; margin: 0 auto;">
+                    <h2 style="margin-bottom: var(--space-6);">Let's work together</h2>
+                    <p class="mb-12" style="font-size: 1.125rem; line-height: 1.6;">
+                        I'm always interested in new opportunities and challenging projects.
+                        Whether you need a full-stack web application or want to collaborate on something innovative,
+                        let's connect and see what we can build together.
+                    </p>
+                    <div class="flex gap-6 justify-center" style="flex-wrap: wrap;">
+                        <a href="mailto:dereje.amare@example.com" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            Send Email
+                        </a>
+                        <a href="https://linkedin.com/in/derejearame" class="btn btn-secondary" target="_blank" rel="noopener">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+                                <rect x="2" y="9" width="4" height="12"/>
+                                <circle cx="4" cy="4" r="2"/>
+                            </svg>
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="section-sm" style="background: var(--accents-1); border-top: 1px solid var(--accents-2); position: relative;">
+        <div class="container">
+            <div class="flex justify-between items-center" style="flex-wrap: wrap; gap: var(--space-4);">
+                <p class="text-small" style="margin: 0;">© 2024 Dereje Amare. All rights reserved.</p>
+                <div class="flex gap-8">
+                    <a href="https://github.com/derejearame" class="text-small link" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://twitter.com/derejearame" class="text-small link" target="_blank" rel="noopener">Twitter</a>
+                    <a href="https://linkedin.com/in/derejearame" class="text-small link" target="_blank" rel="noopener">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <a href="#" class="fab" title="Developer Portfolio">
+        <span class="fab-text">Developer Portfolio</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple smooth scrolling for any remaining anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Parallax effects removed to prevent blur
+
+    // 3D mouse tracking for project cards
+    function init3DEffects() {
+        const cards = document.querySelectorAll('.project-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+
+                this.style.transform = `translateY(-8px) translateZ(30px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg)';
+            });
+        });
+    }
+
+    // Remove all scroll animations - elements are always visible
+    document.querySelectorAll('.card, .project-card').forEach(element => {
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0) translateZ(0)';
+        element.style.transition = 'all 0.3s ease';
+    });
+
+    // Initialize 3D effects
+    init3DEffects();
+
+    // Preload critical animations
+    document.body.style.opacity = '1';
+});
+</script>
+{% endblock %}

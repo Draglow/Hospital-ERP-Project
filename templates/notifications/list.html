@@ -1,0 +1,590 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% csrf_token %}
+
+
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Notifications</h1>
+            <p class="text-muted mb-0">Manage your notifications and alerts</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if unread_count > 0 %}
+            <button class="btn btn-outline-success" id="markAllAsRead" style="border-color: #009639; color: #009639;">
+                <i class="fas fa-check-double me-2"></i>Mark All as Read
+            </button>
+            {% endif %}
+            <a href="{% url 'notifications:preferences' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-cog me-2"></i>Preferences
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All</option>
+                        <option value="unread" {% if status_filter == 'unread' %}selected{% endif %}>Unread</option>
+                        <option value="read" {% if status_filter == 'read' %}selected{% endif %}>Read</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">All Types</option>
+                        {% for value, label in notification_types %}
+                        <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search notifications...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn" style="background-color: #009639; border-color: #009639; color: white;">
+                            <i class="fas fa-search me-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-bell me-2"></i>
+                Notifications
+                {% if unread_count > 0 %}
+                <span class="badge bg-danger ms-2">{{ unread_count }} unread</span>
+                {% endif %}
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            {% if page_obj %}
+                <div class="list-group list-group-flush">
+                    {% for notification in page_obj %}
+                    <div class="list-group-item notification-item {% if not notification.is_read %}unread{% endif %}" 
+                         data-notification-id="{{ notification.pk }}">
+                        <div class="d-flex align-items-start">
+                            <div class="notification-icon me-3">
+                                <i class="{{ notification.get_icon }} {{ notification.get_color_class }}"></i>
+                            </div>
+                            <div class="notification-content flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="notification-title mb-0">{{ notification.title }}</h6>
+                                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="notification-message text-muted mb-2">{{ notification.message }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="notification-meta">
+                                        <span class="badge bg-secondary">{{ notification.get_notification_type_display }}</span>
+                                        <span class="badge bg-{{ notification.priority }}">{{ notification.get_priority_display }}</span>
+                                    </div>
+                                    <div class="notification-actions">
+                                        {% if not notification.is_read %}
+                                        <button class="btn btn-sm btn-outline-success mark-as-read"
+                                                data-notification-id="{{ notification.pk }}"
+                                                style="border-color: #009639; color: #009639;">
+                                            <i class="fas fa-check me-1"></i>Mark as Read
+                                        </button>
+                                        {% endif %}
+                                        {% if notification.action_url %}
+                                        <a href="{{ notification.action_url }}" class="btn btn-sm" style="background-color: #009639; border-color: #009639; color: white;">
+                                            <i class="fas fa-external-link-alt me-1"></i>View
+                                        </a>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-outline-danger delete-notification"
+                                                data-notification-id="{{ notification.pk }}"
+                                                data-notification-title="{{ notification.title|truncatechars:30 }}">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if not notification.is_read %}
+                            <div class="notification-badge">
+                                <span class="badge bg-primary rounded-pill"></span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Notifications pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No notifications found</h5>
+                    <p class="text-muted">You're all caught up! No notifications match your current filters.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.notification-item {
+    padding: 1rem;
+    border: none !important;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+    background-color: #f0f8ff;
+    border-left: 4px solid #007bff !important;
+}
+
+.notification-icon {
+    width: 32px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.notification-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notification-meta .badge {
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+}
+
+.notification-badge {
+    width: 12px;
+    height: 12px;
+}
+
+.notification-badge .badge {
+    width: 12px;
+    height: 12px;
+    padding: 0;
+}
+
+/* Delete button styling */
+.delete-notification {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative !important;
+}
+
+.delete-notification:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+/* Debug styling to make buttons more visible */
+.notification-actions {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+.notification-actions .btn {
+    flex-shrink: 0 !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log('=== NOTIFICATION DELETE SCRIPT LOADED ===');
+
+// Add immediate diagnostic
+console.log('Script loading at:', new Date().toISOString());
+console.log('Document ready state:', document.readyState);
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up notification functionality...');
+    console.log('Current URL:', window.location.href);
+
+    // Test if we can find any notifications
+    const allNotifications = document.querySelectorAll('.notification-item');
+    console.log('Total notifications found:', allNotifications.length);
+
+    // Mark individual notification as read
+    const markAsReadButtons = document.querySelectorAll('.mark-as-read');
+    console.log('Found mark-as-read buttons:', markAsReadButtons.length);
+
+    markAsReadButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.dataset.notificationId;
+            markNotificationAsRead(notificationId, this);
+        });
+    });
+
+    // Delete individual notification - FIXED VERSION
+    const deleteButtons = document.querySelectorAll('.delete-notification');
+    console.log('Found delete buttons:', deleteButtons.length);
+
+    if (deleteButtons.length === 0) {
+        console.log('WARNING: No delete buttons found!');
+    }
+
+    deleteButtons.forEach(function(button, index) {
+        console.log('Setting up delete button', index + 1);
+        console.log('Button element:', button);
+        console.log('Button data:', {
+            id: button.dataset.notificationId,
+            title: button.dataset.notificationTitle,
+            classes: button.className
+        });
+
+        // Remove any existing event listeners to prevent duplicates
+        button.removeEventListener('click', handleDeleteButtonClick);
+        button.addEventListener('click', handleDeleteButtonClick);
+
+        // Add a test click handler to verify events are working
+        button.addEventListener('click', function(e) {
+            console.log('TEST: Delete button clicked!', e.target);
+        });
+
+        console.log('Event listeners attached to button', index + 1);
+    });
+
+    // Mark all notifications as read
+    const markAllBtn = document.getElementById('markAllAsRead');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function() {
+            markAllNotificationsAsRead();
+        });
+    }
+});
+
+// Separate function to handle delete button clicks
+function handleDeleteButtonClick(e) {
+    console.log('=== DELETE BUTTON CLICKED ===');
+    e.preventDefault();
+    e.stopPropagation();
+
+    const button = e.target.closest('.delete-notification');
+    if (!button) {
+        console.error('Could not find delete button element');
+        return;
+    }
+
+    const notificationId = button.dataset.notificationId;
+    const notificationTitle = button.dataset.notificationTitle;
+
+    console.log('Button data - ID:', notificationId, 'Title:', notificationTitle);
+
+    if (!notificationId) {
+        console.error('No notification ID found!');
+        alert('Error: No notification ID found');
+        return;
+    }
+
+    deleteNotification(notificationId, button, notificationTitle || 'Unknown');
+}
+
+function markNotificationAsRead(notificationId, button) {
+    fetch(`/notifications/mark-read/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = button.closest('.notification-item');
+            notificationItem.classList.remove('unread');
+            button.remove();
+            
+            // Update unread count
+            updateUnreadCount();
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+    });
+}
+
+function markAllNotificationsAsRead() {
+    fetch('/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+    });
+}
+
+function deleteNotification(notificationId, button, notificationTitle) {
+    console.log('=== DELETE FUNCTION CALLED ===');
+    console.log('ID:', notificationId, 'Title:', notificationTitle);
+
+    // Validate inputs
+    if (!notificationId || !button) {
+        console.error('Invalid parameters:', { notificationId, button });
+        alert('Error: Invalid notification data');
+        return;
+    }
+
+    // Simple confirmation
+    if (!confirm('Delete "' + notificationTitle + '"?\n\nThis action cannot be undone.')) {
+        console.log('User cancelled deletion');
+        return;
+    }
+
+    console.log('User confirmed, proceeding with deletion...');
+
+    const notificationItem = button.closest('.notification-item');
+    if (!notificationItem) {
+        console.error('Could not find notification item');
+        alert('Error: Could not find notification element');
+        return;
+    }
+
+    const originalContent = button.innerHTML;
+    const wasUnread = notificationItem.classList.contains('unread');
+
+    // Add loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+    button.disabled = true;
+    notificationItem.style.opacity = '0.6';
+
+    console.log('Added loading state, making API call...');
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken || !csrfToken.value) {
+        console.error('CSRF token not found or empty');
+        alert('Security token not found. Please refresh the page.');
+        restoreButtonState(button, originalContent, notificationItem);
+        return;
+    }
+
+    console.log('CSRF token found:', csrfToken.value.substring(0, 10) + '...');
+
+    // Make the API call
+    fetch('/notifications/delete/' + notificationId + '/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('API response:', data);
+        if (data.success) {
+            // Animate removal
+            notificationItem.style.transition = 'all 0.3s ease';
+            notificationItem.style.transform = 'translateX(-100%)';
+            notificationItem.style.opacity = '0';
+
+            setTimeout(() => {
+                notificationItem.remove();
+
+                // Update counts
+                updateUnreadCount();
+                updateMobileSidebarNotification(notificationId, wasUnread);
+
+                // Show success message
+                showDashboardNotification(data.message, 'success');
+
+                // Check if page is empty
+                const remainingItems = document.querySelectorAll('.notification-item');
+                if (remainingItems.length === 0) {
+                    location.reload(); // Reload to show empty state
+                }
+            }, 300);
+        } else {
+            throw new Error(data.message || 'Failed to delete notification');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting notification:', error);
+        restoreButtonState(button, originalContent, notificationItem);
+        showDashboardNotification('Failed to delete notification: ' + error.message, 'danger');
+    });
+}
+
+// Helper function to restore button state
+function restoreButtonState(button, originalContent, notificationItem) {
+    button.innerHTML = originalContent;
+    button.disabled = false;
+    notificationItem.style.opacity = '1';
+}
+
+function updateMobileSidebarNotification(notificationId, wasUnread) {
+    // Update mobile sidebar if it exists (for responsive/mobile views)
+    if (window.mobileDashboard && typeof window.mobileDashboard.removeNotificationFromSidebar === 'function') {
+        window.mobileDashboard.removeNotificationFromSidebar(notificationId, wasUnread);
+    }
+
+    // Also update any mobile notification panels that might be open
+    const mobileNotificationItem = document.querySelector(`.mobile-notification-item[data-notification-id="${notificationId}"]`);
+    if (mobileNotificationItem) {
+        mobileNotificationItem.style.transition = 'all 0.3s ease';
+        mobileNotificationItem.style.transform = 'translateX(100%)';
+        mobileNotificationItem.style.opacity = '0';
+        setTimeout(() => {
+            mobileNotificationItem.remove();
+        }, 300);
+    }
+}
+
+function updateUnreadCount() {
+    const unreadItems = document.querySelectorAll('.notification-item.unread').length;
+    const badge = document.querySelector('.badge.bg-danger');
+    if (badge) {
+        if (unreadItems === 0) {
+            badge.remove();
+        } else {
+            badge.textContent = `${unreadItems} unread`;
+        }
+    }
+
+    // Also update the main notification badge in the header
+    const headerBadge = document.querySelector('#notificationBadge');
+    if (headerBadge) {
+        if (unreadItems === 0) {
+            headerBadge.style.display = 'none';
+        } else {
+            headerBadge.textContent = unreadItems;
+            headerBadge.style.display = 'block';
+        }
+    }
+}
+
+function showDashboardNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Global function to handle delete clicks (for debugging)
+window.deleteNotificationById = function(notificationId) {
+    const button = document.querySelector(`[data-notification-id="${notificationId}"]`);
+    if (button) {
+        const notificationTitle = button.dataset.notificationTitle;
+        deleteNotification(notificationId, button, notificationTitle);
+    } else {
+        console.error('Button not found for notification ID:', notificationId);
+    }
+};
+
+// Global test function to check if delete buttons are working
+window.testDeleteButtons = function() {
+    console.log('=== TESTING DELETE BUTTONS ===');
+    const buttons = document.querySelectorAll('.delete-notification');
+    console.log('Found', buttons.length, 'delete buttons');
+
+    buttons.forEach((button, index) => {
+        console.log(`Button ${index + 1}:`, {
+            element: button,
+            id: button.dataset.notificationId,
+            title: button.dataset.notificationTitle,
+            visible: button.offsetParent !== null,
+            clickable: !button.disabled
+        });
+    });
+
+    if (buttons.length > 0) {
+        console.log('Testing first button click...');
+        const firstButton = buttons[0];
+        console.log('Simulating click on:', firstButton);
+        firstButton.click();
+    }
+
+    return buttons.length;
+};
+
+// Make functions available globally
+window.handleDeleteButtonClick = handleDeleteButtonClick;
+window.deleteNotification = deleteNotification;
+</script>
+{% endblock %}

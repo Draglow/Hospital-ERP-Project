@@ -1,0 +1,389 @@
+<!-- Notification Dropdown Content -->
+<li><h6 class="dropdown-header d-flex justify-content-between align-items-center">
+    <span>Notifications</span>
+    {% if unread_count > 0 %}
+        <span class="badge bg-danger">{{ unread_count }}</span>
+    {% endif %}
+</h6></li>
+
+<!-- Top Action Buttons -->
+<li class="notification-top-actions">
+    <div class="d-flex gap-1 p-2">
+        {% if unread_count > 0 %}
+        <button class="btn btn-sm flex-fill" id="markAllAsReadTop" style="background-color: #009639; border-color: #009639; color: white;">
+            <i class="fas fa-check-double me-1"></i>Mark All Read
+        </button>
+        {% endif %}
+        <a class="btn btn-outline-success btn-sm flex-fill" href="{% url 'notifications:notification_list' %}" style="border-color: #009639; color: #009639;">
+            <i class="fas fa-list me-1"></i>View All
+        </a>
+    </div>
+</li>
+{% if notifications %}
+<li><hr class="dropdown-divider my-1"></li>
+{% endif %}
+
+{% if notifications %}
+    {% for notification in notifications %}
+    <li>
+        <div class="dropdown-item notification-item {% if not notification.is_read %}unread{% endif %}"
+             data-notification-id="{{ notification.pk }}">
+            <div class="d-flex align-items-start">
+                <div class="notification-icon me-3">
+                    <i class="{{ notification.get_icon }} {{ notification.get_color_class }}"></i>
+                </div>
+                <div class="notification-content flex-grow-1">
+                    <div class="notification-title fw-semibold">{{ notification.title|truncatechars:18 }}</div>
+                    <div class="notification-message text-muted small">
+                        {{ notification.message|truncatechars:18 }}
+                    </div>
+                    <div class="notification-time text-muted small">
+                        {{ notification.created_at|timesince }} ago
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    {% if not notification.is_read %}
+                    <button class="notification-action-btn mark-as-read"
+                            data-notification-id="{{ notification.pk }}"
+                            title="Mark as read">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    {% endif %}
+                    <button class="notification-action-btn delete-notification"
+                            data-notification-id="{{ notification.pk }}"
+                            title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    {% if not notification.is_read %}
+                    <div class="notification-unread-indicator">
+                        <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+{% else %}
+    <li class="text-center py-3">
+        <div class="text-muted">
+            <i class="fas fa-bell-slash fa-2x mb-2"></i>
+            <div>No notifications</div>
+        </div>
+    </li>
+{% endif %}
+
+<style>
+/* Top Action Buttons */
+.notification-top-actions {
+    background: rgba(0, 150, 57, 0.05);
+    border-bottom: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.notification-top-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.notification-top-actions .btn-primary {
+    background: #009639;
+    border-color: #009639;
+    color: white;
+}
+
+.notification-top-actions .btn-primary:hover {
+    background: #007a2e;
+    border-color: #007a2e;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 150, 57, 0.2);
+}
+
+.notification-top-actions .btn-outline-primary {
+    color: #009639;
+    border-color: #009639;
+    background: white;
+}
+
+.notification-top-actions .btn-outline-primary:hover {
+    background: #009639;
+    border-color: #009639;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 150, 57, 0.2);
+}
+
+.notification-item {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+    background-color: #f0f8ff;
+    border-left: 3px solid #007bff;
+}
+
+.notification-icon {
+    width: 24px;
+    text-align: center;
+}
+
+.notification-content {
+    min-width: 0;
+}
+
+.notification-title {
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.notification-message {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-top: 0.25rem;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.notification-unread-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+}
+
+.notification-unread-indicator i {
+    color: #0d6efd !important;
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.notification-action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 150, 57, 0.1);
+    color: #009639;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.notification-item:hover .notification-action-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.notification-action-btn:hover {
+    background: rgba(0, 150, 57, 0.2);
+    transform: scale(1.1);
+}
+
+.notification-action-btn.delete-notification {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.notification-action-btn.delete-notification:hover {
+    background: rgba(220, 53, 69, 0.2);
+}
+
+.notification-action-btn.mark-as-read {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.notification-action-btn.mark-as-read:hover {
+    background: rgba(40, 167, 69, 0.2);
+}
+</style>
+
+<script>
+// Note: Event listeners are now handled by the parent page (base.html)
+// This script only contains the functions that may be called from other contexts
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Notification dropdown content loaded');
+
+    // The event listeners are now attached by the parent page's attachNotificationEventListeners() function
+    // This ensures they work properly with dynamically loaded content
+
+    // Mark notification as read when clicked (for the content area)
+    document.querySelectorAll('.notification-content').forEach(content => {
+        content.addEventListener('click', function(e) {
+            const notificationItem = this.closest('.notification-item');
+            const notificationId = notificationItem.dataset.notificationId;
+            if (notificationItem.classList.contains('unread')) {
+                // Get CSRF token from meta tag or form
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                                 document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+                if (!csrfToken) {
+                    console.error('CSRF token not found');
+                    return;
+                }
+
+                fetch(`/notifications/mark-read/${notificationId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notificationItem.classList.remove('unread');
+
+                        // Remove the unread indicator
+                        const unreadIndicator = notificationItem.querySelector('.notification-unread-indicator');
+                        if (unreadIndicator) {
+                            unreadIndicator.style.transition = 'all 0.3s ease';
+                            unreadIndicator.style.transform = 'scale(0)';
+                            unreadIndicator.style.opacity = '0';
+                            setTimeout(() => unreadIndicator.remove(), 300);
+                        }
+
+                        // Remove mark as read button if it exists
+                        const markAsReadBtn = notificationItem.querySelector('.mark-as-read');
+                        if (markAsReadBtn) {
+                            markAsReadBtn.style.transition = 'all 0.3s ease';
+                            markAsReadBtn.style.transform = 'scale(0)';
+                            markAsReadBtn.style.opacity = '0';
+                            setTimeout(() => markAsReadBtn.remove(), 300);
+                        }
+
+                        // Update notification count
+                        updateNotificationCount();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                });
+            }
+        });
+    });
+    
+    // Mark all as read (top button)
+    const markAllBtnTop = document.getElementById('markAllAsReadTop');
+    if (markAllBtnTop) {
+        markAllBtnTop.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Add loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Marking...';
+            this.disabled = true;
+
+            // Get CSRF token from meta tag or form
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                this.innerHTML = originalText;
+                this.disabled = false;
+                showNotificationFeedback('Security token not found. Please refresh the page.', 'error');
+                return;
+            }
+
+            fetch('/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI immediately
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+
+                        // Remove unread indicator
+                        const unreadIndicator = item.querySelector('.notification-unread-indicator');
+                        if (unreadIndicator) {
+                            unreadIndicator.style.transition = 'all 0.3s ease';
+                            unreadIndicator.style.transform = 'scale(0)';
+                            unreadIndicator.style.opacity = '0';
+                            setTimeout(() => unreadIndicator.remove(), 300);
+                        }
+
+                        // Remove mark as read button
+                        const markBtn = item.querySelector('.mark-as-read');
+                        if (markBtn) {
+                            markBtn.style.transition = 'all 0.3s ease';
+                            markBtn.style.transform = 'scale(0)';
+                            markBtn.style.opacity = '0';
+                            setTimeout(() => markBtn.remove(), 300);
+                        }
+                    });
+
+                    // Update badge
+                    const badge = document.querySelector('.dropdown-header .badge');
+                    if (badge) {
+                        badge.style.transition = 'all 0.3s ease';
+                        badge.style.transform = 'scale(0)';
+                        badge.style.opacity = '0';
+                        setTimeout(() => badge.remove(), 300);
+                    }
+
+                    // Update global notification count
+                    updateNotificationCount();
+
+                    // Hide the mark all button
+                    this.style.transition = 'all 0.3s ease';
+                    this.style.transform = 'scale(0)';
+                    this.style.opacity = '0';
+                    setTimeout(() => this.remove(), 300);
+
+                    // Show success feedback
+                    showNotificationFeedback('All notifications marked as read!', 'success');
+                } else {
+                    // Restore button on error
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    showNotificationFeedback('Failed to mark notifications as read', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking all notifications as read:', error);
+                this.innerHTML = originalText;
+                this.disabled = false;
+                showNotificationFeedback('Error occurred. Please try again.', 'error');
+            });
+        });
+    }
+});
+
+// markNotificationAsRead function is now handled by the parent page (base.html)
+
+// deleteDropdownNotification function is now handled by the parent page (base.html)
+
+// All notification functions are now handled by the parent page (base.html)
+// This ensures proper event handling for dynamically loaded content
+</script>

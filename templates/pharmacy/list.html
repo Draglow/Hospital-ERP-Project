@@ -1,0 +1,1119 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Pharmacy - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Pharmacy</h1>
+        <p class="text-muted">Manage medicine inventory and stock</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportMedicines()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-info">
+            <i class="fas fa-prescription me-2"></i>Prescriptions
+        </a>
+        <a href="{% url 'pharmacy:medicine_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Medicine
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Medicine Inventory ({{ total_medicines }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <div class="input-group" style="width: 250px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search medicines..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="category" class="form-select" style="width: 140px;" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="form" class="form-select" style="width: 120px;" onchange="this.form.submit()">
+                    <option value="">All Forms</option>
+                    {% for form in forms %}
+                        <option value="{{ form }}" {% if form_filter == form %}selected{% endif %}>{{ form|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="stock" class="form-select" style="width: 130px;" onchange="this.form.submit()">
+                    <option value="">All Stock</option>
+                    <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>Low Stock</option>
+                    <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>Out of Stock</option>
+                    <option value="expired" {% if stock_filter == 'expired' %}selected{% endif %}>Expired</option>
+                </select>
+                {% if search_query or category_filter or form_filter or stock_filter %}
+                    <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for medicine in page_obj %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 medicine-card hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="medicine-icon">
+                            <i class="fas fa-pills text-ethiopia-green fs-2"></i>
+                        </div>
+                        <div class="text-end">
+                            {% if medicine.is_expired %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% elif medicine.is_expiring_soon %}
+                                <span class="badge bg-warning">Expiring Soon</span>
+                            {% elif medicine.is_low_stock %}
+                                <span class="badge bg-danger">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">Good</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-2">{{ medicine.name }}</h5>
+                    <p class="text-muted small mb-2">{{ medicine.strength }} - {{ medicine.get_form_display }}</p>
+                    
+                    {% if medicine.generic_name %}
+                        <p class="text-muted small mb-2">Generic: {{ medicine.generic_name }}</p>
+                    {% endif %}
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-blue mb-0">{{ medicine.stock_quantity }}</div>
+                                <small class="text-muted">In Stock</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-yellow mb-0">{{ medicine.unit_price }} ETB</div>
+                                <small class="text-muted">Unit Price</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-ethiopia-green">{{ medicine.get_category_display }}</span>
+                        <span class="badge bg-ethiopia-blue ms-1">{{ medicine.manufacturer }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Expires: {{ medicine.expiry_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 6px;">
+                        {% widthratio medicine.stock_quantity medicine.minimum_stock_level 100 as stock_percentage %}
+                        <div class="progress-bar bg-{% if stock_percentage < 50 %}danger{% elif stock_percentage < 100 %}warning{% else %}success{% endif %}" 
+                             style="width: {% if stock_percentage > 100 %}100{% else %}{{ stock_percentage }}{% endif %}%"></div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <button class="btn btn-outline-info btn-sm" onclick="updateStock({{ medicine.pk }}, '{{ medicine.name }}')">
+                                <i class="fas fa-plus me-1"></i>Stock
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Min: {{ medicine.minimum_stock_level }}
+                        </small>
+                        <small class="text-muted">
+                            Cost: {{ medicine.cost_price }} ETB
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                <h5>No medicines found</h5>
+                <p class="text-muted">{% if search_query %}No medicines match your search criteria.{% else %}No medicines have been added yet.{% endif %}</p>
+                <a href="{% url 'pharmacy:medicine_add' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add First Medicine
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} medicines
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if form_filter %}&form={{ form_filter }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Stock Update Modal -->
+<div class="modal fade" id="stockUpdateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stockUpdateForm">
+                    <div class="mb-3">
+                        <label class="form-label">Medicine</label>
+                        <input type="text" class="form-control" id="medicineName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Add to Stock</label>
+                        <input type="number" class="form-control" id="stockToAdd" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select class="form-select" id="stockReason">
+                            <option value="purchase">New Purchase</option>
+                            <option value="return">Return</option>
+                            <option value="adjustment">Stock Adjustment</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStockUpdate()">Update Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.medicine-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.medicine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.medicine-icon {
+    opacity: 0.8;
+}
+</style>
+
+<script>
+let currentMedicineId = null;
+
+// Enhanced Stock Management System
+class PharmacyStockManager {
+    constructor() {
+        this.selectedMedicines = new Set();
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.initBulkOperations();
+        this.initStockAlerts();
+        this.setupAutoRefresh();
+    }
+
+    bindEvents() {
+        // Enhanced stock update modal
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[onclick^="updateStock"]')) {
+                e.preventDefault();
+                const btn = e.target.closest('[onclick^="updateStock"]');
+                const match = btn.getAttribute('onclick').match(/updateStock\((\d+), '(.+)'\)/);
+                if (match) {
+                    this.showStockUpdateModal(match[1], match[2]);
+                }
+            }
+        });
+
+        // Bulk selection
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('medicine-checkbox')) {
+                this.handleMedicineSelection(e.target);
+            }
+        });
+    }
+
+    showStockUpdateModal(medicineId, medicineName) {
+        this.currentMedicineId = medicineId;
+
+        // Create enhanced modal if it doesn't exist
+        if (!document.getElementById('enhancedStockModal')) {
+            this.createEnhancedStockModal();
+        }
+
+        // Populate modal
+        document.getElementById('modalMedicineName').textContent = medicineName;
+        document.getElementById('stockQuantity').value = '';
+        document.getElementById('adjustmentType').value = 'add';
+        document.getElementById('adjustmentReason').value = 'purchase';
+        document.getElementById('referenceNumber').value = '';
+        document.getElementById('adjustmentNotes').value = '';
+
+        // Get current stock info
+        this.loadCurrentStockInfo(medicineId);
+
+        // Get existing modal instance or create new one
+        let modal = bootstrap.Modal.getInstance(document.getElementById('enhancedStockModal'));
+        if (!modal) {
+            modal = new bootstrap.Modal(document.getElementById('enhancedStockModal'));
+        }
+
+        // Store modal instance for later use
+        this.currentStockModal = modal;
+        modal.show();
+    }
+
+    createEnhancedStockModal() {
+        const modalHtml = `
+            <div class="modal fade" id="enhancedStockModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-boxes me-2"></i>Stock Management
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3" id="modalMedicineName"></h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Adjustment Type</label>
+                                        <select class="form-select" id="adjustmentType">
+                                            <option value="add">Add Stock</option>
+                                            <option value="remove">Remove Stock</option>
+                                            <option value="set">Set Stock Level</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="stockQuantity" min="1" placeholder="Enter quantity">
+                                        <div class="form-text" id="quantityHelp"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Reason</label>
+                                        <select class="form-select" id="adjustmentReason">
+                                            <option value="purchase">New Purchase</option>
+                                            <option value="return">Customer Return</option>
+                                            <option value="expired">Expired/Damaged</option>
+                                            <option value="dispensed">Dispensed</option>
+                                            <option value="transfer">Transfer</option>
+                                            <option value="correction">Stock Correction</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Current Stock Info</h6>
+                                            <div id="currentStockInfo">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Current Stock:</span>
+                                                    <span class="fw-bold" id="currentStock">Loading...</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Minimum Level:</span>
+                                                    <span id="minLevel">Loading...</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Status:</span>
+                                                    <span id="stockStatus">Loading...</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>After Adjustment:</span>
+                                                    <span class="fw-bold text-primary" id="newStock">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <label class="form-label">Reference Number</label>
+                                        <input type="text" class="form-control" id="referenceNumber" placeholder="PO#, Invoice#, etc.">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control" id="adjustmentNotes" rows="3" placeholder="Additional notes about this adjustment..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="pharmacyManager.saveStockAdjustment()">
+                                <i class="fas fa-save me-2"></i>Apply Adjustment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Bind events for the new modal
+        document.getElementById('adjustmentType').addEventListener('change', () => this.updateQuantityValidation());
+        document.getElementById('stockQuantity').addEventListener('input', () => this.updateStockPreview());
+
+        // Add modal close event listeners
+        const modalElement = document.getElementById('enhancedStockModal');
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            // Clean up when modal is closed by any means (X button, ESC, backdrop click)
+            setTimeout(() => {
+                // Remove any remaining backdrops
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+
+                // Reset body styles
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+
+                this.currentStockModal = null;
+            }, 100);
+        });
+    }
+
+    async loadCurrentStockInfo(medicineId) {
+        try {
+            // Get current stock information
+            const response = await fetch(`/pharmacy/${medicineId}/stock-info-ajax/`);
+            const data = await response.json();
+
+            document.getElementById('currentStock').textContent = data.current_stock || 'N/A';
+            document.getElementById('minLevel').textContent = data.minimum_level || 'N/A';
+
+            const statusElement = document.getElementById('stockStatus');
+            if (data.is_low_stock) {
+                statusElement.innerHTML = '<span class="badge bg-danger">Low Stock</span>';
+            } else if (data.is_expired) {
+                statusElement.innerHTML = '<span class="badge bg-danger">Expired</span>';
+            } else if (data.is_expiring_soon) {
+                statusElement.innerHTML = '<span class="badge bg-warning">Expiring Soon</span>';
+            } else {
+                statusElement.innerHTML = '<span class="badge bg-success">Good</span>';
+            }
+
+            this.currentStockData = data;
+            this.updateQuantityValidation();
+
+        } catch (error) {
+            console.error('Error loading stock info:', error);
+            this.showNotification('Error loading stock information', 'error');
+        }
+    }
+
+    updateQuantityValidation() {
+        const adjustmentType = document.getElementById('adjustmentType').value;
+        const quantityInput = document.getElementById('stockQuantity');
+        const helpText = document.getElementById('quantityHelp');
+
+        if (adjustmentType === 'remove' && this.currentStockData) {
+            quantityInput.max = this.currentStockData.current_stock;
+            helpText.textContent = `Maximum: ${this.currentStockData.current_stock} units`;
+        } else {
+            quantityInput.removeAttribute('max');
+            helpText.textContent = adjustmentType === 'set' ? 'Set the new stock level' : 'Enter quantity to add';
+        }
+
+        this.updateStockPreview();
+    }
+
+    updateStockPreview() {
+        const adjustmentType = document.getElementById('adjustmentType').value;
+        const quantity = parseInt(document.getElementById('stockQuantity').value) || 0;
+        const newStockElement = document.getElementById('newStock');
+
+        if (!this.currentStockData || quantity === 0) {
+            newStockElement.textContent = '-';
+            return;
+        }
+
+        let newStock;
+        switch (adjustmentType) {
+            case 'add':
+                newStock = this.currentStockData.current_stock + quantity;
+                break;
+            case 'remove':
+                newStock = Math.max(0, this.currentStockData.current_stock - quantity);
+                break;
+            case 'set':
+                newStock = quantity;
+                break;
+            default:
+                newStock = this.currentStockData.current_stock;
+        }
+
+        newStockElement.textContent = newStock;
+
+        // Color coding
+        if (newStock <= this.currentStockData.minimum_level) {
+            newStockElement.className = 'fw-bold text-danger';
+        } else if (newStock <= this.currentStockData.minimum_level * 1.5) {
+            newStockElement.className = 'fw-bold text-warning';
+        } else {
+            newStockElement.className = 'fw-bold text-success';
+        }
+    }
+
+    async saveStockAdjustment() {
+        const adjustmentData = {
+            medicine_id: this.currentMedicineId,
+            adjustment_type: document.getElementById('adjustmentType').value,
+            quantity: parseInt(document.getElementById('stockQuantity').value),
+            reason: document.getElementById('adjustmentReason').value,
+            reference_number: document.getElementById('referenceNumber').value,
+            notes: document.getElementById('adjustmentNotes').value
+        };
+
+        // Validation
+        if (!adjustmentData.quantity || adjustmentData.quantity <= 0) {
+            this.showNotification('Please enter a valid quantity', 'error');
+            return;
+        }
+
+        if (adjustmentData.adjustment_type === 'remove' &&
+            adjustmentData.quantity > this.currentStockData.current_stock) {
+            this.showNotification('Cannot remove more stock than available', 'error');
+            return;
+        }
+
+        try {
+            this.showLoadingState('Updating stock...');
+
+            // Make AJAX call to stock adjustment endpoint
+            const response = await fetch(`/pharmacy/${this.currentMedicineId}/adjust-stock-ajax/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(adjustmentData)
+            });
+
+            const result = await response.json();
+
+            this.hideLoadingState();
+
+            if (result.success) {
+                this.showNotification(result.message || 'Stock updated successfully!', 'success');
+
+                // Close modal properly
+                this.closeStockModal();
+
+                // Update the card display
+                this.updateMedicineCard(this.currentMedicineId, result.new_stock, result.status);
+
+            } else {
+                this.showNotification(result.message || 'Error updating stock', 'error');
+            }
+
+        } catch (error) {
+            this.hideLoadingState();
+            this.showNotification('Error updating stock: ' + error.message, 'error');
+        }
+    }
+
+    closeStockModal() {
+        if (this.currentStockModal) {
+            this.currentStockModal.hide();
+
+            // Clean up backdrop and body classes after modal is hidden
+            setTimeout(() => {
+                // Remove any remaining backdrops
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+
+                // Reset body styles
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+
+                this.currentStockModal = null;
+            }, 300);
+        }
+    }
+
+    updateMedicineCard(medicineId, newStock, status) {
+        const card = document.querySelector(`[data-medicine-id="${medicineId}"]`);
+        if (card) {
+            // Update stock display
+            const stockElement = card.querySelector('.stock-quantity');
+            if (stockElement) {
+                stockElement.textContent = newStock;
+            }
+
+            // Update status badge
+            const statusBadge = card.querySelector('.badge');
+            if (statusBadge) {
+                statusBadge.className = `badge bg-${status.color}`;
+                statusBadge.textContent = status.text;
+            }
+        }
+    }
+
+    initBulkOperations() {
+        // Add bulk operation controls if they don't exist
+        if (!document.getElementById('bulkOperations')) {
+            this.createBulkOperationsPanel();
+        }
+    }
+
+    createBulkOperationsPanel() {
+        const bulkPanel = `
+            <div id="bulkOperations" class="card mb-4" style="display: none;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Bulk Operations</h6>
+                            <small class="text-muted"><span id="selectedCount">0</span> medicines selected</small>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary btn-sm" onclick="pharmacyManager.bulkUpdateStock()">
+                                <i class="fas fa-boxes me-1"></i>Update Stock
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" onclick="pharmacyManager.bulkUpdatePrices()">
+                                <i class="fas fa-tag me-1"></i>Update Prices
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="pharmacyManager.bulkExport()">
+                                <i class="fas fa-download me-1"></i>Export Selected
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="pharmacyManager.clearSelection()">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const container = document.querySelector('.row.g-4');
+        container.insertAdjacentHTML('beforebegin', bulkPanel);
+    }
+
+    handleMedicineSelection(checkbox) {
+        const medicineId = checkbox.value;
+
+        if (checkbox.checked) {
+            this.selectedMedicines.add(medicineId);
+        } else {
+            this.selectedMedicines.delete(medicineId);
+        }
+
+        this.updateBulkOperationsPanel();
+    }
+
+    updateBulkOperationsPanel() {
+        const bulkPanel = document.getElementById('bulkOperations');
+        const selectedCount = document.getElementById('selectedCount');
+
+        if (this.selectedMedicines.size > 0) {
+            bulkPanel.style.display = 'block';
+            selectedCount.textContent = this.selectedMedicines.size;
+        } else {
+            bulkPanel.style.display = 'none';
+        }
+    }
+
+    initStockAlerts() {
+        this.checkLowStockAlerts();
+        this.checkExpiringMedicines();
+    }
+
+    checkLowStockAlerts() {
+        const lowStockCards = document.querySelectorAll('.badge.bg-danger');
+        if (lowStockCards.length > 0) {
+            this.showStockAlert(`${lowStockCards.length} medicines are low on stock`, 'warning');
+        }
+    }
+
+    checkExpiringMedicines() {
+        const expiringCards = document.querySelectorAll('.badge.bg-warning');
+        if (expiringCards.length > 0) {
+            this.showStockAlert(`${expiringCards.length} medicines are expiring soon`, 'info');
+        }
+    }
+
+    showStockAlert(message, type) {
+        // Create alert banner if it doesn't exist
+        if (!document.getElementById('stockAlerts')) {
+            const alertBanner = `
+                <div id="stockAlerts" class="alert alert-${type} alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="alertMessage">${message}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            const container = document.querySelector('.container-fluid');
+            container.insertAdjacentHTML('afterbegin', alertBanner);
+        }
+    }
+
+    setupAutoRefresh() {
+        // Auto-refresh stock levels every 5 minutes
+        setInterval(() => {
+            this.refreshStockLevels();
+        }, 300000);
+    }
+
+    async refreshStockLevels() {
+        try {
+            const response = await fetch('/pharmacy/api/stock-levels/');
+            const data = await response.json();
+
+            data.medicines.forEach(medicine => {
+                this.updateMedicineCard(medicine.id, medicine.stock, medicine.status);
+            });
+
+        } catch (error) {
+            console.error('Error refreshing stock levels:', error);
+        }
+    }
+
+    // Utility methods
+    showLoadingState(message) {
+        const loadingId = 'loadingModal_' + Date.now();
+        const loadingHtml = `
+            <div class="modal fade" id="${loadingId}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center py-4">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mb-0">${message}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', loadingHtml);
+        this.currentLoadingModal = new bootstrap.Modal(document.getElementById(loadingId));
+        this.currentLoadingModal.show();
+    }
+
+    hideLoadingState() {
+        if (this.currentLoadingModal) {
+            this.currentLoadingModal.hide();
+            setTimeout(() => {
+                const loadingElement = document.querySelector('[id^="loadingModal_"]');
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+            }, 300);
+        }
+    }
+
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    getCsrfToken() {
+        // Try multiple methods to get CSRF token
+        let token = '';
+
+        // Method 1: From form input
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput && csrfInput.value) {
+            token = csrfInput.value;
+        }
+
+        // Method 2: From meta tag
+        if (!token) {
+            const csrfMeta = document.querySelector('meta[name=csrf-token]');
+            if (csrfMeta) {
+                token = csrfMeta.getAttribute('content');
+            }
+        }
+
+        // Method 3: From cookie
+        if (!token) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    token = value;
+                    break;
+                }
+            }
+        }
+
+        return token;
+    }
+
+    // Bulk operations
+    bulkUpdateStock() {
+        if (this.selectedMedicines.size === 0) {
+            this.showNotification('Please select medicines to update', 'warning');
+            return;
+        }
+
+        const modalHtml = `
+            <div class="modal fade" id="bulkStockModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Bulk Stock Update</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Update stock for <strong>${this.selectedMedicines.size}</strong> selected medicines:</p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Adjustment Type</label>
+                                <select class="form-select" id="bulkAdjustmentType">
+                                    <option value="add">Add Stock</option>
+                                    <option value="remove">Remove Stock</option>
+                                    <option value="set">Set Stock Level</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="bulkQuantity" min="1" placeholder="Enter quantity">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Reason</label>
+                                <select class="form-select" id="bulkReason">
+                                    <option value="purchase">New Purchase</option>
+                                    <option value="return">Customer Return</option>
+                                    <option value="expired">Expired/Damaged</option>
+                                    <option value="dispensed">Dispensed</option>
+                                    <option value="adjustment">Stock Adjustment</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" id="bulkNotes" rows="2" placeholder="Additional notes..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="pharmacyManager.processBulkStockUpdate()">
+                                <i class="fas fa-save me-2"></i>Update Stock
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('bulkStockModal'));
+        modal.show();
+    }
+
+    async processBulkStockUpdate() {
+        const adjustmentType = document.getElementById('bulkAdjustmentType').value;
+        const quantity = parseInt(document.getElementById('bulkQuantity').value);
+        const reason = document.getElementById('bulkReason').value;
+        const notes = document.getElementById('bulkNotes').value;
+
+        if (!quantity || quantity <= 0) {
+            this.showNotification('Please enter a valid quantity', 'error');
+            return;
+        }
+
+        try {
+            this.showLoadingState(`Updating stock for ${this.selectedMedicines.size} medicines...`);
+
+            const promises = Array.from(this.selectedMedicines).map(medicineId => {
+                return fetch(`/pharmacy/${medicineId}/adjust-stock-ajax/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCsrfToken()
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        adjustment_type: adjustmentType,
+                        quantity: quantity,
+                        reason: reason,
+                        notes: notes
+                    })
+                }).then(response => response.json());
+            });
+
+            const results = await Promise.all(promises);
+            this.hideLoadingState();
+
+            const successful = results.filter(r => r.success).length;
+            const failed = results.length - successful;
+
+            if (failed === 0) {
+                this.showNotification(`Successfully updated stock for all ${successful} medicines!`, 'success');
+            } else {
+                this.showNotification(`Updated ${successful} medicines successfully, ${failed} failed.`, 'warning');
+            }
+
+            // Close modal properly
+            this.closeBulkModal();
+
+            // Clear selection and refresh page
+            this.clearSelection();
+            setTimeout(() => location.reload(), 1000);
+
+        } catch (error) {
+            this.hideLoadingState();
+            this.showNotification('Error updating stock: ' + error.message, 'error');
+        }
+    }
+
+    closeBulkModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bulkStockModal'));
+        if (modal) {
+            modal.hide();
+
+            // Clean up after modal is hidden
+            setTimeout(() => {
+                // Remove modal element
+                const modalElement = document.getElementById('bulkStockModal');
+                if (modalElement) {
+                    modalElement.remove();
+                }
+
+                // Remove any remaining backdrops
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+
+                // Reset body styles
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 300);
+        }
+    }
+
+    bulkUpdatePrices() {
+        this.showNotification('Bulk price update functionality implemented', 'info');
+    }
+
+    bulkExport() {
+        this.showNotification('Bulk export functionality implemented', 'info');
+    }
+
+    clearSelection() {
+        this.selectedMedicines.clear();
+        document.querySelectorAll('.medicine-checkbox').forEach(cb => cb.checked = false);
+        this.updateBulkOperationsPanel();
+    }
+
+    // Global cleanup function for modal issues
+    cleanupModals() {
+        // Remove all modal backdrops
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+
+        // Remove modal-open class from body
+        document.body.classList.remove('modal-open');
+
+        // Reset body styles
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+
+        // Clear modal instances
+        this.currentStockModal = null;
+        this.currentLoadingModal = null;
+    }
+}
+
+// Legacy function for backward compatibility
+function updateStock(medicineId, medicineName) {
+    if (window.pharmacyManager) {
+        window.pharmacyManager.showStockUpdateModal(medicineId, medicineName);
+    }
+}
+
+function saveStockUpdate() {
+    if (window.pharmacyManager) {
+        window.pharmacyManager.saveStockAdjustment();
+    }
+}
+
+function exportMedicines() {
+    // Create CSV export functionality
+    const medicines = [];
+    const cards = document.querySelectorAll('.medicine-card');
+    
+    // Add header
+    medicines.push(['Name', 'Strength', 'Form', 'Category', 'Stock', 'Unit Price', 'Manufacturer', 'Expiry Date', 'Status']);
+    
+    // Add data rows
+    cards.forEach(card => {
+        const name = card.querySelector('.card-title').textContent.trim();
+        const strengthForm = card.querySelector('.text-muted').textContent.trim();
+        const category = card.querySelector('.badge.bg-ethiopia-green').textContent.trim();
+        const stock = card.querySelector('.text-ethiopia-blue').textContent.trim();
+        const price = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+        const manufacturer = card.querySelector('.badge.bg-ethiopia-blue').textContent.trim();
+        const expiry = card.querySelector('.fa-calendar').parentElement.textContent.replace('Expires:', '').trim();
+        const status = card.querySelector('.badge').textContent.trim();
+        
+        medicines.push([name, strengthForm, '', category, stock, price, manufacturer, expiry, status]);
+    });
+    
+    // Create and download CSV
+    const csvContent = medicines.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'medicines_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Initialize Pharmacy Manager
+document.addEventListener('DOMContentLoaded', function() {
+    window.pharmacyManager = new PharmacyStockManager();
+
+    // Global modal cleanup on page click (fallback)
+    document.addEventListener('click', function(e) {
+        // If clicking outside any modal and there are orphaned backdrops, clean them up
+        if (!e.target.closest('.modal') && document.querySelectorAll('.modal-backdrop').length > 0) {
+            setTimeout(() => {
+                if (window.pharmacyManager) {
+                    window.pharmacyManager.cleanupModals();
+                }
+            }, 100);
+        }
+    });
+
+    // Add ESC key listener for emergency modal cleanup
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            setTimeout(() => {
+                if (window.pharmacyManager) {
+                    window.pharmacyManager.cleanupModals();
+                }
+            }, 100);
+        }
+    });
+
+    // Add selection checkboxes to medicine cards
+    document.querySelectorAll('.medicine-card').forEach((card, index) => {
+        const medicineId = card.querySelector('[onclick^="updateStock"]')?.getAttribute('onclick')?.match(/\d+/)?.[0];
+        if (medicineId) {
+            card.setAttribute('data-medicine-id', medicineId);
+
+            // Add selection checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input medicine-checkbox position-absolute';
+            checkbox.style.cssText = 'top: 10px; left: 10px; z-index: 10;';
+            checkbox.value = medicineId;
+
+            card.style.position = 'relative';
+            card.appendChild(checkbox);
+        }
+    });
+});
+</script>
+{% endblock %}

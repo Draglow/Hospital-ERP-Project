@@ -1,0 +1,303 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Stock Adjustment - {{ medicine.name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Stock Adjustment</h1>
+        <p class="text-muted">{{ medicine.name }} - Current: {{ medicine.current_stock }} units</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h5 class="card-title mb-4">
+                <i class="fas fa-plus-minus text-ethiopia-green me-2"></i>Adjust Stock Quantity
+            </h5>
+            
+            <form method="post" class="mobile-form needs-validation" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="mobile" value="1">
+                
+                <div class="mb-3">
+                    <label class="form-label">Adjustment Type <span class="text-danger">*</span></label>
+                    <select class="form-select" name="adjustment_type" required>
+                        <option value="">Select adjustment type</option>
+                        <option value="add">Add Stock</option>
+                        <option value="remove">Remove Stock</option>
+                        <option value="set">Set Stock Level</option>
+                    </select>
+                    <div class="invalid-feedback">Please select an adjustment type.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" name="quantity" min="1" required>
+                    <div class="form-text">Enter the number of units to add, remove, or set</div>
+                    <div class="invalid-feedback">Please enter a valid quantity.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Reason <span class="text-danger">*</span></label>
+                    <select class="form-select" name="reason" required>
+                        <option value="">Select reason</option>
+                        <option value="purchase">New Purchase</option>
+                        <option value="return">Patient Return</option>
+                        <option value="expired">Expired Medicine</option>
+                        <option value="damaged">Damaged/Lost</option>
+                        <option value="dispensed">Dispensed to Patient</option>
+                        <option value="transfer">Transfer to Another Location</option>
+                        <option value="correction">Stock Count Correction</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a reason.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="3" placeholder="Additional notes about this adjustment..."></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Reference Number</label>
+                    <input type="text" class="form-control" name="reference_number" placeholder="Purchase order, invoice number, etc.">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Apply Adjustment
+                    </button>
+                    <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Current Stock Info -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-blue me-2"></i>
+                Current Stock Information
+            </h6>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <label class="form-label text-muted">Current Stock</label>
+                    <div class="fw-semibold fs-4 text-success">{{ medicine.current_stock }} units</div>
+                </div>
+                
+                <div class="col-6">
+                    <label class="form-label text-muted">Minimum Level</label>
+                    <div class="fw-semibold">{{ medicine.minimum_stock }} units</div>
+                </div>
+                
+                <div class="col-6">
+                    <label class="form-label text-muted">Stock Status</label>
+                    <div>
+                        <span class="badge bg-{% if medicine.current_stock > medicine.minimum_stock %}success{% elif medicine.current_stock > 0 %}warning{% else %}danger{% endif %}">
+                            {% if medicine.current_stock > medicine.minimum_stock %}
+                                Adequate Stock
+                            {% elif medicine.current_stock > 0 %}
+                                Low Stock
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <label class="form-label text-muted">Unit Price</label>
+                    <div class="fw-semibold text-ethiopia-green">{{ medicine.unit_price|floatformat:2 }} ETB</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock Adjustment Preview -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-calculator text-ethiopia-yellow me-2"></i>
+                Adjustment Preview
+            </h6>
+            
+            <div id="adjustmentPreview" class="d-none">
+                <div class="bg-light p-3 rounded">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Current Stock:</span>
+                        <span id="currentStock">{{ medicine.current_stock }} units</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Adjustment:</span>
+                        <span id="adjustmentAmount">+0 units</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>New Stock Level:</span>
+                        <span id="newStock" class="text-ethiopia-green">{{ medicine.current_stock }} units</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Adjustments -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-red me-2"></i>
+                Recent Adjustments
+            </h6>
+            
+            {% if recent_adjustments %}
+                {% for adjustment in recent_adjustments %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div>
+                        <div class="fw-semibold">{{ adjustment.adjustment_type|title }} {{ adjustment.quantity }} units</div>
+                        <div class="small text-muted">{{ adjustment.reason }} - {{ adjustment.created_at|date:"M d, Y" }}</div>
+                    </div>
+                    <span class="badge bg-{% if adjustment.adjustment_type == 'add' %}success{% else %}warning{% endif %}">
+                        {% if adjustment.adjustment_type == 'add' %}+{% else %}-{% endif %}{{ adjustment.quantity }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No recent adjustments found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form .form-control,
+.mobile-form .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+}
+
+.mobile-form .form-label {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form .invalid-feedback {
+    font-size: 0.875rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-dashboard-card h6 {
+    color: var(--mobile-primary);
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-form .form-control,
+    .mobile-form .form-select {
+        padding: 0.625rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation and preview
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile stock adjustment form loaded');
+    
+    const adjustmentType = document.querySelector('select[name="adjustment_type"]');
+    const quantity = document.querySelector('input[name="quantity"]');
+    const preview = document.getElementById('adjustmentPreview');
+    const currentStock = {{ medicine.current_stock }};
+    
+    function updatePreview() {
+        const type = adjustmentType.value;
+        const qty = parseInt(quantity.value) || 0;
+        
+        if (type && qty > 0) {
+            preview.classList.remove('d-none');
+            
+            let newStock = currentStock;
+            let adjustmentText = '';
+            
+            if (type === 'add') {
+                newStock = currentStock + qty;
+                adjustmentText = '+' + qty + ' units';
+            } else if (type === 'remove') {
+                newStock = Math.max(0, currentStock - qty);
+                adjustmentText = '-' + qty + ' units';
+            } else if (type === 'set') {
+                newStock = qty;
+                adjustmentText = 'Set to ' + qty + ' units';
+            }
+            
+            document.getElementById('adjustmentAmount').textContent = adjustmentText;
+            document.getElementById('newStock').textContent = newStock + ' units';
+            
+            // Update color based on stock level
+            const newStockElement = document.getElementById('newStock');
+            if (newStock > {{ medicine.minimum_stock }}) {
+                newStockElement.className = 'text-success';
+            } else if (newStock > 0) {
+                newStockElement.className = 'text-warning';
+            } else {
+                newStockElement.className = 'text-danger';
+            }
+        } else {
+            preview.classList.add('d-none');
+        }
+    }
+    
+    adjustmentType.addEventListener('change', updatePreview);
+    quantity.addEventListener('input', updatePreview);
+    
+    // Show mobile notification if coming from detail page
+    if (document.referrer.includes('/pharmacy/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Stock adjustment mode activated!', 'info');
+        }
+    }
+});
+</script>
+{% endblock %}

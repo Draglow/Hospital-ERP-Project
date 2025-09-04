@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Notification Button Fix Test - Ethiopian Hospital ERP</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        /* Replicate the fixed button styles */
+        .mobile-notification-action-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(0, 150, 57, 0.1);
+            color: #009639;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 150, 57, 0.2);
+            position: relative;
+            opacity: 1 !important;
+            visibility: visible !important;
+            margin: 5px;
+        }
+
+        .mobile-mark-as-read {
+            background: rgba(40, 167, 69, 0.15) !important;
+            color: #28a745 !important;
+            border: 2px solid rgba(40, 167, 69, 0.3) !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: flex !important;
+            position: relative !important;
+            z-index: 10 !important;
+        }
+
+        .mobile-mark-as-read:hover {
+            background: rgba(40, 167, 69, 0.25) !important;
+            border-color: rgba(40, 167, 69, 0.5) !important;
+            color: #1e7e34 !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .mobile-delete-notification {
+            background: rgba(220, 53, 69, 0.15) !important;
+            color: #dc3545 !important;
+            border: 2px solid rgba(220, 53, 69, 0.3) !important;
+        }
+
+        .mobile-delete-notification:hover {
+            background: rgba(220, 53, 69, 0.25) !important;
+            border-color: rgba(220, 53, 69, 0.5) !important;
+            color: #c82333 !important;
+            transform: translateY(-1px) !important;
+        }
+        
+        .demo-notification {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #007bff;
+        }
+        
+        .demo-notification.unread {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.02);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-fixed { background: #28a745; }
+        .status-issue { background: #dc3545; }
+        .status-testing { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-card">
+            <h1 class="mb-4">🔧 Mobile Notification Button Fix - COMPLETED</h1>
+            <div class="alert alert-success">
+                <h5><i class="fas fa-check-circle me-2"></i>Mark as Read Button Visibility Issue Fixed</h5>
+                <p class="mb-0">The invisible "Mark as Read" button issue has been resolved with comprehensive CSS fixes and JavaScript fallbacks.</p>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3>🎯 Issues Fixed</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>CSS Conflicts Resolved:</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="status-indicator status-fixed"></span>Removed duplicate CSS rules</li>
+                        <li><span class="status-indicator status-fixed"></span>Fixed conflicting background colors</li>
+                        <li><span class="status-indicator status-fixed"></span>Added !important declarations</li>
+                        <li><span class="status-indicator status-fixed"></span>Enhanced media query styles</li>
+                        <li><span class="status-indicator status-fixed"></span>Forced visibility properties</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>JavaScript Enhancements:</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="status-indicator status-fixed"></span>Added visibility debugging</li>
+                        <li><span class="status-indicator status-fixed"></span>JavaScript style fallbacks</li>
+                        <li><span class="status-indicator status-fixed"></span>Console logging for diagnosis</li>
+                        <li><span class="status-indicator status-fixed"></span>Force style application</li>
+                        <li><span class="status-indicator status-fixed"></span>Runtime style verification</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3>🔍 Button Visibility Test</h3>
+            <p>These buttons demonstrate the fixed styling that should now be visible on the mobile notification page:</p>
+            
+            <div class="demo-notification unread">
+                <div class="notification-header">
+                    <div>
+                        <h6 class="mb-1">Sample Unread Notification</h6>
+                        <p class="text-muted small mb-0">This notification has not been read yet</p>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="mobile-notification-action-btn mobile-mark-as-read" title="Mark as Read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="mobile-notification-action-btn mobile-delete-notification" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-notification">
+                <div class="notification-header">
+                    <div>
+                        <h6 class="mb-1">Sample Read Notification</h6>
+                        <p class="text-muted small mb-0">This notification has been read (no mark as read button)</p>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="mobile-notification-action-btn mobile-delete-notification" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3>🔧 Technical Fixes Applied</h3>
+            <div class="row">
+                <div class="col-md-12">
+                    <h6>CSS Fixes:</h6>
+                    <div class="bg-light p-3 rounded">
+                        <code>
+.mobile-mark-as-read {<br>
+&nbsp;&nbsp;background: rgba(40, 167, 69, 0.15) !important;<br>
+&nbsp;&nbsp;color: #28a745 !important;<br>
+&nbsp;&nbsp;border: 2px solid rgba(40, 167, 69, 0.3) !important;<br>
+&nbsp;&nbsp;opacity: 1 !important;<br>
+&nbsp;&nbsp;visibility: visible !important;<br>
+&nbsp;&nbsp;display: flex !important;<br>
+&nbsp;&nbsp;position: relative !important;<br>
+&nbsp;&nbsp;z-index: 10 !important;<br>
+}
+                        </code>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h6>JavaScript Fallback:</h6>
+                    <div class="bg-light p-3 rounded">
+                        <code>
+// Force visibility as a fallback<br>
+button.style.display = 'flex';<br>
+button.style.visibility = 'visible';<br>
+button.style.opacity = '1';<br>
+button.style.background = 'rgba(40, 167, 69, 0.15)';<br>
+button.style.color = '#28a745';<br>
+button.style.border = '2px solid rgba(40, 167, 69, 0.3)';
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3>✅ Verification Steps</h3>
+            <div class="alert alert-info">
+                <h6>To verify the fix:</h6>
+                <ol>
+                    <li><strong>Navigate to:</strong> <code>/notifications/?mobile=1</code></li>
+                    <li><strong>Look for unread notifications</strong> (they should have a green left border)</li>
+                    <li><strong>Check for green checkmark buttons</strong> next to unread notifications</li>
+                    <li><strong>Open browser console</strong> to see debugging information</li>
+                    <li><strong>Verify button functionality</strong> by clicking the mark as read buttons</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <div class="alert alert-success">
+                <h5><i class="fas fa-tools me-2"></i>Fix Summary</h5>
+                <p class="mb-2">The "Mark as Read" button visibility issue has been comprehensively fixed:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li>✅ Removed conflicting CSS rules</li>
+                            <li>✅ Added !important declarations</li>
+                            <li>✅ Fixed media query conflicts</li>
+                            <li>✅ Enhanced button styling</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li>✅ Added JavaScript fallbacks</li>
+                            <li>✅ Implemented debugging tools</li>
+                            <li>✅ Force style application</li>
+                            <li>✅ Runtime verification</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('Mobile Notification Button Fix Test Page Loaded');
+        
+        // Test button functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.mobile-mark-as-read')) {
+                alert('Mark as Read button clicked! This confirms the button is visible and clickable.');
+            }
+            if (e.target.closest('.mobile-delete-notification')) {
+                alert('Delete button clicked! This confirms the button is visible and clickable.');
+            }
+        });
+        
+        // Log button visibility status
+        setTimeout(() => {
+            const markButtons = document.querySelectorAll('.mobile-mark-as-read');
+            const deleteButtons = document.querySelectorAll('.mobile-delete-notification');
+            
+            console.log(`Found ${markButtons.length} mark as read buttons`);
+            console.log(`Found ${deleteButtons.length} delete buttons`);
+            
+            markButtons.forEach((btn, i) => {
+                const style = window.getComputedStyle(btn);
+                console.log(`Mark button ${i + 1}:`, {
+                    display: style.display,
+                    visibility: style.visibility,
+                    opacity: style.opacity,
+                    backgroundColor: style.backgroundColor
+                });
+            });
+        }, 100);
+    </script>
+</body>
+</html>

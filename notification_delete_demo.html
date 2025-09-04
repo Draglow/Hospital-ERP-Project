@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Delete Demo - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ethiopia-green: #009639;
+            --ethiopia-green-dark: #007a2e;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .notification-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--ethiopia-green);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-item.unread {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-ethiopia-green {
+            background-color: var(--ethiopia-green);
+            border-color: var(--ethiopia-green);
+            color: white;
+        }
+
+        .btn-ethiopia-green:hover {
+            background-color: var(--ethiopia-green-dark);
+            border-color: var(--ethiopia-green-dark);
+            color: white;
+        }
+
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: rgba(220, 53, 69, 0.4);
+            transform: scale(1.1);
+        }
+
+        .badge-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--ethiopia-green);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            display: none;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .alert-custom {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="text-center mb-5">
+            <h1 class="text-ethiopia-green mb-3">
+                <i class="fas fa-hospital me-2"></i>
+                Ethiopian Hospital ERP
+            </h1>
+            <h2 class="h4 text-muted mb-3">Notification Delete Functionality Demo</h2>
+            <p class="text-muted">
+                This demo shows the delete functionality with real-time updates, smooth animations, 
+                and comprehensive error handling.
+            </p>
+        </div>
+
+        <!-- Badge Counter -->
+        <div class="badge-counter" id="badgeCounter">
+            <i class="fas fa-bell me-2"></i>
+            <span id="notificationCount">5</span> notifications
+        </div>
+
+        <!-- Notifications List -->
+        <div id="notificationsList">
+            <div class="notification-item unread" data-id="1">
+                <div class="notification-content">
+                    <div class="notification-title">New Patient Registration</div>
+                    <div class="notification-message">John Doe has been registered as a new patient</div>
+                    <div class="notification-time">2 minutes ago</div>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn btn-sm btn-outline-primary" onclick="markAsRead(1)">
+                        <i class="fas fa-check me-1"></i>Mark as Read
+                    </button>
+                    <button class="delete-btn" onclick="deleteNotification(1, this)" title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notification-item unread" data-id="2">
+                <div class="notification-content">
+                    <div class="notification-title">Appointment Scheduled</div>
+                    <div class="notification-message">Dr. Smith has a new appointment at 3:00 PM</div>
+                    <div class="notification-time">15 minutes ago</div>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn btn-sm btn-outline-primary" onclick="markAsRead(2)">
+                        <i class="fas fa-check me-1"></i>Mark as Read
+                    </button>
+                    <button class="delete-btn" onclick="deleteNotification(2, this)" title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notification-item" data-id="3">
+                <div class="notification-content">
+                    <div class="notification-title">Medicine Stock Alert</div>
+                    <div class="notification-message">Paracetamol stock is running low (5 units remaining)</div>
+                    <div class="notification-time">1 hour ago</div>
+                </div>
+                <div class="notification-actions">
+                    <button class="delete-btn" onclick="deleteNotification(3, this)" title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notification-item unread" data-id="4">
+                <div class="notification-content">
+                    <div class="notification-title">Billing Invoice Generated</div>
+                    <div class="notification-message">Invoice #INV-2024-001 has been generated for Patient ID: 12345</div>
+                    <div class="notification-time">2 hours ago</div>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn btn-sm btn-outline-primary" onclick="markAsRead(4)">
+                        <i class="fas fa-check me-1"></i>Mark as Read
+                    </button>
+                    <button class="delete-btn" onclick="deleteNotification(4, this)" title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notification-item" data-id="5">
+                <div class="notification-content">
+                    <div class="notification-title">System Maintenance</div>
+                    <div class="notification-message">Scheduled maintenance will occur tonight at 2:00 AM</div>
+                    <div class="notification-time">3 hours ago</div>
+                </div>
+                <div class="notification-actions">
+                    <button class="delete-btn" onclick="deleteNotification(5, this)" title="Delete notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <i class="fas fa-bell-slash"></i>
+            <h5>No notifications</h5>
+            <p>You're all caught up! No notifications to display.</p>
+            <button class="btn btn-ethiopia-green" onclick="resetDemo()">
+                <i class="fas fa-refresh me-2"></i>Reset Demo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let notifications = [1, 2, 3, 4, 5];
+        let unreadNotifications = [1, 2, 4];
+
+        function deleteNotification(id, button) {
+            const notificationItem = button.closest('.notification-item');
+            const title = notificationItem.querySelector('.notification-title').textContent;
+            
+            if (!confirm(`Delete "${title}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            // Add loading state
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            notificationItem.style.opacity = '0.6';
+
+            // Simulate API call delay
+            setTimeout(() => {
+                // Remove from arrays
+                notifications = notifications.filter(n => n !== id);
+                unreadNotifications = unreadNotifications.filter(n => n !== id);
+
+                // Animate removal
+                notificationItem.style.transition = 'all 0.3s ease';
+                notificationItem.style.transform = 'translateX(-100%)';
+                notificationItem.style.opacity = '0';
+
+                setTimeout(() => {
+                    notificationItem.remove();
+                    updateCounter();
+                    checkEmptyState();
+                    showAlert(`"${title}" deleted successfully`, 'success');
+                }, 300);
+            }, 1000); // Simulate network delay
+        }
+
+        function markAsRead(id) {
+            const notificationItem = document.querySelector(`[data-id="${id}"]`);
+            notificationItem.classList.remove('unread');
+            
+            // Remove from unread array
+            unreadNotifications = unreadNotifications.filter(n => n !== id);
+            
+            // Remove mark as read button
+            const markBtn = notificationItem.querySelector('.btn-outline-primary');
+            if (markBtn) {
+                markBtn.style.transition = 'all 0.3s ease';
+                markBtn.style.transform = 'scale(0)';
+                markBtn.style.opacity = '0';
+                setTimeout(() => markBtn.remove(), 300);
+            }
+            
+            updateCounter();
+            showAlert('Notification marked as read', 'info');
+        }
+
+        function updateCounter() {
+            const counter = document.getElementById('notificationCount');
+            const badge = document.getElementById('badgeCounter');
+            
+            counter.textContent = notifications.length;
+            
+            if (notifications.length === 0) {
+                badge.style.display = 'none';
+            }
+        }
+
+        function checkEmptyState() {
+            const list = document.getElementById('notificationsList');
+            const empty = document.getElementById('emptyState');
+            
+            if (notifications.length === 0) {
+                list.style.display = 'none';
+                empty.style.display = 'block';
+            }
+        }
+
+        function resetDemo() {
+            location.reload();
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show alert-custom`;
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.parentNode.removeChild(alertDiv);
+                        }
+                    }, 150);
+                }
+            }, 3000);
+        }
+
+        // Initialize
+        updateCounter();
+    </script>
+</body>
+</html>

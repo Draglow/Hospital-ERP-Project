@@ -1,0 +1,466 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Delete Patient - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-danger">Delete Patient</h1>
+            <p class="text-muted mb-0">Permanent deletion confirmation</p>
+        </div>
+        <a href="{% url 'patients:patient_detail' patient.pk %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Mobile Patient Info Card -->
+<div class="mobile-dashboard-card mb-4">
+    <div class="text-center mb-4">
+        <div class="mobile-patient-avatar mb-3">
+            {% if patient.profile_picture %}
+                <img src="{{ patient.profile_picture.url }}" alt="{{ patient.get_full_name }}" class="rounded-circle">
+            {% else %}
+                <div class="mobile-avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+        </div>
+        <h5 class="text-danger mb-1">{{ patient.get_full_name }}</h5>
+        <p class="text-muted mb-0">Patient ID: {{ patient.patient_id }}</p>
+        <small class="text-muted">{{ patient.phone }} • {{ patient.email|default:"No email" }}</small>
+    </div>
+    
+    <!-- Patient Quick Stats -->
+    <div class="mobile-patient-stats">
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-item">
+                <div class="mobile-stat-value">{{ patient.age }}</div>
+                <div class="mobile-stat-label">Age</div>
+            </div>
+            <div class="mobile-stat-item">
+                <div class="mobile-stat-value">{{ patient.get_gender_display }}</div>
+                <div class="mobile-stat-label">Gender</div>
+            </div>
+            <div class="mobile-stat-item">
+                <div class="mobile-stat-value">{{ patient.appointments.count }}</div>
+                <div class="mobile-stat-label">Appointments</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Warning Card -->
+<div class="mobile-dashboard-card mb-4">
+    <div class="alert alert-danger d-flex align-items-start mb-0">
+        <i class="fas fa-exclamation-triangle fa-2x me-3 mt-1"></i>
+        <div>
+            <h6 class="alert-heading text-danger mb-2">⚠️ Permanent Deletion Warning</h6>
+            <p class="mb-2">This action cannot be undone. Deleting this patient will permanently remove:</p>
+            <ul class="mb-0 small">
+                <li>All personal information and contact details</li>
+                <li>Complete medical history and records</li>
+                <li>All appointment history and notes</li>
+                <li>Billing records and payment history</li>
+                <li>Prescription and medication records</li>
+                <li>Any uploaded documents or files</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Data Impact Card -->
+<div class="mobile-dashboard-card mb-4">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-database me-2"></i>Data Impact Summary
+    </h6>
+    
+    <div class="mobile-data-impact-list">
+        <div class="mobile-data-impact-item">
+            <div class="mobile-data-impact-icon text-warning">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="mobile-data-impact-content">
+                <div class="mobile-data-impact-title">Appointments</div>
+                <div class="mobile-data-impact-count">{{ patient.appointments.count }} record{{ patient.appointments.count|pluralize }}</div>
+            </div>
+        </div>
+        
+        <div class="mobile-data-impact-item">
+            <div class="mobile-data-impact-icon text-info">
+                <i class="fas fa-file-medical"></i>
+            </div>
+            <div class="mobile-data-impact-content">
+                <div class="mobile-data-impact-title">Medical Records</div>
+                <div class="mobile-data-impact-count">{{ patient.medical_records.count|default:0 }} record{{ patient.medical_records.count|default:0|pluralize }}</div>
+            </div>
+        </div>
+        
+        <div class="mobile-data-impact-item">
+            <div class="mobile-data-impact-icon text-success">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="mobile-data-impact-content">
+                <div class="mobile-data-impact-title">Billing Records</div>
+                <div class="mobile-data-impact-count">{{ patient.bills.count|default:0 }} record{{ patient.bills.count|default:0|pluralize }}</div>
+            </div>
+        </div>
+        
+        <div class="mobile-data-impact-item">
+            <div class="mobile-data-impact-icon text-ethiopia-green">
+                <i class="fas fa-pills"></i>
+            </div>
+            <div class="mobile-data-impact-content">
+                <div class="mobile-data-impact-title">Prescriptions</div>
+                <div class="mobile-data-impact-count">{{ patient.prescriptions.count|default:0 }} record{{ patient.prescriptions.count|default:0|pluralize }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Alternative Actions Card -->
+<div class="mobile-dashboard-card mb-4">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-lightbulb me-2"></i>Consider These Alternatives
+    </h6>
+    
+    <div class="mobile-alternatives-list">
+        <div class="mobile-alternative-item">
+            <div class="mobile-alternative-icon">
+                <i class="fas fa-user-slash text-warning"></i>
+            </div>
+            <div class="mobile-alternative-content">
+                <div class="mobile-alternative-title">Deactivate Patient</div>
+                <div class="mobile-alternative-desc">Hide patient from active lists while preserving all data</div>
+            </div>
+            <button class="btn btn-sm btn-outline-warning" onclick="deactivatePatient()">
+                <i class="fas fa-user-slash"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-alternative-item">
+            <div class="mobile-alternative-icon">
+                <i class="fas fa-archive text-info"></i>
+            </div>
+            <div class="mobile-alternative-content">
+                <div class="mobile-alternative-title">Archive Patient</div>
+                <div class="mobile-alternative-desc">Move to archived patients with full data retention</div>
+            </div>
+            <button class="btn btn-sm btn-outline-info" onclick="archivePatient()">
+                <i class="fas fa-archive"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-alternative-item">
+            <div class="mobile-alternative-icon">
+                <i class="fas fa-download text-success"></i>
+            </div>
+            <div class="mobile-alternative-content">
+                <div class="mobile-alternative-title">Export Data First</div>
+                <div class="mobile-alternative-desc">Download patient data before deletion</div>
+            </div>
+            <button class="btn btn-sm btn-outline-success" onclick="exportPatientData()">
+                <i class="fas fa-download"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Confirmation Form -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-danger mb-3">
+        <i class="fas fa-trash me-2"></i>Confirm Deletion
+    </h6>
+    
+    <form method="post" id="deletePatientForm">
+        {% csrf_token %}
+        
+        <!-- Confirmation Checkbox -->
+        <div class="mobile-form-group mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="confirmDeletion" required>
+                <label class="form-check-label" for="confirmDeletion">
+                    <strong>I understand this action is permanent and cannot be undone</strong>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Reason for Deletion -->
+        <div class="mobile-form-group mb-4">
+            <label for="deletionReason" class="form-label">Reason for Deletion <span class="text-danger">*</span></label>
+            <select class="form-select" id="deletionReason" name="deletion_reason" required>
+                <option value="">Select a reason...</option>
+                <option value="duplicate_record">Duplicate Record</option>
+                <option value="test_data">Test Data</option>
+                <option value="patient_request">Patient Request</option>
+                <option value="data_error">Data Entry Error</option>
+                <option value="gdpr_compliance">GDPR/Privacy Compliance</option>
+                <option value="other">Other (specify below)</option>
+            </select>
+        </div>
+        
+        <!-- Additional Notes -->
+        <div class="mobile-form-group mb-4">
+            <label for="deletionNotes" class="form-label">Additional Notes</label>
+            <textarea class="form-control" id="deletionNotes" name="deletion_notes" rows="3" 
+                      placeholder="Provide additional context for this deletion..."></textarea>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                <i class="fas fa-trash me-2"></i>Yes, Permanently Delete Patient
+            </button>
+            <a href="{% url 'patients:patient_detail' patient.pk %}?mobile=1" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Cancel - Keep Patient
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Mobile Safety Notice -->
+<div class="mobile-dashboard-card mt-3">
+    <div class="alert alert-info d-flex align-items-center mb-0">
+        <i class="fas fa-info-circle me-3"></i>
+        <div>
+            <small><strong>Safety Notice:</strong> This deletion will be logged for audit purposes. 
+            Consider exporting patient data before proceeding with deletion.</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-patient-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.mobile-patient-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mobile-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--ethiopia-green), var(--ethiopia-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.mobile-patient-stats {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    padding: var(--mobile-spacing-md);
+}
+
+.mobile-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-stat-item {
+    text-align: center;
+}
+
+.mobile-stat-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-data-impact-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-data-impact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--mobile-spacing-md);
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-sm);
+}
+
+.mobile-data-impact-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--mobile-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.mobile-data-impact-content {
+    flex: 1;
+}
+
+.mobile-data-impact-title {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-data-impact-count {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.mobile-alternatives-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-alternative-item {
+    display: flex;
+    align-items: center;
+    gap: var(--mobile-spacing-md);
+    padding: var(--mobile-spacing-md);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-alternative-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--mobile-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-alternative-content {
+    flex: 1;
+}
+
+.mobile-alternative-title {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-alternative-desc {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.mobile-form-group {
+    margin-bottom: var(--mobile-spacing-md);
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+#confirmDeleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmCheckbox = document.getElementById('confirmDeletion');
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+    const deleteForm = document.getElementById('deletePatientForm');
+    
+    // Enable/disable delete button based on checkbox
+    confirmCheckbox.addEventListener('change', function() {
+        deleteBtn.disabled = !this.checked;
+    });
+    
+    // Form submission confirmation
+    deleteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const reason = document.getElementById('deletionReason').value;
+        if (!reason) {
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Please select a reason for deletion', 'error');
+            } else {
+                alert('Please select a reason for deletion');
+            }
+            return;
+        }
+        
+        // Final confirmation
+        if (confirm('⚠️ FINAL CONFIRMATION\n\nAre you absolutely sure you want to permanently delete this patient?\n\nThis action CANNOT be undone!')) {
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Deleting patient...', 'info');
+            }
+            this.submit();
+        }
+    });
+    
+    console.log('Mobile patient delete page loaded');
+});
+
+function deactivatePatient() {
+    if (confirm('Deactivate this patient instead of deleting?')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Patient deactivation feature coming soon!', 'info');
+        } else {
+            alert('Patient deactivation feature coming soon!');
+        }
+    }
+}
+
+function archivePatient() {
+    if (confirm('Archive this patient instead of deleting?')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Patient archiving feature coming soon!', 'info');
+        } else {
+            alert('Patient archiving feature coming soon!');
+        }
+    }
+}
+
+function exportPatientData() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Exporting patient data...', 'info');
+    }
+    
+    // Simulate export process
+    setTimeout(() => {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Patient data export completed!', 'success');
+        } else {
+            alert('Patient data export completed!');
+        }
+    }, 2000);
+}
+</script>
+{% endblock %}

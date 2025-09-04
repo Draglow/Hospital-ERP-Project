@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar Scroll Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --navbar-height: 60px;
+            --primary-green: #009639;
+            --primary-blue: #0066cc;
+        }
+
+        /* Fixed Navbar Styles */
+        .navbar {
+            z-index: 1030;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            transition: none !important;
+        }
+
+        .navbar-3d {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+            border-bottom: 3px solid var(--primary-green);
+            box-shadow: 
+                0 4px 15px rgba(0, 150, 57, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            position: fixed !important;
+            width: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            transition: none !important;
+            z-index: 1030 !important;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed !important;
+            top: var(--navbar-height) !important;
+            left: 0 !important;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height)) !important;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(0, 150, 57, 0.1);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            z-index: 1020;
+            transition: width 0.3s ease;
+            overflow-y: auto;
+            transform: none !important;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: calc(100vh - var(--navbar-height));
+            padding-top: calc(var(--navbar-height) + 2rem);
+        }
+
+        .content-section {
+            height: 100vh;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+                z-index: 1040;
+                position: fixed !important;
+                top: var(--navbar-height) !important;
+                height: calc(100vh - var(--navbar-height)) !important;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0) !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-top: calc(var(--navbar-height) + 1rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white navbar-3d">
+        <div class="container-fluid">
+            <button class="btn btn-outline-primary me-3" type="button" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-hospital text-success me-2"></i>
+                Ethiopian Hospital ERP
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-outline-warning position-relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+                </button>
+                <button class="btn btn-outline-success">
+                    <i class="fas fa-user-circle me-2"></i>
+                    User
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="p-3 text-center border-bottom">
+            <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                <i class="fas fa-user text-white fs-4"></i>
+            </div>
+            <h6 class="mt-2 mb-1">Test User</h6>
+            <small class="text-muted">Administrator</small>
+        </div>
+        
+        <nav class="p-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#section1">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#section2">
+                        <i class="fas fa-users me-2"></i>Patients
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#section3">
+                        <i class="fas fa-calendar-alt me-2"></i>Appointments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#section4">
+                        <i class="fas fa-user-md me-2"></i>Doctors
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#section5">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Billing
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-section" id="section1">
+            <h2>Section 1 - Dashboard</h2>
+            <p>This is a test to verify that the navbar remains fixed and connected to the sidebar during scroll events.</p>
+            <p>The navbar should NOT hide or translate when scrolling on mobile devices.</p>
+            <p>Scroll down to test the behavior...</p>
+        </div>
+        
+        <div class="content-section" id="section2">
+            <h2>Section 2 - Patients</h2>
+            <p>Continue scrolling to test navbar stability...</p>
+            <p>The navbar should remain visible and properly positioned at all times.</p>
+        </div>
+        
+        <div class="content-section" id="section3">
+            <h2>Section 3 - Appointments</h2>
+            <p>The sidebar should maintain its connection to the navbar.</p>
+            <p>No visual separation should occur during scroll events.</p>
+        </div>
+        
+        <div class="content-section" id="section4">
+            <h2>Section 4 - Doctors</h2>
+            <p>Test mobile responsiveness by resizing the browser window.</p>
+            <p>The sidebar should slide out on mobile while navbar stays fixed.</p>
+        </div>
+        
+        <div class="content-section" id="section5">
+            <h2>Section 5 - Billing</h2>
+            <p>Final test section. The navbar should be stable throughout all scroll interactions.</p>
+            <p>✅ If you can see this and the navbar is still properly positioned, the fix is working!</p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const navbar = document.querySelector('.navbar');
+            
+            // Mobile sidebar toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+            
+            // Ensure navbar stays properly positioned
+            if (navbar) {
+                navbar.style.transform = 'none';
+                navbar.style.transition = 'none';
+            }
+            
+            // Handle window resize to maintain navbar-sidebar connection
+            window.addEventListener('resize', function() {
+                if (navbar) {
+                    navbar.style.transform = 'none';
+                }
+                
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                }
+            });
+            
+            // Log scroll events to verify no transform is applied
+            window.addEventListener('scroll', function() {
+                console.log('Scroll event - Navbar transform:', navbar.style.transform);
+                console.log('Scroll position:', window.pageYOffset);
+            });
+        });
+    </script>
+</body>
+</html>

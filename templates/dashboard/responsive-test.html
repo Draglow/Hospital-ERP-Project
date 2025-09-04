@@ -1,0 +1,345 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Responsive Test - Ethiopian Hospital ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-section {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--primary-green);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.test-header {
+    color: var(--primary-green);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.device-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    z-index: 1000;
+}
+
+.overflow-test {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="device-indicator" id="deviceIndicator">
+    Loading...
+</div>
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">Responsive Design Test</h1>
+        <p class="text-muted">Testing dashboard responsiveness across device sizes</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="runResponsiveTests()">
+            <i class="fas fa-play me-2"></i>Run Tests
+        </button>
+        <button class="btn btn-primary" onclick="toggleSidebar()">
+            <i class="fas fa-bars me-2"></i>Toggle Sidebar
+        </button>
+    </div>
+</div>
+
+<!-- Test Results -->
+<div class="test-section">
+    <div class="test-header">📱 Device Information</div>
+    <div id="deviceInfo">
+        <p><strong>Screen Width:</strong> <span id="screenWidth"></span>px</p>
+        <p><strong>Device Type:</strong> <span id="deviceType"></span></p>
+        <p><strong>Orientation:</strong> <span id="orientation"></span></p>
+        <p><strong>Viewport:</strong> <span id="viewport"></span></p>
+    </div>
+</div>
+
+<!-- Layout Test Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card test-section">
+            <div class="test-header">📊 Statistics Card Test</div>
+            <div class="stat-icon">
+                <i class="fas fa-users text-ethiopia-green"></i>
+            </div>
+            <div class="stat-number">1,234</div>
+            <div class="stat-label">Total Patients</div>
+            <div class="overflow-test">
+                This content should not overflow horizontally on any device size.
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card test-section">
+            <div class="test-header">💰 Revenue Card Test</div>
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave text-ethiopia-yellow"></i>
+            </div>
+            <div class="stat-number">567,890</div>
+            <div class="stat-label">Monthly Revenue (ETB)</div>
+            <div class="overflow-test">
+                Long text content that should wrap properly without causing horizontal scroll.
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card test-section">
+            <div class="test-header">📅 Appointments Test</div>
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check text-ethiopia-blue"></i>
+            </div>
+            <div class="stat-number">45</div>
+            <div class="stat-label">Today's Appointments</div>
+            <div class="overflow-test">
+                Button test: <button class="btn btn-sm btn-primary">Click Me</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card test-section">
+            <div class="test-header">⚠️ Alerts Test</div>
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle text-ethiopia-red"></i>
+            </div>
+            <div class="stat-number">3</div>
+            <div class="stat-label">Low Stock Medicines</div>
+            <div class="overflow-test">
+                Form test: <input type="text" class="form-control form-control-sm" placeholder="Test input">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Test -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="dashboard-card test-section">
+            <div class="test-header">📈 Chart Responsiveness Test</div>
+            <div class="chart-container">
+                <canvas id="testChart"></canvas>
+            </div>
+            <div class="overflow-test">
+                Chart container should scale properly on all devices without horizontal overflow.
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="dashboard-card test-section">
+            <div class="test-header">📋 Table Test</div>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>Dr. Smith</td>
+                            <td>10:00 AM</td>
+                            <td><span class="badge bg-success">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>Dr. Johnson</td>
+                            <td>11:30 AM</td>
+                            <td><span class="badge bg-warning">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="overflow-test">
+                Table should scroll horizontally on mobile if needed.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Button Tests -->
+<div class="test-section">
+    <div class="test-header">🔘 Button and Form Tests</div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <button class="btn btn-primary w-100">Full Width Primary Button</button>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-outline-secondary w-100">Full Width Secondary Button</button>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Test Input Field">
+        </div>
+        <div class="col-md-4">
+            <select class="form-select">
+                <option>Select Option</option>
+                <option>Option 1</option>
+                <option>Option 2</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success w-100">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Test Results Display -->
+<div class="test-section">
+    <div class="test-header">🧪 Automated Test Results</div>
+    <div id="testResults">
+        <p class="text-muted">Click "Run Tests" to see automated responsive test results.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize test chart
+document.addEventListener('DOMContentLoaded', function() {
+    updateDeviceInfo();
+    initTestChart();
+    
+    // Update device info on resize
+    window.addEventListener('resize', updateDeviceInfo);
+    window.addEventListener('orientationchange', function() {
+        setTimeout(updateDeviceInfo, 500);
+    });
+});
+
+function updateDeviceInfo() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const deviceType = width <= 768 ? 'Mobile' : width <= 1024 ? 'Tablet' : 'Desktop';
+    const orientation = width > height ? 'Landscape' : 'Portrait';
+    
+    document.getElementById('screenWidth').textContent = width;
+    document.getElementById('deviceType').textContent = deviceType;
+    document.getElementById('orientation').textContent = orientation;
+    document.getElementById('viewport').textContent = `${width} × ${height}`;
+    document.getElementById('deviceIndicator').textContent = `${deviceType} (${width}px)`;
+}
+
+function initTestChart() {
+    const ctx = document.getElementById('testChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Test Data',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: '#009639',
+                    backgroundColor: 'rgba(0, 150, 57, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: window.innerWidth > 768
+                    }
+                }
+            }
+        });
+    }
+}
+
+function runResponsiveTests() {
+    const results = [];
+    
+    // Test for horizontal overflow
+    const hasOverflow = document.body.scrollWidth > window.innerWidth;
+    results.push({
+        test: 'Horizontal Overflow',
+        passed: !hasOverflow,
+        message: hasOverflow ? 'Page has horizontal scroll' : 'No horizontal overflow'
+    });
+    
+    // Test sidebar state
+    const sidebar = document.getElementById('sidebar');
+    const isMobile = window.innerWidth <= 768;
+    if (sidebar) {
+        const isHidden = sidebar.style.transform.includes('translateX(-100%)') || 
+                        getComputedStyle(sidebar).transform.includes('translateX(-100%)');
+        results.push({
+            test: 'Sidebar State',
+            passed: isMobile ? isHidden || sidebar.classList.contains('show') : true,
+            message: isMobile ? (isHidden ? 'Properly hidden on mobile' : 'Visible on mobile') : 'Desktop mode'
+        });
+    }
+    
+    // Test element widths
+    const cards = document.querySelectorAll('.dashboard-card');
+    let cardOverflow = false;
+    cards.forEach(card => {
+        if (card.getBoundingClientRect().right > window.innerWidth) {
+            cardOverflow = true;
+        }
+    });
+    
+    results.push({
+        test: 'Card Overflow',
+        passed: !cardOverflow,
+        message: cardOverflow ? 'Some cards overflow viewport' : 'All cards fit properly'
+    });
+    
+    displayTestResults(results);
+}
+
+function displayTestResults(results) {
+    const container = document.getElementById('testResults');
+    const passed = results.filter(r => r.passed).length;
+    const total = results.length;
+    
+    let html = `<div class="alert alert-${passed === total ? 'success' : 'warning'}">
+        <strong>Test Results: ${passed}/${total} passed</strong>
+    </div>`;
+    
+    results.forEach(result => {
+        const icon = result.passed ? '✅' : '❌';
+        const color = result.passed ? 'success' : 'danger';
+        html += `<div class="text-${color}">
+            ${icon} <strong>${result.test}:</strong> ${result.message}
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+function toggleSidebar() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.click();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,578 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <p class="text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if is_mobile_device %}
+        <a href="{% url 'patients:mobile_dashboard' %}" class="btn btn-outline-success">
+            <i class="fas fa-mobile-alt me-2"></i>Mobile View
+        </a>
+        {% endif %}
+        <button class="btn btn-outline-primary" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+            <i class="fas fa-plus me-2"></i>Quick Add
+        </button>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions mb-4">
+    <a href="{% url 'appointments:appointment_add' %}" class="quick-action-btn">
+        <i class="fas fa-calendar-plus"></i>
+        <span>New Appointment</span>
+    </a>
+    <a href="{% url 'patients:patient_add' %}" class="quick-action-btn">
+        <i class="fas fa-user-plus"></i>
+        <span>Add Patient</span>
+    </a>
+    <a href="{% url 'billing:invoice_add' %}" class="quick-action-btn">
+        <i class="fas fa-file-invoice"></i>
+        <span>Create Invoice</span>
+    </a>
+    <a href="{% url 'pharmacy:medicine_add' %}" class="quick-action-btn">
+        <i class="fas fa-pills"></i>
+        <span>Add Medicine</span>
+    </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check text-ethiopia-green"></i>
+            </div>
+            <div class="stat-number" id="todayAppointments">{{ today_appointments|default:0 }}</div>
+            <div class="stat-label">Today's Appointments</div>
+            <div class="mt-2">
+                <small class="text-{% if appointments_change.direction == 'up' %}success{% elif appointments_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                    <i class="fas fa-arrow-{% if appointments_change.direction == 'up' %}up{% elif appointments_change.direction == 'down' %}down{% else %}right{% endif %}"></i>
+                    {{ appointments_change.percentage }}% from yesterday
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users text-ethiopia-blue"></i>
+            </div>
+            <div class="stat-number" id="totalPatients">{{ total_patients|default:0 }}</div>
+            <div class="stat-label">Total Patients</div>
+            <div class="mt-2">
+                <small class="text-{% if patient_change.direction == 'up' %}success{% elif patient_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                    <i class="fas fa-arrow-{% if patient_change.direction == 'up' %}up{% elif patient_change.direction == 'down' %}down{% else %}right{% endif %}"></i>
+                    {{ patient_change.percentage }}% this month
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave text-ethiopia-yellow"></i>
+            </div>
+            <div class="stat-number" id="monthlyRevenue">{{ monthly_revenue|default:0|floatformat:0 }}</div>
+            <div class="stat-label">Monthly Revenue (ETB)</div>
+            <div class="mt-2">
+                <small class="text-{% if revenue_change.direction == 'up' %}success{% elif revenue_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                    <i class="fas fa-arrow-{% if revenue_change.direction == 'up' %}up{% elif revenue_change.direction == 'down' %}down{% else %}right{% endif %}"></i>
+                    {{ revenue_change.percentage }}% from last month
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle text-ethiopia-red"></i>
+            </div>
+            <div class="stat-number" id="lowStockMedicines">{{ low_stock_medicines|default:0 }}</div>
+            <div class="stat-label">Low Stock Medicines</div>
+            <div class="mt-2">
+                <small class="text-{% if low_stock_medicines > 0 %}warning{% else %}success{% endif %}">
+                    <i class="fas fa-{% if low_stock_medicines > 0 %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                    {% if low_stock_medicines > 0 %}Needs attention{% else %}All good{% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Patient Trends</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        Last 6 Months
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Last 3 Months</a></li>
+                        <li><a class="dropdown-item" href="#">Last 6 Months</a></li>
+                        <li><a class="dropdown-item" href="#">Last Year</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="patientTrendsChart"></canvas>
+            </div>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <div class="text-center">
+                        <div class="h4 text-ethiopia-green mb-0">{{ patient_trends.total_new_patients|default:0 }}</div>
+                        <small class="text-muted">New Patients (6 months)</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center">
+                        <div class="h4 text-ethiopia-blue mb-0">{{ patient_trends.average_per_month|default:0 }}</div>
+                        <small class="text-muted">Average per Month</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Revenue Breakdown</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        This Month
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">This Month</a></li>
+                        <li><a class="dropdown-item" href="#">Last Month</a></li>
+                        <li><a class="dropdown-item" href="#">Last 3 Months</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Revenue from paid invoices only
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row -->
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Appointments by Doctor</h5>
+                <a href="{% url 'appointments:appointment_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="chart-container">
+                <canvas id="appointmentsChart"></canvas>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="text-center">
+                        <div class="h5 text-ethiopia-green mb-0">{{ appointments_by_doctor.total_appointments_this_month|default:0 }}</div>
+                        <small class="text-muted">Total Appointments This Month</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h6 class="text-muted mb-2">Doctor Performance</h6>
+                {% for doctor in appointments_by_doctor.doctor_performance %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small">{{ doctor.name }}</span>
+                    <div class="d-flex align-items-center">
+                        <div class="progress me-2" style="width: 60px; height: 8px;">
+                            <div class="progress-bar bg-ethiopia-green" style="width: {{ doctor.completion_rate }}%"></div>
+                        </div>
+                        <span class="small text-muted">{{ doctor.completion_rate }}%</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-2">
+                    <small>No appointment data available</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Recent Activity</h5>
+                <a href="{% url 'patients:patient_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="activity-list">
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-icon bg-{{ activity.color }} text-white">
+                        <i class="{{ activity.icon }}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="fw-semibold">{{ activity.title }}</div>
+                        <div class="activity-time">{{ activity.description|truncatechars:50 }}</div>
+                        <small class="text-muted">{{ activity.time|timesince }} ago</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon bg-muted text-white">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="fw-semibold">No recent activity</div>
+                        <div class="activity-time">System activity will appear here</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Modal -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="{% url 'patients:patient_add' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                            <i class="fas fa-user-plus fs-2 mb-2"></i>
+                            <span>Add Patient</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'appointments:appointment_add' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                            <i class="fas fa-calendar-plus fs-2 mb-2"></i>
+                            <span>New Appointment</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'doctors:doctor_add' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                            <i class="fas fa-user-md fs-2 mb-2"></i>
+                            <span>Add Doctor</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'pharmacy:medicine_add' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                            <i class="fas fa-pills fs-2 mb-2"></i>
+                            <span>Add Medicine</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Responsive Dashboard Detection -->
+<script src="{% static 'js/responsive-dashboard.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dashboard-specific functionality
+    console.log('Dashboard loaded successfully');
+
+    // Initialize charts with real data
+    initRealDataCharts();
+
+    // Show welcome notification
+    setTimeout(() => {
+        Dashboard.showNotification('Welcome to Ethiopian Hospital ERP Dashboard!', 'success');
+    }, 1000);
+
+    // Auto-refresh dashboard every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000); // 5 minutes
+});
+
+function initRealDataCharts() {
+    // Patient Trends Chart with real data
+    const patientTrendsCtx = document.getElementById('patientTrendsChart');
+    if (patientTrendsCtx) {
+        new Chart(patientTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ patient_trends.labels|safe }},
+                datasets: [{
+                    label: 'New Patients',
+                    data: {{ patient_trends.data|safe }},
+                    borderColor: '#009639',
+                    backgroundColor: 'rgba(0, 150, 57, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            maxRotation: window.innerWidth <= 768 ? 45 : 0,
+                            padding: 8
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: window.innerWidth <= 768 ? 3 : 4,
+                        hoverRadius: window.innerWidth <= 768 ? 5 : 6
+                    },
+                    line: {
+                        borderWidth: window.innerWidth <= 768 ? 2 : 3
+                    }
+                }
+            }
+        });
+    }
+
+    // Revenue Breakdown Chart with real data
+    const revenueCtx = document.getElementById('revenueChart');
+    if (revenueCtx) {
+        const revenueData = {{ revenue_breakdown.data|safe }};
+        const revenueLabels = {{ revenue_breakdown.labels|safe }};
+
+        // Generate colors for each segment
+        const colors = [
+            '#009639', // Ethiopian Green
+            '#FFCD00', // Ethiopian Yellow
+            '#DA020E', // Ethiopian Red
+            '#0F47AF', // Ethiopian Blue
+            '#FF6B35', // Orange
+            '#6C5CE7', // Purple
+            '#00B894', // Teal
+            '#FDCB6E'  // Light Yellow
+        ];
+
+        new Chart(revenueCtx, {
+            type: 'doughnut',
+            data: {
+                labels: revenueLabels,
+                datasets: [{
+                    data: revenueData,
+                    backgroundColor: colors.slice(0, revenueLabels.length),
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: window.innerWidth <= 768 ? 'bottom' : 'right',
+                        labels: {
+                            padding: window.innerWidth <= 768 ? 10 : 15,
+                            usePointStyle: true,
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            boxWidth: window.innerWidth <= 768 ? 8 : 12,
+                            boxHeight: window.innerWidth <= 768 ? 8 : 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value.toLocaleString()} ETB (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: window.innerWidth <= 768 ? '50%' : '60%',
+                layout: {
+                    padding: window.innerWidth <= 768 ? 5 : 10
+                }
+            }
+        });
+    }
+
+    // Appointments by Doctor Chart with real data
+    const appointmentsCtx = document.getElementById('appointmentsChart');
+    if (appointmentsCtx) {
+        new Chart(appointmentsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ appointments_by_doctor.labels|safe }},
+                datasets: [{
+                    label: 'Appointments',
+                    data: {{ appointments_by_doctor.data|safe }},
+                    backgroundColor: [
+                        '#009639',
+                        '#FFCD00',
+                        '#DA020E',
+                        '#0F47AF',
+                        '#009639'
+                    ],
+                    borderRadius: 10,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 9 : 12
+                            },
+                            maxRotation: window.innerWidth <= 768 ? 45 : 0,
+                            padding: 8
+                        }
+                    }
+                },
+                elements: {
+                    bar: {
+                        borderRadius: window.innerWidth <= 768 ? 6 : 10,
+                        borderSkipped: false
+                    }
+                },
+                layout: {
+                    padding: window.innerWidth <= 768 ? 5 : 10
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

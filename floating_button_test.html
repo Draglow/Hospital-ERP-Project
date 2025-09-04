@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Action Button Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #009639;
+            --primary-yellow: #FFCD00;
+            --primary-red: #DA020E;
+            --primary-blue: #0F47AF;
+            --text-light: #ffffff;
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 15px 35px rgba(0, 0, 0, 0.2);
+            --transition-medium: 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Floating Action Button */
+        .floating-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 180px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: var(--text-light);
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all var(--transition-medium);
+            box-shadow: var(--shadow-medium);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .floating-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .floating-action-btn:hover::before {
+            left: 100%;
+        }
+
+        .floating-action-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: var(--shadow-heavy);
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .floating-action-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .floating-action-btn i {
+            font-size: 16px;
+        }
+
+        /* Glowing Animation */
+        .floating-action-btn {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px rgba(0, 150, 57, 0.4), 0 0 30px rgba(0, 150, 57, 0.3), 0 0 40px rgba(0, 150, 57, 0.2);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(0, 150, 57, 0.6), 0 0 40px rgba(0, 150, 57, 0.4), 0 0 50px rgba(0, 150, 57, 0.3);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .floating-action-btn {
+                width: 160px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 12px;
+            }
+            
+            .floating-action-btn i {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .floating-action-btn {
+                width: 140px;
+                height: 45px;
+                bottom: 15px;
+                right: 15px;
+                font-size: 11px;
+            }
+            
+            .floating-action-btn i {
+                font-size: 12px;
+            }
+        }
+
+        /* Accessibility */
+        .floating-action-btn:focus {
+            outline: 3px solid var(--primary-yellow);
+            outline-offset: 2px;
+        }
+
+        .floating-action-btn:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        .test-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-content">
+            <h1 class="text-primary mb-4">Floating Action Button Test</h1>
+            <p class="lead">This page tests the floating action button functionality and responsive design.</p>
+            
+            <h3>Test Instructions:</h3>
+            <ul>
+                <li>Check if the floating button appears in the bottom-right corner</li>
+                <li>Verify the glowing animation effect</li>
+                <li>Test hover effects (shimmer animation)</li>
+                <li>Test click functionality</li>
+                <li>Resize the window to test responsive behavior</li>
+                <li>Test keyboard navigation (Tab to focus, Enter to activate)</li>
+                <li>Test on mobile devices for touch interactions</li>
+            </ul>
+            
+            <h3>Expected Behavior:</h3>
+            <ul>
+                <li>Button should glow with a pulsing green animation</li>
+                <li>On hover, button should lift up and show shimmer effect</li>
+                <li>On mobile, button should be smaller and positioned appropriately</li>
+                <li>Button should be accessible via keyboard navigation</li>
+                <li>Clicking should navigate to developer information page</li>
+            </ul>
+        </div>
+        
+        <div class="test-content">
+            <h3>Responsive Breakpoints Test</h3>
+            <p>Resize your browser window to test these breakpoints:</p>
+            <ul>
+                <li><strong>Desktop (>768px):</strong> Full size button (180x60px)</li>
+                <li><strong>Tablet (≤768px):</strong> Medium button (160x50px)</li>
+                <li><strong>Mobile (≤480px):</strong> Small button (140x45px)</li>
+            </ul>
+        </div>
+        
+        <div class="test-content">
+            <h3>Accessibility Test</h3>
+            <p>Test keyboard navigation:</p>
+            <ol>
+                <li>Press Tab multiple times to navigate to the floating button</li>
+                <li>The button should show a yellow focus outline</li>
+                <li>Press Enter or Space to activate the button</li>
+                <li>Screen readers should announce "Contact Developer - Learn more about the developer"</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <a href="#developer-page" class="floating-action-btn" role="button" aria-label="Contact Developer - Learn more about the developer" onclick="alert('Floating button clicked! In the real app, this would navigate to the developer page.')">
+        <i class="fas fa-user-tie" aria-hidden="true"></i>
+        <span>Contact Developer</span>
+    </a>
+
+    <script>
+        // Test script for additional functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const floatingBtn = document.querySelector('.floating-action-btn');
+            
+            // Add touch feedback for mobile
+            floatingBtn.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            floatingBtn.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+            
+            // Log interactions for testing
+            floatingBtn.addEventListener('click', function(e) {
+                console.log('Floating button clicked');
+            });
+            
+            floatingBtn.addEventListener('focus', function() {
+                console.log('Floating button focused');
+            });
+            
+            floatingBtn.addEventListener('blur', function() {
+                console.log('Floating button blurred');
+            });
+        });
+    </script>
+</body>
+</html>

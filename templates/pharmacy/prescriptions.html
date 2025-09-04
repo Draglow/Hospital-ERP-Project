@@ -1,0 +1,265 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Prescriptions - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Prescriptions</h1>
+        <p class="text-muted">Manage patient prescriptions and dispensing</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportPrescriptions()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <button class="btn btn-outline-success" onclick="refreshPrescriptions()">
+            <i class="fas fa-sync-alt me-2"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card text-center">
+            <div class="card-icon mb-3">
+                <i class="fas fa-prescription-bottle text-ethiopia-green fs-1"></i>
+            </div>
+            <h4 class="text-ethiopia-green mb-1">{{ total_prescriptions }}</h4>
+            <p class="text-muted mb-0">Total Prescriptions</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card text-center">
+            <div class="card-icon mb-3">
+                <i class="fas fa-clock text-warning fs-1"></i>
+            </div>
+            <h4 class="text-warning mb-1">{{ pending_count }}</h4>
+            <p class="text-muted mb-0">Pending</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card text-center">
+            <div class="card-icon mb-3">
+                <i class="fas fa-check-circle text-success fs-1"></i>
+            </div>
+            <h4 class="text-success mb-1">{{ dispensed_count }}</h4>
+            <p class="text-muted mb-0">Dispensed</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card text-center">
+            <div class="card-icon mb-3">
+                <i class="fas fa-exclamation-triangle text-danger fs-1"></i>
+            </div>
+            <h4 class="text-danger mb-1">{{ urgent_count }}</h4>
+            <p class="text-muted mb-0">Urgent</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Prescription Management ({{ total_prescriptions }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <div class="input-group" style="width: 250px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search prescriptions..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="status" class="form-select" style="width: 140px;" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    {% for status_code, status_name in statuses %}
+                        <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_name }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or status_filter %}
+                    <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Medicine</th>
+                    <th>Prescribed</th>
+                    <th>Dispensed</th>
+                    <th>Status</th>
+                    <th>Prescribed Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription in page_obj %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-ethiopia-green rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">{{ prescription.appointment.patient.get_full_name }}</div>
+                                <small class="text-muted">{{ prescription.appointment.patient.patient_id }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="fw-semibold">{{ prescription.medicine.name }}</div>
+                            <small class="text-muted">{{ prescription.medicine.strength }} - {{ prescription.medicine.get_form_display }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">{{ prescription.quantity_prescribed }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-success">{{ prescription.quantity_dispensed }}</span>
+                        {% if prescription.remaining_quantity > 0 %}
+                            <small class="text-muted d-block">{{ prescription.remaining_quantity }} remaining</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if prescription.status == 'dispensed' %}success{% elif prescription.status == 'pending' %}warning{% elif prescription.status == 'partially_dispensed' %}info{% else %}danger{% endif %}">
+                            {{ prescription.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ prescription.prescribed_date|date:"M d, Y" }}</div>
+                        <small class="text-muted">{{ prescription.prescribed_date|time:"g:i A" }}</small>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            {% if prescription.status != 'dispensed' and prescription.status != 'cancelled' %}
+                                <a href="{% url 'pharmacy:prescription_dispense' prescription.pk %}" class="btn btn-sm btn-outline-success" title="Dispense">
+                                    <i class="fas fa-pills"></i>
+                                </a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewPrescriptionDetails({{ prescription.pk }})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if prescription.status == 'pending' %}
+                                <button class="btn btn-sm btn-outline-danger" onclick="cancelPrescription({{ prescription.pk }})" title="Cancel">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="fas fa-prescription-bottle fa-3x mb-3"></i>
+                            <h5>No prescriptions found</h5>
+                            <p>{% if search_query %}No prescriptions match your search criteria.{% else %}No prescriptions have been created yet.{% endif %}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Prescriptions pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Prescription Details Modal -->
+<div class="modal fade" id="prescriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Prescription Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="prescriptionModalBody">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewPrescriptionDetails(prescriptionId) {
+    // Show modal with prescription details
+    const modal = new bootstrap.Modal(document.getElementById('prescriptionModal'));
+    const modalBody = document.getElementById('prescriptionModalBody');
+    
+    modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+    modal.show();
+    
+    // In a real implementation, this would fetch prescription details via AJAX
+    setTimeout(() => {
+        modalBody.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Prescription details would be loaded here via AJAX call to get detailed information.
+            </div>
+        `;
+    }, 1000);
+}
+
+function cancelPrescription(prescriptionId) {
+    if (confirm('Are you sure you want to cancel this prescription?')) {
+        // In a real implementation, this would make an AJAX call to cancel the prescription
+        alert('Prescription cancellation functionality would be implemented here.');
+    }
+}
+
+function exportPrescriptions() {
+    // Export prescriptions to CSV
+    alert('Export functionality would be implemented here.');
+}
+
+function refreshPrescriptions() {
+    location.reload();
+}
+
+// Auto-refresh every 30 seconds
+setInterval(function() {
+    if (!document.hidden) {
+        // Only refresh if no modals are open
+        if (!document.querySelector('.modal.show')) {
+            location.reload();
+        }
+    }
+}, 30000);
+</script>
+{% endblock %}

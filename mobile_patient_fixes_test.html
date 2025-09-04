@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Patient Page Fixes Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            color: #009639;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 8px;
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .before, .after {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .before {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        
+        .after {
+            background: #f0fff4;
+            border-color: #28a745;
+        }
+        
+        .mobile-demo-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Mobile Patient Page Fixes Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Patient Management Page Fixes</h5>
+            <ul class="mb-0">
+                <li><strong>Save Patient Button:</strong> Fixed text visibility with proper styling</li>
+                <li><strong>Search Icon:</strong> Enhanced visibility with Ethiopian green branding</li>
+                <li><strong>Card Content:</strong> Fixed overflow issues in statistics cards</li>
+                <li><strong>Touch Targets:</strong> All buttons meet 44px minimum requirement</li>
+                <li><strong>Responsive Design:</strong> Works across all mobile screen sizes</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Save Patient Button Fix -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-save me-2"></i>
+                Save Patient Button - Text Visibility Fix
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Broken)</h6>
+                    <button class="btn btn-primary w-100" style="background: #009639; color: transparent;">
+                        <i class="fas fa-save me-2"></i>Save Patient
+                    </button>
+                    <small class="text-muted d-block mt-2">Text invisible/not displaying</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Fixed)</h6>
+                    <button class="btn btn-primary w-100 mobile-add-patient-btn">
+                        <i class="fas fa-save me-2"></i>
+                        <span class="mobile-btn-text">Save Patient</span>
+                    </button>
+                    <small class="text-muted d-block mt-2">Text clearly visible with proper styling</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Search Icon Fix -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-search me-2"></i>
+                Search Icon - Visibility Enhancement
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Broken)</h6>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Search patients...">
+                        <button class="btn btn-primary" style="background: transparent; color: transparent;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted d-block mt-2">Search icon invisible</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Fixed)</h6>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Search patients...">
+                        <button class="btn btn-primary mobile-search-btn">
+                            <i class="fas fa-search"></i>
+                            <span class="sr-only">Search</span>
+                        </button>
+                    </div>
+                    <small class="text-muted d-block mt-2">Search icon clearly visible with Ethiopian branding</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 3: Card Content Overflow Fix -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-chart-bar me-2"></i>
+                Statistics Cards - Content Overflow Fix
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Broken)</h6>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div style="border: 1px solid #ddd; padding: 0.5rem; text-align: center; overflow: visible;">
+                            <div style="font-size: 1.5rem; color: #009639;">150</div>
+                            <div style="font-size: 0.75rem; white-space: nowrap; overflow: visible;">All Registered Patients Growing</div>
+                            <div style="font-size: 0.6rem; white-space: nowrap; overflow: visible;">15% increase this month</div>
+                        </div>
+                        <div style="border: 1px solid #ddd; padding: 0.5rem; text-align: center; overflow: visible;">
+                            <div style="font-size: 1.5rem; color: #009639;">25</div>
+                            <div style="font-size: 0.75rem; white-space: nowrap; overflow: visible;">Today's Appointments</div>
+                            <div style="font-size: 0.6rem; white-space: nowrap; overflow: visible;">5% from yesterday</div>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Text overflows card boundaries</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Fixed)</h6>
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-users text-ethiopia-blue"></i>
+                            </div>
+                            <div class="mobile-stat-number">150</div>
+                            <div class="mobile-stat-label">All Registered</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>15% this month
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-calendar-check text-ethiopia-green"></i>
+                            </div>
+                            <div class="mobile-stat-number">25</div>
+                            <div class="mobile-stat-label">Today's Appointments</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>5% from yesterday
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Text properly contained within card boundaries</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 4: Complete Mobile Patient Add Form -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-user-plus me-2"></i>
+                Complete Mobile Patient Add Form
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <div class="p-3">
+                    <!-- Mobile Page Header -->
+                    <div class="mobile-page-header mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Add New Patient</h5>
+                                <p class="text-muted mb-0 small">Register a new patient</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Form -->
+                    <div class="mobile-dashboard-card">
+                        <h6 class="text-ethiopia-green mb-3">Patient Information</h6>
+                        
+                        <form class="mobile-form">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" placeholder="Enter patient name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" placeholder="Enter phone number">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            
+                            <!-- Form Actions -->
+                            <div class="mobile-form-actions">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-outline-secondary w-100">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-primary w-100 mobile-add-patient-btn">
+                                            <i class="fas fa-save me-2"></i>
+                                            <span class="mobile-btn-text">Save Patient</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 5: Mobile Patient Search -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-list me-2"></i>
+                Mobile Patient Search & List
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <div class="p-3">
+                    <!-- Mobile Search -->
+                    <div class="mobile-dashboard-card mb-3">
+                        <form class="d-flex gap-2">
+                            <input type="text" class="form-control" placeholder="Search patients..." value="John">
+                            <button type="submit" class="btn btn-primary mobile-search-btn">
+                                <i class="fas fa-search"></i>
+                                <span class="sr-only">Search</span>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Sample Patient Item -->
+                    <div class="mobile-dashboard-card">
+                        <div class="d-flex align-items-center">
+                            <div class="mobile-patient-avatar me-3">
+                                <div class="patient-avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="mobile-patient-name">John Doe</div>
+                                <div class="mobile-patient-info-grid mt-2">
+                                    <div class="mobile-patient-info-row">
+                                        <div class="mobile-patient-info-item">
+                                            <div class="mobile-patient-info-value text-ethiopia-blue">P001</div>
+                                            <div class="mobile-patient-info-label">Patient ID</div>
+                                        </div>
+                                        <div class="mobile-patient-info-item">
+                                            <div class="mobile-patient-info-value text-ethiopia-green">35 years</div>
+                                            <div class="mobile-patient-info-label">Age</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mobile-patient-actions">
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>All Fixes Applied Successfully</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ Button Text Visibility:</h6>
+                    <ul class="small">
+                        <li>Added mobile-btn-text class to Save Patient button</li>
+                        <li>Applied Ethiopian green gradient background</li>
+                        <li>Ensured proper z-index and positioning</li>
+                        <li>44px minimum touch target compliance</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Search & Card Improvements:</h6>
+                    <ul class="small">
+                        <li>Enhanced search icon visibility</li>
+                        <li>Fixed card content overflow with word-wrap</li>
+                        <li>Improved text truncation and ellipsis</li>
+                        <li>Responsive design across all mobile sizes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Patient Fixes Test Loaded');
+            
+            // Test button interactions
+            document.querySelectorAll('.mobile-add-patient-btn, .mobile-search-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const btnType = this.classList.contains('mobile-search-btn') ? 'Search' : 'Save Patient';
+                    alert(`${btnType} button clicked! Text is now properly visible.`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

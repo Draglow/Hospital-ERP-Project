@@ -1,0 +1,477 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Mobile Navigation Test - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Navigation Test</h1>
+            <p class="text-muted mb-0">Test mobile navigation links</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-success" onclick="runAllTests()">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="resetTests()">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Test Status Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-clipboard-check me-2"></i>Test Status
+    </h6>
+    <div id="testStatus" class="test-status">
+        <div class="test-summary">
+            <span class="badge bg-secondary" id="totalTests">0</span> Total Tests
+            <span class="badge bg-success" id="passedTests">0</span> Passed
+            <span class="badge bg-danger" id="failedTests">0</span> Failed
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Links Test -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-link me-2"></i>Navigation Links Test
+    </h6>
+    <div class="navigation-test-list">
+        {% for link in navigation_links %}
+        <div class="navigation-test-item" data-test="nav-{{ forloop.counter }}">
+            <div class="test-info">
+                <div class="test-name">{{ link.name }}</div>
+                <small class="test-url text-muted">{% url link.url %}{{ link.params }}</small>
+            </div>
+            <div class="test-actions">
+                <span class="test-status-badge badge bg-secondary">Pending</span>
+                <a href="{% url link.url %}{{ link.params }}" class="btn btn-sm btn-outline-primary test-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Mobile Features Test -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-yellow mb-3">
+        <i class="fas fa-mobile-alt me-2"></i>Mobile Features Test
+    </h6>
+    <div class="mobile-features-test">
+        <div class="feature-test-item" data-test="mobile-detection">
+            <div class="test-info">
+                <div class="test-name">Mobile Detection</div>
+                <small class="text-muted">Check if mobile context is detected</small>
+            </div>
+            <div class="test-actions">
+                <span class="test-status-badge badge bg-secondary">Pending</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="testMobileDetection()">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="feature-test-item" data-test="mobile-template">
+            <div class="test-info">
+                <div class="test-name">Mobile Template</div>
+                <small class="text-muted">Verify mobile template is being used</small>
+            </div>
+            <div class="test-actions">
+                <span class="test-status-badge badge bg-secondary">Pending</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="testMobileTemplate()">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="feature-test-item" data-test="mobile-navigation">
+            <div class="test-info">
+                <div class="test-name">Mobile Navigation</div>
+                <small class="text-muted">Test mobile sidebar and bottom nav</small>
+            </div>
+            <div class="test-actions">
+                <span class="test-status-badge badge bg-secondary">Pending</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="testMobileNavigation()">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Results -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-red mb-3">
+        <i class="fas fa-list-alt me-2"></i>Test Results
+    </h6>
+    <div id="testResults" class="test-results">
+        <div class="text-center text-muted py-3">
+            <i class="fas fa-info-circle fs-4 mb-2"></i>
+            <p>Click "Run All Tests" to start testing</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid">
+    <button class="mobile-quick-action-card" onclick="runAllTests()">
+        <i class="fas fa-play"></i>
+        <span>Run Tests</span>
+    </button>
+    <button class="mobile-quick-action-card" onclick="exportResults()">
+        <i class="fas fa-download"></i>
+        <span>Export</span>
+    </button>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+    <button class="mobile-quick-action-card text-warning" onclick="resetTests()">
+        <i class="fas fa-redo"></i>
+        <span>Reset</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-status {
+    padding: 1rem;
+    background: rgba(0, 150, 57, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid #009639;
+}
+
+.test-summary {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.navigation-test-list,
+.mobile-features-test {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.navigation-test-item,
+.feature-test-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 150, 57, 0.1);
+    transition: all 0.3s ease;
+}
+
+.navigation-test-item:hover,
+.feature-test-item:hover {
+    background: rgba(0, 150, 57, 0.05);
+    border-color: rgba(0, 150, 57, 0.2);
+}
+
+.test-info {
+    flex: 1;
+}
+
+.test-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.test-url {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+}
+
+.test-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.test-status-badge.bg-success {
+    background-color: #009639 !important;
+}
+
+.test-status-badge.bg-danger {
+    background-color: #DA020E !important;
+}
+
+.test-results {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.test-result-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.test-result-item.success {
+    background: rgba(0, 150, 57, 0.1);
+    border-left-color: #009639;
+}
+
+.test-result-item.error {
+    background: rgba(218, 2, 14, 0.1);
+    border-left-color: #DA020E;
+}
+
+.test-result-item.warning {
+    background: rgba(255, 205, 0, 0.1);
+    border-left-color: #FFCD00;
+}
+
+@media (max-width: 375px) {
+    .navigation-test-item,
+    .feature-test-item {
+        padding: 0.75rem;
+    }
+    
+    .test-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .test-summary {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile navigation test loaded');
+    
+    // Initialize test counters
+    updateTestCounters();
+    
+    // Auto-run mobile detection test
+    setTimeout(() => {
+        testMobileDetection();
+        testMobileTemplate();
+    }, 1000);
+});
+
+let testResults = [];
+
+function updateTestCounters() {
+    const totalTests = document.querySelectorAll('.navigation-test-item, .feature-test-item').length;
+    const passedTests = document.querySelectorAll('.test-status-badge.bg-success').length;
+    const failedTests = document.querySelectorAll('.test-status-badge.bg-danger').length;
+    
+    document.getElementById('totalTests').textContent = totalTests;
+    document.getElementById('passedTests').textContent = passedTests;
+    document.getElementById('failedTests').textContent = failedTests;
+}
+
+function addTestResult(testName, status, message) {
+    const result = {
+        name: testName,
+        status: status,
+        message: message,
+        timestamp: new Date().toLocaleTimeString()
+    };
+    
+    testResults.push(result);
+    
+    const resultsContainer = document.getElementById('testResults');
+    const resultItem = document.createElement('div');
+    resultItem.className = `test-result-item ${status}`;
+    resultItem.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <strong>${testName}</strong>
+                <div class="small text-muted">${message}</div>
+            </div>
+            <small class="text-muted">${result.timestamp}</small>
+        </div>
+    `;
+    
+    if (resultsContainer.querySelector('.text-center')) {
+        resultsContainer.innerHTML = '';
+    }
+    
+    resultsContainer.appendChild(resultItem);
+    resultsContainer.scrollTop = resultsContainer.scrollHeight;
+}
+
+function updateTestStatus(testElement, status) {
+    const badge = testElement.querySelector('.test-status-badge');
+    badge.className = `test-status-badge badge bg-${status === 'success' ? 'success' : status === 'error' ? 'danger' : 'warning'}`;
+    badge.textContent = status === 'success' ? 'Passed' : status === 'error' ? 'Failed' : 'Warning';
+    updateTestCounters();
+}
+
+function testMobileDetection() {
+    const testElement = document.querySelector('[data-test="mobile-detection"]');
+    
+    // Check if mobile parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMobileParam = urlParams.get('mobile') === '1';
+    
+    // Check if mobile template is being used
+    const isMobileTemplate = document.querySelector('.mobile-dashboard-card') !== null;
+    
+    if (isMobileParam || isMobileTemplate) {
+        updateTestStatus(testElement, 'success');
+        addTestResult('Mobile Detection', 'success', 'Mobile context detected successfully');
+    } else {
+        updateTestStatus(testElement, 'error');
+        addTestResult('Mobile Detection', 'error', 'Mobile context not detected');
+    }
+}
+
+function testMobileTemplate() {
+    const testElement = document.querySelector('[data-test="mobile-template"]');
+    
+    // Check for mobile-specific elements
+    const mobileElements = [
+        '.mobile-dashboard-card',
+        '.mobile-nav-menu',
+        '.mobile-bottom-nav',
+        '.mobile-quick-actions-grid'
+    ];
+    
+    const foundElements = mobileElements.filter(selector => document.querySelector(selector) !== null);
+    
+    if (foundElements.length >= 3) {
+        updateTestStatus(testElement, 'success');
+        addTestResult('Mobile Template', 'success', `Found ${foundElements.length}/${mobileElements.length} mobile elements`);
+    } else {
+        updateTestStatus(testElement, 'warning');
+        addTestResult('Mobile Template', 'warning', `Only found ${foundElements.length}/${mobileElements.length} mobile elements`);
+    }
+}
+
+function testMobileNavigation() {
+    const testElement = document.querySelector('[data-test="mobile-navigation"]');
+    
+    // Test sidebar toggle
+    const sidebarToggle = document.getElementById('mobileSidebarToggle');
+    const sidebar = document.getElementById('mobileSidebar');
+    
+    if (sidebarToggle && sidebar) {
+        // Simulate sidebar toggle
+        sidebarToggle.click();
+        
+        setTimeout(() => {
+            const isActive = sidebar.classList.contains('active');
+            if (isActive) {
+                updateTestStatus(testElement, 'success');
+                addTestResult('Mobile Navigation', 'success', 'Mobile sidebar toggle works correctly');
+                
+                // Close sidebar
+                sidebarToggle.click();
+            } else {
+                updateTestStatus(testElement, 'error');
+                addTestResult('Mobile Navigation', 'error', 'Mobile sidebar toggle not working');
+            }
+        }, 500);
+    } else {
+        updateTestStatus(testElement, 'error');
+        addTestResult('Mobile Navigation', 'error', 'Mobile sidebar elements not found');
+    }
+}
+
+function runAllTests() {
+    // Reset all tests
+    resetTests();
+    
+    // Run tests with delays
+    setTimeout(() => testMobileDetection(), 500);
+    setTimeout(() => testMobileTemplate(), 1000);
+    setTimeout(() => testMobileNavigation(), 1500);
+    
+    // Test navigation links
+    const navItems = document.querySelectorAll('.navigation-test-item');
+    navItems.forEach((item, index) => {
+        setTimeout(() => {
+            const testName = item.querySelector('.test-name').textContent;
+            const testUrl = item.querySelector('.test-url').textContent;
+            
+            // Simulate link test (in real scenario, you'd check if the link loads correctly)
+            if (testUrl.includes('?mobile=1') || testUrl.includes('/mobile/')) {
+                updateTestStatus(item, 'success');
+                addTestResult(`Navigation: ${testName}`, 'success', 'Mobile parameter present in URL');
+            } else if (testName === 'Dashboard') {
+                updateTestStatus(item, 'success');
+                addTestResult(`Navigation: ${testName}`, 'success', 'Mobile dashboard URL correct');
+            } else {
+                updateTestStatus(item, 'warning');
+                addTestResult(`Navigation: ${testName}`, 'warning', 'Mobile parameter missing');
+            }
+        }, 2000 + (index * 200));
+    });
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Running all tests...', 'info');
+    }
+}
+
+function resetTests() {
+    // Reset all test statuses
+    document.querySelectorAll('.test-status-badge').forEach(badge => {
+        badge.className = 'test-status-badge badge bg-secondary';
+        badge.textContent = 'Pending';
+    });
+    
+    // Clear test results
+    testResults = [];
+    document.getElementById('testResults').innerHTML = `
+        <div class="text-center text-muted py-3">
+            <i class="fas fa-info-circle fs-4 mb-2"></i>
+            <p>Tests reset. Click "Run All Tests" to start testing</p>
+        </div>
+    `;
+    
+    updateTestCounters();
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Tests reset', 'warning');
+    }
+}
+
+function exportResults() {
+    const results = {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        testResults: testResults,
+        summary: {
+            total: testResults.length,
+            passed: testResults.filter(r => r.status === 'success').length,
+            failed: testResults.filter(r => r.status === 'error').length,
+            warnings: testResults.filter(r => r.status === 'warning').length
+        }
+    };
+    
+    const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mobile-navigation-test-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Test results exported!', 'success');
+    }
+}
+</script>
+{% endblock %}

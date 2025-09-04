@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Delete Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ethiopia-green: #009639;
+        }
+
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+        }
+
+        .mobile-notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .mobile-notification-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .mobile-notification-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-delete-notification {
+            background-color: #dc3545;
+            color: white;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            z-index: 100 !important;
+            position: relative !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: rgba(220, 53, 69, 0.3) !important;
+        }
+
+        .mobile-delete-notification i {
+            pointer-events: none !important;
+            font-size: 14px !important;
+        }
+
+        .mobile-delete-notification:active {
+            background-color: rgba(220, 53, 69, 0.8) !important;
+            transform: scale(0.95) !important;
+        }
+
+        .test-log {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+
+        .test-controls {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-ethiopia-green {
+            background-color: var(--ethiopia-green);
+            border-color: var(--ethiopia-green);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="text-center mb-4">
+            <h2 class="text-ethiopia-green">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Mobile Delete Test
+            </h2>
+            <p class="text-muted">Ethiopian Hospital ERP - Mobile Delete Debug</p>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="test-controls">
+            <h5>Test Controls</h5>
+            <div class="d-grid gap-2">
+                <button class="btn btn-ethiopia-green" onclick="runMobileTests()">
+                    <i class="fas fa-play me-2"></i>Run Mobile Tests
+                </button>
+                <button class="btn btn-outline-primary" onclick="testMobileButtons()">
+                    <i class="fas fa-touch me-2"></i>Test Button Detection
+                </button>
+                <button class="btn btn-outline-success" onclick="simulateMobileClick()">
+                    <i class="fas fa-hand-pointer me-2"></i>Simulate Click
+                </button>
+                <button class="btn btn-outline-warning" onclick="clearLog()">
+                    <i class="fas fa-eraser me-2"></i>Clear Log
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Log -->
+        <div id="testLog" class="test-log">Mobile Delete Test Initialized
+Ready to test mobile delete functionality...
+</div>
+
+        <!-- Demo Mobile Notifications -->
+        <div class="mobile-notification-card">
+            <div class="mobile-notification-actions">
+                <button class="mobile-notification-action-btn mobile-delete-notification"
+                        data-notification-id="mobile-test-1"
+                        aria-label="Delete notification"
+                        onclick="handleMobileDeleteClick(this)"
+                        type="button">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <h6 class="mb-2">Test Mobile Notification 1</h6>
+            <p class="mb-0 text-muted">This is a test notification for mobile delete functionality.</p>
+        </div>
+
+        <div class="mobile-notification-card">
+            <div class="mobile-notification-actions">
+                <button class="mobile-notification-action-btn mobile-delete-notification"
+                        data-notification-id="mobile-test-2"
+                        aria-label="Delete notification"
+                        onclick="handleMobileDeleteClick(this)"
+                        type="button">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <h6 class="mb-2">Test Mobile Notification 2</h6>
+            <p class="mb-0 text-muted">Another test notification to verify mobile delete functionality.</p>
+        </div>
+
+        <div class="mobile-notification-card">
+            <div class="mobile-notification-actions">
+                <button class="mobile-notification-action-btn mobile-delete-notification"
+                        data-notification-id="mobile-test-3"
+                        aria-label="Delete notification"
+                        onclick="handleMobileDeleteClick(this)"
+                        type="button">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <h6 class="mb-2">Test Mobile Notification 3</h6>
+            <p class="mb-0 text-muted">Third test notification with enhanced mobile delete functionality.</p>
+        </div>
+    </div>
+
+    <!-- Hidden CSRF Token for Testing -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="mobile-test-csrf-token-12345">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Logging function
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').textContent = 'Log cleared.\n';
+        }
+
+        // Mobile delete handler
+        function handleMobileDeleteClick(button) {
+            log('=== MOBILE DELETE ONCLICK HANDLER CALLED ===');
+            log('Button: ' + button.tagName + ' with classes: ' + button.className);
+            
+            const notificationId = button.dataset.notificationId;
+            log('Notification ID: ' + notificationId);
+
+            if (!notificationId) {
+                log('ERROR: No notification ID found!');
+                alert('Error: No notification ID found');
+                return;
+            }
+
+            log('Calling deleteNotification...');
+            deleteNotification(notificationId, button);
+        }
+
+        // Mock delete function for testing
+        function deleteNotification(notificationId, button) {
+            log('=== DELETE NOTIFICATION FUNCTION CALLED ===');
+            log('ID: ' + notificationId);
+            log('Button: ' + button.tagName);
+
+            if (!confirm('Delete notification "' + notificationId + '"?\n\nThis is just a test - no actual deletion will occur.')) {
+                log('User cancelled deletion');
+                return;
+            }
+
+            log('User confirmed deletion');
+            
+            const notificationCard = button.closest('.mobile-notification-card');
+            if (notificationCard) {
+                log('Found notification card, animating removal...');
+                notificationCard.style.transition = 'all 0.3s ease';
+                notificationCard.style.transform = 'translateX(-100%)';
+                notificationCard.style.opacity = '0';
+                
+                setTimeout(() => {
+                    notificationCard.remove();
+                    log('✓ Notification card removed successfully');
+                }, 300);
+            } else {
+                log('ERROR: Could not find notification card');
+            }
+        }
+
+        // Test functions
+        function runMobileTests() {
+            log('=== RUNNING MOBILE TESTS ===');
+            testMobileButtons();
+            testEventHandlers();
+            testCSRFToken();
+            log('=== MOBILE TESTS COMPLETE ===');
+        }
+
+        function testMobileButtons() {
+            log('Testing mobile delete buttons...');
+            const buttons = document.querySelectorAll('.mobile-delete-notification');
+            log('Found ' + buttons.length + ' mobile delete buttons');
+            
+            buttons.forEach((button, index) => {
+                log('Button ' + (index + 1) + ':');
+                log('  - ID: ' + button.dataset.notificationId);
+                log('  - Visible: ' + (button.offsetParent !== null));
+                log('  - Clickable: ' + !button.disabled);
+                log('  - Has onclick: ' + (button.onclick !== null));
+            });
+        }
+
+        function testEventHandlers() {
+            log('Testing event handlers...');
+            const buttons = document.querySelectorAll('.mobile-delete-notification');
+            
+            buttons.forEach((button, index) => {
+                // Add test event listeners
+                button.addEventListener('click', function(e) {
+                    log('Click event detected on button ' + (index + 1));
+                });
+                
+                button.addEventListener('touchstart', function(e) {
+                    log('Touch start detected on button ' + (index + 1));
+                });
+                
+                button.addEventListener('touchend', function(e) {
+                    log('Touch end detected on button ' + (index + 1));
+                });
+            });
+            
+            log('Event handlers attached to ' + buttons.length + ' buttons');
+        }
+
+        function testCSRFToken() {
+            log('Testing CSRF token...');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken && csrfToken.value) {
+                log('✓ CSRF Token found: ' + csrfToken.value.substring(0, 10) + '...');
+            } else {
+                log('✗ CSRF Token not found!');
+            }
+        }
+
+        function simulateMobileClick() {
+            log('Simulating mobile click...');
+            const firstButton = document.querySelector('.mobile-delete-notification');
+            if (firstButton) {
+                log('Found first button, simulating click...');
+                firstButton.click();
+            } else {
+                log('No mobile delete buttons found');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Mobile delete test page loaded');
+            log('User agent: ' + navigator.userAgent);
+            log('Touch support: ' + ('ontouchstart' in window));
+            
+            // Auto-run tests after a short delay
+            setTimeout(() => {
+                log('Auto-running initial tests...');
+                testMobileButtons();
+            }, 1000);
+        });
+
+        // Make functions globally available
+        window.handleMobileDeleteClick = handleMobileDeleteClick;
+        window.deleteNotification = deleteNotification;
+        window.testMobileButtons = testMobileButtons;
+    </script>
+</body>
+</html>

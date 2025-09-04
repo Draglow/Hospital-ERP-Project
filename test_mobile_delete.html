@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Delete Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .debug-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: rgba(220, 53, 69, 0.4);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-success mb-4">
+            <i class="fas fa-hospital me-2"></i>
+            Mobile Delete Test
+        </h1>
+        
+        <!-- Test Controls -->
+        <div class="test-card">
+            <h5>🔧 Delete Function Tests</h5>
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-primary" onclick="testCSRFToken()">Test CSRF Token</button>
+                <button class="btn btn-success" onclick="testDeleteEndpoint()">Test Delete Endpoint</button>
+                <button class="btn btn-warning" onclick="testNetworkConnection()">Test Network</button>
+                <button class="btn btn-info" onclick="clearDebug()">Clear Debug</button>
+            </div>
+            
+            <!-- Debug Output -->
+            <div class="debug-output" id="debugOutput">
+                Click a test button to start debugging...
+            </div>
+        </div>
+        
+        <!-- Sample Notification Card -->
+        <div class="test-card">
+            <h5>📱 Sample Mobile Notification</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6>New Patient Registration</h6>
+                    <p class="text-muted mb-0">John Doe has been registered as a new patient</p>
+                    <small class="text-muted">2 minutes ago</small>
+                </div>
+                <button class="delete-btn" onclick="testMobileDelete(123)" title="Delete notification">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- CSRF Token (simulated) -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="test-csrf-token-12345">
+    </div>
+
+    <script>
+        let debugOutput = document.getElementById('debugOutput');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.textContent += `[${timestamp}] ${message}\n`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearDebug() {
+            debugOutput.textContent = 'Debug cleared.\n';
+        }
+        
+        function testCSRFToken() {
+            log('=== TESTING CSRF TOKEN ===');
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            log('CSRF token element found: ' + (csrfToken ? 'Yes' : 'No'));
+            
+            if (csrfToken) {
+                log('CSRF token value: ' + csrfToken.value);
+                log('CSRF token length: ' + csrfToken.value.length);
+            } else {
+                log('❌ CSRF token not found! This could be the problem.');
+            }
+            
+            // Check for meta tag version
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            log('CSRF meta tag found: ' + (metaToken ? 'Yes' : 'No'));
+            
+            if (metaToken) {
+                log('Meta token value: ' + metaToken.getAttribute('content'));
+            }
+            
+            log('CSRF test completed.\n');
+        }
+        
+        function testDeleteEndpoint() {
+            log('=== TESTING DELETE ENDPOINT ===');
+            
+            const testId = 123;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            
+            if (!csrfToken) {
+                log('❌ No CSRF token found - cannot test endpoint');
+                return;
+            }
+            
+            const deleteUrl = `/notifications/delete/${testId}/`;
+            log('Testing URL: ' + deleteUrl);
+            log('Method: POST');
+            log('Headers: X-CSRFToken, Content-Type');
+            
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                log('Response received:');
+                log('- Status: ' + response.status);
+                log('- Status Text: ' + response.statusText);
+                log('- OK: ' + response.ok);
+                
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        log('Error response body: ' + text);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                log('✅ Success response:');
+                log('- Success: ' + data.success);
+                log('- Message: ' + data.message);
+                log('Delete endpoint test completed successfully.\n');
+            })
+            .catch(error => {
+                log('❌ Delete endpoint test failed:');
+                log('- Error: ' + error.message);
+                
+                if (error.message.includes('404')) {
+                    log('- Likely cause: Notification ID 123 does not exist (expected)');
+                } else if (error.message.includes('403')) {
+                    log('- Likely cause: CSRF token invalid or user not authenticated');
+                } else if (error.message.includes('500')) {
+                    log('- Likely cause: Server error');
+                } else {
+                    log('- Likely cause: Network error or URL routing issue');
+                }
+                
+                log('Delete endpoint test completed with errors.\n');
+            });
+        }
+        
+        function testNetworkConnection() {
+            log('=== TESTING NETWORK CONNECTION ===');
+            
+            // Test basic connectivity
+            fetch('/notifications/')
+            .then(response => {
+                log('✅ Network connection OK');
+                log('- Status: ' + response.status);
+                log('- Can reach notifications app');
+                
+                // Test if we can reach the delete endpoint (should get 405 Method Not Allowed for GET)
+                return fetch('/notifications/delete/1/');
+            })
+            .then(response => {
+                log('Delete endpoint reachable:');
+                log('- Status: ' + response.status);
+                
+                if (response.status === 405) {
+                    log('✅ Delete endpoint exists (405 Method Not Allowed for GET is expected)');
+                } else if (response.status === 404) {
+                    log('❌ Delete endpoint not found (404)');
+                } else {
+                    log('- Unexpected status: ' + response.status);
+                }
+                
+                log('Network test completed.\n');
+            })
+            .catch(error => {
+                log('❌ Network test failed:');
+                log('- Error: ' + error.message);
+                log('- Check your internet connection');
+                log('- Check if the Django server is running');
+                log('Network test completed with errors.\n');
+            });
+        }
+        
+        function testMobileDelete(notificationId) {
+            log('=== TESTING MOBILE DELETE FUNCTION ===');
+            log('Notification ID: ' + notificationId);
+            
+            if (!confirm('Test delete notification ' + notificationId + '?\n\nThis will test the delete functionality.')) {
+                log('User cancelled test');
+                return;
+            }
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            
+            if (!csrfToken) {
+                log('❌ CSRF token not found');
+                alert('CSRF token not found!');
+                return;
+            }
+            
+            log('CSRF token found, making request...');
+            
+            const deleteUrl = `/notifications/delete/${notificationId}/`;
+            
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                log('Response status: ' + response.status);
+                
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        log('Error response: ' + text);
+                        throw new Error(`HTTP ${response.status}: ${text}`);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                log('✅ Delete successful:');
+                log('- Success: ' + data.success);
+                log('- Message: ' + data.message);
+                alert('Delete test successful: ' + data.message);
+                log('Mobile delete test completed successfully.\n');
+            })
+            .catch(error => {
+                log('❌ Delete test failed:');
+                log('- Error: ' + error.message);
+                alert('Delete test failed: ' + error.message);
+                log('Mobile delete test completed with errors.\n');
+            });
+        }
+        
+        // Initialize
+        log('Mobile Delete Test Page Loaded');
+        log('Ready for testing...\n');
+    </script>
+</body>
+</html>

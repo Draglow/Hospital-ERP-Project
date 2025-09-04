@@ -1,0 +1,1082 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Settings - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Settings</h1>
+            <p class="text-muted mb-0">Manage your preferences</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounts:settings_test' %}" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-vial"></i>
+            </a>
+            <button class="btn btn-sm btn-outline-primary" onclick="exportSettings()">
+                <i class="fas fa-download"></i>
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Settings Cards -->
+<div class="mobile-settings-container">
+    <!-- Account Settings -->
+    <div class="mobile-dashboard-card mb-3">
+        <h6 class="text-ethiopia-green mb-3">
+            <i class="fas fa-user me-2"></i>Account Settings
+        </h6>
+        <div class="mobile-settings-list">
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Profile Information</div>
+                    <small class="text-muted">Update your personal details</small>
+                </div>
+                <a href="{% url 'accounts:profile' %}?mobile=1" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i>
+                </a>
+            </div>
+            
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Change Password</div>
+                    <small class="text-muted">Update your account password</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="fas fa-key"></i>
+                </button>
+            </div>
+            
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Two-Factor Authentication</div>
+                    <small class="text-muted">Enhance your account security</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="twoFactorAuth" {% if settings.two_factor_enabled %}checked{% endif %}>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="mobile-dashboard-card mb-3">
+        <h6 class="text-ethiopia-blue mb-3">
+            <i class="fas fa-bell me-2"></i>Notifications
+        </h6>
+        <div class="mobile-settings-list">
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Email Notifications</div>
+                    <small class="text-muted">Receive updates via email</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="emailNotifications" {% if settings.email_notifications %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Push Notifications</div>
+                    <small class="text-muted">Browser push notifications</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="pushNotifications" {% if settings.push_notifications %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Appointment Reminders</div>
+                    <small class="text-muted">Get reminded about appointments</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="appointmentReminders" {% if settings.appointment_reminders %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Advanced Notification Settings</div>
+                    <small class="text-muted">Configure detailed notification preferences</small>
+                </div>
+                <a href="{% url 'notifications:preferences' %}?mobile=1" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Settings -->
+    <div class="mobile-dashboard-card mb-3">
+        <h6 class="text-ethiopia-yellow mb-3">
+            <i class="fas fa-palette me-2"></i>Display
+        </h6>
+        <div class="mobile-settings-list">
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Language</div>
+                    <small class="text-muted">Choose your preferred language</small>
+                </div>
+                <select class="form-select form-select-sm" id="languageSelect" style="width: auto;">
+                    {% for value, label in language_choices %}
+                        <option value="{{ value }}" {% if settings.language == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Date Format</div>
+                    <small class="text-muted">How dates are displayed</small>
+                </div>
+                <select class="form-select form-select-sm" id="dateFormatSelect" style="width: auto;">
+                    {% for value, label in date_format_choices %}
+                        <option value="{{ value }}" {% if settings.date_format == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Time Zone</div>
+                    <small class="text-muted">Africa/Addis_Ababa</small>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" disabled>
+                    <i class="fas fa-clock"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy & Security -->
+    <div class="mobile-dashboard-card mb-3">
+        <h6 class="text-ethiopia-red mb-3">
+            <i class="fas fa-shield-alt me-2"></i>Privacy & Security
+        </h6>
+        <div class="mobile-settings-list">
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Session Timeout</div>
+                    <small class="text-muted">Auto-logout after inactivity</small>
+                </div>
+                <select class="form-select form-select-sm" id="sessionTimeoutSelect" style="width: auto;">
+                    {% for value, label in session_timeout_choices %}
+                        <option value="{{ value }}" {% if settings.session_timeout == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mobile-setting-item">
+                <div class="mobile-setting-info">
+                    <div class="mobile-setting-title">Data Export</div>
+                    <small class="text-muted">Download your data</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportUserData()">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Quick Actions -->
+<div class="mobile-quick-actions-grid">
+    <a href="{% url 'accounts:profile' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+    </a>
+    <button class="mobile-quick-action-card" onclick="saveAllSettings()">
+        <i class="fas fa-save"></i>
+        <span>Save All</span>
+    </button>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+    <button class="mobile-quick-action-card text-danger" onclick="resetSettings()">
+        <i class="fas fa-undo"></i>
+        <span>Reset</span>
+    </button>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mobile-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 150, 57, 0.1);
+    transition: all 0.3s ease;
+}
+
+.mobile-setting-item:hover {
+    background: rgba(0, 150, 57, 0.05);
+    border-color: rgba(0, 150, 57, 0.2);
+}
+
+.mobile-setting-info {
+    flex: 1;
+}
+
+.mobile-setting-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+/* Enhanced mobile touch interactions */
+.form-check-input {
+    min-width: 44px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+    background-color: #009639;
+    border-color: #009639;
+    transform: scale(1.05);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 57, 0.25);
+    border-color: #009639;
+}
+
+/* Enhanced button interactions */
+.btn {
+    min-height: 44px;
+    min-width: 44px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.btn:active::before {
+    width: 100px;
+    height: 100px;
+}
+
+/* Enhanced select interactions */
+.form-select {
+    min-height: 44px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #009639;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 57, 0.25);
+}
+
+/* Enhanced mobile setting items */
+.mobile-setting-item {
+    min-height: 60px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-setting-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 150, 57, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.mobile-setting-item:active::before {
+    left: 100%;
+}
+
+.mobile-setting-item:hover {
+    background: rgba(0, 150, 57, 0.05);
+    border-color: rgba(0, 150, 57, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 150, 57, 0.15);
+}
+
+.mobile-setting-item:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 150, 57, 0.1);
+}
+
+/* Quick action cards enhancement */
+.mobile-quick-action-card {
+    min-height: 80px;
+    min-width: 80px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-quick-action-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 150, 57, 0.2);
+}
+
+.mobile-quick-action-card:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Mobile-optimized animations with smooth, performant transitions */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0, 150, 57, 0.3);
+    transform: scale(0);
+    animation: ripple 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+/* Smooth slide-in animation for settings cards */
+@keyframes slideInUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Apply animations to settings cards */
+.mobile-dashboard-card {
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(var(--animation-order, 0) * 0.1s);
+}
+
+.mobile-dashboard-card:nth-child(1) { --animation-order: 1; }
+.mobile-dashboard-card:nth-child(2) { --animation-order: 2; }
+.mobile-dashboard-card:nth-child(3) { --animation-order: 3; }
+.mobile-dashboard-card:nth-child(4) { --animation-order: 4; }
+
+/* Quick actions animation */
+.mobile-quick-actions-grid {
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: 0.5s;
+}
+
+.mobile-quick-action-card {
+    animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(0.6s + var(--card-order, 0) * 0.1s);
+}
+
+.mobile-quick-action-card:nth-child(1) { --card-order: 1; }
+.mobile-quick-action-card:nth-child(2) { --card-order: 2; }
+.mobile-quick-action-card:nth-child(3) { --card-order: 3; }
+.mobile-quick-action-card:nth-child(4) { --card-order: 4; }
+
+/* Success/error state animations */
+.settings-success {
+    animation: pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-error {
+    animation: shake 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced mobile navigation animations */
+.mobile-setting-item {
+    transform: translateY(10px);
+    opacity: 0;
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(var(--item-order, 0) * 0.05s);
+}
+
+.mobile-setting-item:nth-child(1) { --item-order: 1; }
+.mobile-setting-item:nth-child(2) { --item-order: 2; }
+.mobile-setting-item:nth-child(3) { --item-order: 3; }
+.mobile-setting-item:nth-child(4) { --item-order: 4; }
+.mobile-setting-item:nth-child(5) { --item-order: 5; }
+
+@media (max-width: 375px) {
+    .mobile-setting-item {
+        padding: 0.75rem;
+        min-height: 56px;
+    }
+
+    .mobile-setting-title {
+        font-size: 0.9rem;
+    }
+
+    .form-check-input {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .btn {
+        min-height: 40px;
+        min-width: 40px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile settings loaded');
+
+    // Show mobile notification if coming from dashboard
+    if (document.referrer.includes('/dashboard/mobile/')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Settings loaded successfully!', 'success');
+        }
+    }
+
+    // Add change listeners to form elements for auto-save
+    const settingsElements = [
+        'twoFactorAuth', 'emailNotifications', 'pushNotifications',
+        'appointmentReminders', 'languageSelect', 'dateFormatSelect', 'sessionTimeoutSelect'
+    ];
+
+    settingsElements.forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener('change', function() {
+                // Auto-save after a short delay
+                clearTimeout(window.settingsAutoSaveTimeout);
+                window.settingsAutoSaveTimeout = setTimeout(() => {
+                    saveAllSettings(false); // false = don't show success message for auto-save
+                }, 1000);
+            });
+        }
+    });
+
+    // Add ripple effect to interactive elements
+    initializeRippleEffects();
+
+    // Add enhanced touch feedback
+    initializeTouchFeedback();
+
+    // Initialize mobile-optimized animations
+    initializeMobileAnimations();
+});
+
+// Initialize ripple effects for buttons and interactive elements
+function initializeRippleEffects() {
+    const rippleElements = document.querySelectorAll('.btn, .mobile-setting-item, .mobile-quick-action-card');
+
+    rippleElements.forEach(element => {
+        element.addEventListener('touchstart', createRipple);
+        element.addEventListener('mousedown', createRipple);
+    });
+}
+
+function createRipple(event) {
+    const element = event.currentTarget;
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left - size / 2;
+    const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top - size / 2;
+
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+
+    element.appendChild(ripple);
+
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+// Initialize enhanced touch feedback
+function initializeTouchFeedback() {
+    // Add haptic feedback for supported devices
+    const interactiveElements = document.querySelectorAll('.form-check-input, .btn, .form-select');
+
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchstart', () => {
+            // Haptic feedback for supported devices
+            if (navigator.vibrate) {
+                navigator.vibrate(10); // Very short vibration
+            }
+        });
+
+        // Add visual feedback for form controls
+        if (element.classList.contains('form-check-input')) {
+            element.addEventListener('change', function() {
+                this.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        }
+    });
+});
+
+// Get CSRF token for AJAX requests
+function getCSRFToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        return csrfToken.value;
+    }
+
+    // Try to get from cookie
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+function saveAllSettings(showMessage = true) {
+    // Validate settings before saving
+    if (!validateSettings()) {
+        return;
+    }
+
+    // Collect all settings data
+    const settingsData = {
+        two_factor_enabled: document.getElementById('twoFactorAuth')?.checked || false,
+        email_notifications: document.getElementById('emailNotifications')?.checked || false,
+        push_notifications: document.getElementById('pushNotifications')?.checked || false,
+        appointment_reminders: document.getElementById('appointmentReminders')?.checked || false,
+        language: document.getElementById('languageSelect')?.value || 'en',
+        date_format: document.getElementById('dateFormatSelect')?.value || 'gregorian',
+        session_timeout: parseInt(document.getElementById('sessionTimeoutSelect')?.value) || 60
+    };
+
+    // Clear any existing field errors
+    clearFieldErrors();
+
+    // Set loading state
+    setLoadingState(true);
+
+    if (showMessage && window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Saving settings...', 'info');
+    }
+
+    // Make AJAX request to save settings
+    fetch('/accounts/api/settings/save/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify(settingsData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Animate success feedback
+            const settingsContainer = document.querySelector('.mobile-settings-container');
+            if (settingsContainer) {
+                animateSuccess(settingsContainer);
+            }
+
+            if (showMessage && window.mobileDashboard) {
+                mobileDashboard.showMobileNotification(data.message, 'success');
+            }
+        } else {
+            // Animate error feedback
+            const settingsContainer = document.querySelector('.mobile-settings-container');
+            if (settingsContainer) {
+                animateError(settingsContainer);
+            }
+
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification(data.message || 'Error saving settings', 'danger');
+            } else {
+                alert(data.message || 'Error saving settings');
+            }
+        }
+    })
+    .catch(error => {
+        handleNetworkError(error, 'saving settings');
+    })
+    .finally(() => {
+        setLoadingState(false);
+    });
+}
+
+function exportSettings() {
+    // Get current settings and create downloadable file
+    fetch('/accounts/api/settings/get/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const settingsBlob = new Blob([JSON.stringify(data.settings, null, 2)], {
+                type: 'application/json'
+            });
+            const url = URL.createObjectURL(settingsBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'settings_export.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Settings exported successfully!', 'success');
+            }
+        } else {
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Error exporting settings', 'danger');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error exporting settings:', error);
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Network error exporting settings', 'danger');
+        }
+    });
+}
+
+function exportUserData() {
+    // Placeholder for user data export - would need backend implementation
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('User data export feature coming soon!', 'info');
+    } else {
+        alert('User data export feature coming soon!');
+    }
+}
+
+function resetSettings() {
+    if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
+        // Clear any existing field errors
+        clearFieldErrors();
+
+        // Set loading state
+        setLoadingState(true);
+
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Resetting settings...', 'info');
+        }
+
+        fetch('/accounts/api/settings/reset/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show reset values
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification(data.message, 'success');
+                }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification(data.message || 'Error resetting settings', 'danger');
+                } else {
+                    alert(data.message || 'Error resetting settings');
+                }
+            }
+        })
+        .catch(error => {
+            handleNetworkError(error, 'resetting settings');
+        })
+        .finally(() => {
+            setLoadingState(false);
+        });
+    }
+}
+
+// Initialize mobile-optimized animations
+function initializeMobileAnimations() {
+    // Stagger animation for settings cards
+    const settingsCards = document.querySelectorAll('.mobile-dashboard-card');
+    settingsCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // Stagger animation for setting items
+    const settingItems = document.querySelectorAll('.mobile-setting-item');
+    settingItems.forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.05}s`;
+    });
+
+    // Add intersection observer for scroll-triggered animations
+    if ('IntersectionObserver' in window) {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements that should animate on scroll
+        const animateOnScroll = document.querySelectorAll('.mobile-quick-actions-grid');
+        animateOnScroll.forEach(element => {
+            observer.observe(element);
+        });
+    }
+
+    // Add smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+}
+
+// Enhanced animation feedback for user interactions
+function animateSettingChange(element) {
+    element.style.animation = 'pulse 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    setTimeout(() => {
+        element.style.animation = '';
+    }, 300);
+}
+
+function animateSuccess(element) {
+    element.classList.add('settings-success');
+    setTimeout(() => {
+        element.classList.remove('settings-success');
+    }, 600);
+}
+
+function animateError(element) {
+    element.classList.add('settings-error');
+    setTimeout(() => {
+        element.classList.remove('settings-error');
+    }, 600);
+}
+
+// Enhanced page transitions
+function smoothPageTransition(url) {
+    // Fade out current content
+    document.body.style.opacity = '0.7';
+    document.body.style.transform = 'scale(0.98)';
+
+    setTimeout(() => {
+        window.location.href = url;
+    }, 200);
+}
+
+// Add smooth transitions to navigation links
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('a[href*="mobile=1"]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.href && !this.href.includes('#')) {
+                e.preventDefault();
+                smoothPageTransition(this.href);
+            }
+        });
+    });
+});
+
+// Validate settings before saving
+function validateSettings() {
+    const errors = [];
+
+    // Validate session timeout
+    const sessionTimeout = parseInt(document.getElementById('sessionTimeoutSelect')?.value);
+    if (isNaN(sessionTimeout) || sessionTimeout < 30 || sessionTimeout > 480) {
+        errors.push('Session timeout must be between 30 minutes and 8 hours');
+    }
+
+    // Validate language selection
+    const language = document.getElementById('languageSelect')?.value;
+    const validLanguages = ['en', 'am', 'or'];
+    if (!validLanguages.includes(language)) {
+        errors.push('Please select a valid language');
+    }
+
+    // Validate date format
+    const dateFormat = document.getElementById('dateFormatSelect')?.value;
+    const validFormats = ['gregorian', 'ethiopian'];
+    if (!validFormats.includes(dateFormat)) {
+        errors.push('Please select a valid date format');
+    }
+
+    // Check for conflicting settings
+    const emailNotifications = document.getElementById('emailNotifications')?.checked;
+    const pushNotifications = document.getElementById('pushNotifications')?.checked;
+    const appointmentReminders = document.getElementById('appointmentReminders')?.checked;
+
+    if (!emailNotifications && !pushNotifications && appointmentReminders) {
+        if (!confirm('You have appointment reminders enabled but no notification methods selected. Reminders may not be delivered. Continue anyway?')) {
+            return false;
+        }
+    }
+
+    // Display validation errors
+    if (errors.length > 0) {
+        const errorMessage = 'Please fix the following errors:\n• ' + errors.join('\n• ');
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Validation errors found', 'danger');
+        } else {
+            alert(errorMessage);
+        }
+        return false;
+    }
+
+    return true;
+}
+
+// Enhanced error handling for network requests
+function handleNetworkError(error, operation) {
+    console.error(`Error during ${operation}:`, error);
+
+    let message = `Network error during ${operation}`;
+
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        message = 'Unable to connect to server. Please check your internet connection.';
+    } else if (error.status === 403) {
+        message = 'Permission denied. Please refresh the page and try again.';
+    } else if (error.status === 500) {
+        message = 'Server error. Please try again later.';
+    } else if (error.status === 429) {
+        message = 'Too many requests. Please wait a moment and try again.';
+    }
+
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification(message, 'danger');
+    } else {
+        alert(message);
+    }
+}
+
+// Add visual feedback for form validation
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    // Remove existing error styling
+    field.classList.remove('is-invalid');
+    const existingError = field.parentNode.querySelector('.invalid-feedback');
+    if (existingError) {
+        existingError.remove();
+    }
+
+    // Add error styling
+    field.classList.add('is-invalid');
+
+    // Add error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'invalid-feedback';
+    errorDiv.textContent = message;
+    field.parentNode.appendChild(errorDiv);
+
+    // Remove error styling after 5 seconds
+    setTimeout(() => {
+        field.classList.remove('is-invalid');
+        if (errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
+
+function clearFieldErrors() {
+    const invalidFields = document.querySelectorAll('.is-invalid');
+    const errorMessages = document.querySelectorAll('.invalid-feedback');
+
+    invalidFields.forEach(field => field.classList.remove('is-invalid'));
+    errorMessages.forEach(error => error.remove());
+}
+
+// Add loading state management
+function setLoadingState(isLoading) {
+    const saveButton = document.querySelector('[onclick="saveAllSettings()"]');
+    const resetButton = document.querySelector('[onclick="resetSettings()"]');
+    const exportButton = document.querySelector('[onclick="exportSettings()"]');
+
+    const buttons = [saveButton, resetButton, exportButton].filter(btn => btn);
+
+    buttons.forEach(button => {
+        if (isLoading) {
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            button.style.cursor = 'not-allowed';
+
+            // Add spinner if it's the save button
+            if (button === saveButton) {
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.dataset.originalHTML = originalHTML;
+            }
+        } else {
+            button.disabled = false;
+            button.style.opacity = '';
+            button.style.cursor = '';
+
+            // Restore original content
+            if (button === saveButton && button.dataset.originalHTML) {
+                button.innerHTML = button.dataset.originalHTML;
+                delete button.dataset.originalHTML;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

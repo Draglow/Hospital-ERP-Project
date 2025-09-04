@@ -1,0 +1,314 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}New Appointment - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">New Appointment</h1>
+            <p class="text-muted mb-0">Schedule an appointment</p>
+        </div>
+        <div>
+            <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Form -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">Appointment Details</h6>
+    
+    <form method="post" class="mobile-form needs-validation" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="mobile" value="1">
+        
+        <!-- Patient Selection -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Patient Information</h6>
+            <div class="mb-3">
+                <label for="patient" class="form-label">Patient *</label>
+                <select class="form-select" id="patient" name="patient" required>
+                    <option value="">Select Patient</option>
+                    {% for patient in patients %}
+                    <option value="{{ patient.pk }}" {% if selected_patient and selected_patient.pk == patient.pk %}selected{% endif %}>
+                        {{ patient.get_full_name }} - {{ patient.patient_id }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select a patient.</div>
+            </div>
+        </div>
+
+        <!-- Doctor Selection -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Doctor Information</h6>
+            <div class="mb-3">
+                <label for="doctor" class="form-label">Doctor *</label>
+                <select class="form-select" id="doctor" name="doctor" required>
+                    <option value="">Select Doctor</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.pk }}">
+                        Dr. {{ doctor.get_full_name }} - {{ doctor.specialty }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select a doctor.</div>
+            </div>
+        </div>
+
+        <!-- Appointment Date & Time -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Schedule</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="appointment_date" class="form-label">Date *</label>
+                    <input type="date" class="form-control" id="appointment_date" name="appointment_date" required>
+                    <div class="invalid-feedback">Please select an appointment date.</div>
+                </div>
+                <div class="col-12">
+                    <label for="appointment_time" class="form-label">Time *</label>
+                    <input type="time" class="form-control" id="appointment_time" name="appointment_time" required>
+                    <div class="invalid-feedback">Please select an appointment time.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Details -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Appointment Details</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="appointment_type" class="form-label">Type *</label>
+                    <select class="form-select" id="appointment_type" name="appointment_type" required>
+                        <option value="">Select Type</option>
+                        {% for value, label in appointment_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select appointment type.</div>
+                </div>
+                <div class="col-12">
+                    <label for="priority" class="form-label">Priority</label>
+                    <select class="form-select" id="priority" name="priority">
+                        {% for value, label in priorities %}
+                        <option value="{{ value }}" {% if value == 'normal' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Medical Information</h6>
+            <div class="mb-3">
+                <label for="chief_complaint" class="form-label">Chief Complaint *</label>
+                <textarea class="form-control" id="chief_complaint" name="chief_complaint" rows="3" required placeholder="Main reason for visit"></textarea>
+                <div class="invalid-feedback">Please enter the chief complaint.</div>
+            </div>
+            <div class="mb-3">
+                <label for="symptoms" class="form-label">Symptoms</label>
+                <textarea class="form-control" id="symptoms" name="symptoms" rows="3" placeholder="Current symptoms"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Additional Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Any additional information"></textarea>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mobile-form-actions">
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    <a href="{% url 'patients:patient_add' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user-plus"></i>
+        <span>Add Patient</span>
+    </a>
+    <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user-md"></i>
+        <span>Doctors</span>
+    </a>
+    <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-calendar"></i>
+        <span>Appointments</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1rem;
+}
+
+.mobile-form-section-title {
+    color: #009639;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.2);
+}
+
+.mobile-form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(0, 150, 57, 0.1);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #009639;
+    box-shadow: 0 0 0 0.2rem rgba(0, 150, 57, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #009639, #0F47AF);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 150, 57, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 375px) {
+    .mobile-form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+    
+    .mobile-form-section-title {
+        font-size: 0.9rem;
+    }
+    
+    .form-control,
+    .form-select {
+        padding: 10px 14px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Show mobile notification
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification('Please fill in all required fields', 'danger');
+                }
+            }
+            form.classList.add('was-validated');
+        }, false);
+    }
+    
+    // Set minimum date to today
+    const dateInput = document.getElementById('appointment_date');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        dateInput.value = today;
+    }
+    
+    // Set default time
+    const timeInput = document.getElementById('appointment_time');
+    if (timeInput && !timeInput.value) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(Math.ceil(now.getMinutes() / 15) * 15).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+    
+    // Doctor availability check
+    const doctorSelect = document.getElementById('doctor');
+    const dateSelect = document.getElementById('appointment_date');
+    const timeSelect = document.getElementById('appointment_time');
+    
+    function checkAvailability() {
+        const doctor = doctorSelect.value;
+        const date = dateSelect.value;
+        const time = timeSelect.value;
+        
+        if (doctor && date && time) {
+            // You can implement availability checking here
+            console.log('Checking availability for:', { doctor, date, time });
+        }
+    }
+    
+    if (doctorSelect && dateSelect && timeSelect) {
+        doctorSelect.addEventListener('change', checkAvailability);
+        dateSelect.addEventListener('change', checkAvailability);
+        timeSelect.addEventListener('change', checkAvailability);
+    }
+    
+    // Show success notification on form load
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Appointment form loaded successfully!', 'info');
+    }
+});
+</script>
+{% endblock %}

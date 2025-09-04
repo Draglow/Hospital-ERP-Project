@@ -1,0 +1,305 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Edit Dr. {{ doctor.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Edit Dr. {{ doctor.get_full_name }}</h1>
+        <p class="text-muted">Update doctor profile and information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Profile
+        </a>
+        <a href="{% url 'doctors:doctor_list' %}" class="btn btn-outline-info">
+            <i class="fas fa-list me-2"></i>All Doctors
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Doctor Information</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user text-ethiopia-green me-2"></i>
+                            Personal Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">First Name *</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ doctor.first_name }}" required>
+                            <div class="invalid-feedback">Please enter first name.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Last Name *</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ doctor.last_name }}" required>
+                            <div class="invalid-feedback">Please enter last name.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" class="form-control" name="date_of_birth" value="{{ doctor.date_of_birth|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Please enter date of birth.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Gender *</label>
+                            <select class="form-select" name="gender" required>
+                                <option value="male" {% if doctor.gender == 'male' %}selected{% endif %}>Male</option>
+                                <option value="female" {% if doctor.gender == 'female' %}selected{% endif %}>Female</option>
+                            </select>
+                            <div class="invalid-feedback">Please select gender.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-phone text-ethiopia-blue me-2"></i>
+                            Contact Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" name="phone_number" value="{{ doctor.phone_number }}" placeholder="+251 91 234 5678" required>
+                            <div class="form-text">Format: +251 91 234 5678</div>
+                            <div class="invalid-feedback">Please enter phone number.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="email" value="{{ doctor.email }}" placeholder="doctor@hospital.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Emergency Contact</label>
+                            <input type="tel" class="form-control" name="emergency_contact" value="{{ doctor.emergency_contact }}" placeholder="+251 91 234 5678">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" name="address" rows="2" placeholder="Full address...">{{ doctor.address }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-graduation-cap text-ethiopia-yellow me-2"></i>
+                            Professional Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Specialization *</label>
+                            <select class="form-select" name="specialization" required>
+                                <option value="Cardiology" {% if doctor.specialization == 'Cardiology' %}selected{% endif %}>Cardiology</option>
+                                <option value="Pediatrics" {% if doctor.specialization == 'Pediatrics' %}selected{% endif %}>Pediatrics</option>
+                                <option value="Internal Medicine" {% if doctor.specialization == 'Internal Medicine' %}selected{% endif %}>Internal Medicine</option>
+                                <option value="Surgery" {% if doctor.specialization == 'Surgery' %}selected{% endif %}>Surgery</option>
+                                <option value="Orthopedics" {% if doctor.specialization == 'Orthopedics' %}selected{% endif %}>Orthopedics</option>
+                                <option value="Neurology" {% if doctor.specialization == 'Neurology' %}selected{% endif %}>Neurology</option>
+                                <option value="Dermatology" {% if doctor.specialization == 'Dermatology' %}selected{% endif %}>Dermatology</option>
+                                <option value="Ophthalmology" {% if doctor.specialization == 'Ophthalmology' %}selected{% endif %}>Ophthalmology</option>
+                                <option value="ENT" {% if doctor.specialization == 'ENT' %}selected{% endif %}>ENT</option>
+                                <option value="Gynecology" {% if doctor.specialization == 'Gynecology' %}selected{% endif %}>Gynecology</option>
+                                <option value="Psychiatry" {% if doctor.specialization == 'Psychiatry' %}selected{% endif %}>Psychiatry</option>
+                                <option value="Emergency Medicine" {% if doctor.specialization == 'Emergency Medicine' %}selected{% endif %}>Emergency Medicine</option>
+                            </select>
+                            <div class="invalid-feedback">Please select specialization.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Department *</label>
+                            <select class="form-select" name="department" required>
+                                <option value="Cardiology" {% if doctor.department == 'Cardiology' %}selected{% endif %}>Cardiology</option>
+                                <option value="Pediatrics" {% if doctor.department == 'Pediatrics' %}selected{% endif %}>Pediatrics</option>
+                                <option value="Internal Medicine" {% if doctor.department == 'Internal Medicine' %}selected{% endif %}>Internal Medicine</option>
+                                <option value="Surgery" {% if doctor.department == 'Surgery' %}selected{% endif %}>Surgery</option>
+                                <option value="Emergency" {% if doctor.department == 'Emergency' %}selected{% endif %}>Emergency</option>
+                                <option value="Outpatient" {% if doctor.department == 'Outpatient' %}selected{% endif %}>Outpatient</option>
+                                <option value="ICU" {% if doctor.department == 'ICU' %}selected{% endif %}>ICU</option>
+                            </select>
+                            <div class="invalid-feedback">Please select department.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">License Number</label>
+                            <input type="text" class="form-control" name="license_number" value="{{ doctor.license_number }}" placeholder="e.g., ETH-MD-2024-001">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Years of Experience</label>
+                            <input type="number" class="form-control" name="years_of_experience" value="{{ doctor.years_of_experience }}" min="0" max="50">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-briefcase text-ethiopia-red me-2"></i>
+                            Employment Details
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Employment Type *</label>
+                            <select class="form-select" name="employment_type" required>
+                                <option value="full_time" {% if doctor.employment_type == 'full_time' %}selected{% endif %}>Full Time</option>
+                                <option value="part_time" {% if doctor.employment_type == 'part_time' %}selected{% endif %}>Part Time</option>
+                                <option value="contract" {% if doctor.employment_type == 'contract' %}selected{% endif %}>Contract</option>
+                                <option value="consultant" {% if doctor.employment_type == 'consultant' %}selected{% endif %}>Consultant</option>
+                            </select>
+                            <div class="invalid-feedback">Please select employment type.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Join Date *</label>
+                            <input type="date" class="form-control" name="join_date" value="{{ doctor.join_date|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Please enter join date.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Consultation Fee (ETB)</label>
+                            <input type="number" class="form-control" name="consultation_fee" value="{{ doctor.consultation_fee }}" min="0" step="0.01" placeholder="e.g., 500.00">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="is_active">
+                                <option value="true" {% if doctor.is_active %}selected{% endif %}>Active</option>
+                                <option value="false" {% if not doctor.is_active %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="mb-3">
+                            <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                            Additional Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Qualifications</label>
+                            <textarea class="form-control" name="qualifications" rows="3" placeholder="Educational qualifications, certifications, etc...">{{ doctor.qualifications }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Biography</label>
+                            <textarea class="form-control" name="bio" rows="3" placeholder="Brief professional biography...">{{ doctor.bio }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-green me-2"></i>
+                Profile History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Created:</strong> {{ doctor.created_at|date:"M d, Y g:i A" }}
+                </div>
+                {% if doctor.updated_at != doctor.created_at %}
+                <div class="mb-2">
+                    <strong>Last Modified:</strong> {{ doctor.updated_at|date:"M d, Y g:i A" }}
+                </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Doctor ID:</strong> {{ doctor.doctor_id }}
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if doctor.is_active %}success{% else %}secondary{% endif %}">
+                        {% if doctor.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-chart-bar text-ethiopia-blue me-2"></i>
+                Current Statistics
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Total Appointments:</strong> {{ total_appointments|default:0 }}
+                </div>
+                <div class="mb-2">
+                    <strong>This Month:</strong> {{ monthly_appointments|default:0 }}
+                </div>
+                <div class="mb-2">
+                    <strong>Completed:</strong> {{ completed_appointments|default:0 }}
+                </div>
+                <div class="mb-2">
+                    <strong>Average Rating:</strong> 4.8/5.0
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-exclamation-triangle text-ethiopia-yellow me-2"></i>
+                Important Notes
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">• Changes to active doctors may affect scheduled appointments</p>
+                <p class="mb-2">• Verify license information before updating</p>
+                <p class="mb-0">• Consultation fee changes apply to new appointments only</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set maximum birth date to 18 years ago
+document.addEventListener('DOMContentLoaded', function() {
+    const birthDateInput = document.querySelector('input[name="date_of_birth"]');
+    if (birthDateInput) {
+        const eighteenYearsAgo = new Date();
+        eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+        birthDateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

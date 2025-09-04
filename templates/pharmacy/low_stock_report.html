@@ -1,0 +1,273 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Low Stock Report - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-danger">Low Stock Report</h1>
+        <p class="text-muted">{{ total_count }} medicine{{ total_count|pluralize }} below minimum stock level</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportLowStock()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <button class="btn btn-outline-success" onclick="printReport()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+        <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Pharmacy
+        </a>
+    </div>
+</div>
+
+<!-- Alert Banner -->
+<div class="alert alert-warning d-flex align-items-center mb-4">
+    <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+    <div>
+        <h6 class="alert-heading mb-1">Stock Alert</h6>
+        <p class="mb-0">The following medicines are running low and need immediate restocking to avoid shortages.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-danger">{{ total_count }}</div>
+            <div class="stat-label">Low Stock Items</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-warning">{{ medicines|length }}</div>
+            <div class="stat-label">Items Listed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-info">
+                {% for medicine in medicines %}
+                    {% if medicine.stock_quantity == 0 %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Out of Stock</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-success">
+                {% for medicine in medicines %}
+                    {% if medicine.stock_quantity > 0 %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Critical Stock</div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Medicines List -->
+{% if medicines %}
+    <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Low Stock Medicines</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="selectAll()">
+                    <i class="fas fa-check-square me-1"></i>Select All
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="bulkRestock()">
+                    <i class="fas fa-plus me-1"></i>Bulk Restock
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                        </th>
+                        <th>Medicine</th>
+                        <th>Category</th>
+                        <th>Current Stock</th>
+                        <th>Minimum Level</th>
+                        <th>Shortage</th>
+                        <th>Unit Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in medicines %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="medicine-checkbox" value="{{ medicine.pk }}">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="medicine-icon me-3">
+                                    <i class="fas fa-pills text-ethiopia-green"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ medicine.name }}</div>
+                                    <small class="text-muted">{{ medicine.manufacturer }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-ethiopia-blue">{{ medicine.get_category_display }}</span>
+                        </td>
+                        <td>
+                            <span class="fw-bold {% if medicine.stock_quantity == 0 %}text-danger{% else %}text-warning{% endif %}">
+                                {{ medicine.stock_quantity }}
+                            </span>
+                            <small class="text-muted">{{ medicine.unit }}</small>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ medicine.minimum_stock_level }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-danger">
+                                {{ medicine.minimum_stock_level|add:medicine.stock_quantity|add:"-"|add:medicine.stock_quantity }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">{{ medicine.selling_price|default:medicine.cost_price }} ETB</span>
+                        </td>
+                        <td>
+                            {% if medicine.stock_quantity == 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% else %}
+                                <span class="badge bg-warning">Low Stock</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'pharmacy:stock_adjustment' medicine.pk %}" class="btn btn-outline-primary" title="Restock">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                                <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}" class="btn btn-outline-info" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="dashboard-card text-center py-5">
+        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+        <h5 class="text-success">All Stock Levels Good</h5>
+        <p class="text-muted">No medicines are currently below their minimum stock levels.</p>
+        <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-primary">
+            <i class="fas fa-pills me-2"></i>View All Medicines
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.medicine-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 150, 57, 0.1);
+    border-radius: 8px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.dashboard-card {
+    margin-bottom: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportLowStock() {
+    // Export low stock report to CSV
+    window.location.href = '{% url "pharmacy:low_stock_report" %}?export=csv';
+}
+
+function printReport() {
+    window.print();
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.medicine-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !selectAllCheckbox.checked;
+    });
+    
+    selectAllCheckbox.checked = !selectAllCheckbox.checked;
+}
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const checkboxes = document.querySelectorAll('.medicine-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function bulkRestock() {
+    const selectedMedicines = [];
+    const checkboxes = document.querySelectorAll('.medicine-checkbox:checked');
+    
+    checkboxes.forEach(checkbox => {
+        selectedMedicines.push(checkbox.value);
+    });
+    
+    if (selectedMedicines.length === 0) {
+        alert('Please select medicines to restock.');
+        return;
+    }
+    
+    // In a real implementation, this would open a bulk restock modal
+    alert(`Selected ${selectedMedicines.length} medicine(s) for restocking. Bulk restock feature coming soon!`);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Low stock report loaded');
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000);
+});
+</script>
+{% endblock %}

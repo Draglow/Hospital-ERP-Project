@@ -1,0 +1,245 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Edit Dr. {{ doctor.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Edit Dr. {{ doctor.get_full_name }}</h1>
+        <p class="text-muted">Update doctor profile and information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+</div>
+
+<div class="mobile-dashboard-card">
+    <h5 class="card-title mb-4">Doctor Information</h5>
+    
+    <form method="post" class="mobile-form needs-validation" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="mobile" value="1">
+        
+        <!-- Personal Information -->
+        <div class="mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-user text-ethiopia-green me-2"></i>
+                Personal Information
+            </h6>
+            
+            <div class="mb-3">
+                <label class="form-label">First Name *</label>
+                <input type="text" class="form-control" name="first_name" value="{{ doctor.user.first_name }}" required>
+                <div class="invalid-feedback">Please enter first name.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Last Name *</label>
+                <input type="text" class="form-control" name="last_name" value="{{ doctor.user.last_name }}" required>
+                <div class="invalid-feedback">Please enter last name.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" value="{{ doctor.user.email }}" placeholder="doctor@hospital.com">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" name="phone" value="{{ doctor.user.phone }}" placeholder="+251 91 234 5678">
+            </div>
+        </div>
+        
+        <!-- Professional Information -->
+        <div class="mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-graduation-cap text-ethiopia-yellow me-2"></i>
+                Professional Information
+            </h6>
+            
+            <div class="mb-3">
+                <label class="form-label">Specialty *</label>
+                <select class="form-select" name="specialty" required>
+                    {% for value, label in specialties %}
+                        <option value="{{ value }}" {% if doctor.specialty == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select specialty.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Sub-Specialty</label>
+                <input type="text" class="form-control" name="sub_specialty" value="{{ doctor.sub_specialty }}" placeholder="e.g., Interventional Cardiology">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">License Number</label>
+                <input type="text" class="form-control" name="license_number" value="{{ doctor.license_number }}" placeholder="e.g., ETH-MD-2024-001">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Years of Experience</label>
+                <input type="number" class="form-control" name="years_of_experience" value="{{ doctor.years_of_experience }}" min="0" max="50">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Medical School</label>
+                <input type="text" class="form-control" name="medical_school" value="{{ doctor.medical_school }}" placeholder="e.g., Addis Ababa University">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Graduation Year</label>
+                <input type="number" class="form-control" name="graduation_year" value="{{ doctor.graduation_year }}" min="1950" max="2030">
+            </div>
+        </div>
+        
+        <!-- Employment Details -->
+        <div class="mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-briefcase text-ethiopia-red me-2"></i>
+                Employment Details
+            </h6>
+            
+            <div class="mb-3">
+                <label class="form-label">Availability Status *</label>
+                <select class="form-select" name="availability_status" required>
+                    {% for value, label in availabilities %}
+                        <option value="{{ value }}" {% if doctor.availability_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select availability status.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Consultation Fee (ETB)</label>
+                <input type="number" class="form-control" name="consultation_fee" value="{{ doctor.consultation_fee }}" min="0" step="0.01" placeholder="e.g., 500.00">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Languages Spoken</label>
+                <input type="text" class="form-control" name="languages_spoken" value="{{ doctor.languages_spoken }}" placeholder="e.g., Amharic, English, Arabic">
+            </div>
+        </div>
+        
+        <!-- Additional Information -->
+        <div class="mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                Additional Information
+            </h6>
+            
+            <div class="mb-3">
+                <label class="form-label">Certifications</label>
+                <textarea class="form-control" name="certifications" rows="3" placeholder="Professional certifications, board certifications, etc...">{{ doctor.certifications }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Biography</label>
+                <textarea class="form-control" name="bio" rows="3" placeholder="Brief professional biography...">{{ doctor.bio }}</textarea>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Save Changes
+            </button>
+            <a href="{% url 'doctors:doctor_detail' doctor.pk %}?mobile=1" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    <a href="{% url 'doctors:doctor_detail' doctor.pk %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user-md"></i>
+        <span>View Profile</span>
+    </a>
+    <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-list"></i>
+        <span>All Doctors</span>
+    </a>
+    <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}&mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-calendar-plus"></i>
+        <span>Book Appointment</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form .form-control,
+.mobile-form .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+}
+
+.mobile-form .form-label {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form .invalid-feedback {
+    font-size: 0.875rem;
+}
+
+.mobile-form h6 {
+    color: var(--mobile-primary);
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-form .form-control,
+    .mobile-form .form-select {
+        padding: 0.625rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile doctor edit form loaded');
+    
+    // Show mobile notification if coming from detail page
+    if (document.referrer.includes('/doctors/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Edit mode activated!', 'info');
+        }
+    }
+});
+</script>
+{% endblock %}

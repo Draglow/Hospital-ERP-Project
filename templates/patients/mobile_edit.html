@@ -1,0 +1,338 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ patient.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Edit Patient</h1>
+        <p class="text-muted">{{ patient.get_full_name }} - ID: {{ patient.patient_id }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'patients:patient_detail' patient.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h5 class="card-title mb-4">Update Patient Information</h5>
+            
+            <form method="post" class="mobile-form needs-validation" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="mobile" value="1">
+                
+                <!-- Personal Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user text-ethiopia-green me-2"></i>
+                        Personal Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">First Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="first_name" value="{{ patient.first_name }}" required>
+                        <div class="invalid-feedback">Please enter first name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="last_name" value="{{ patient.last_name }}" required>
+                        <div class="invalid-feedback">Please enter last name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="date_of_birth" value="{{ patient.date_of_birth|date:'Y-m-d' }}" required>
+                        <div class="invalid-feedback">Please enter date of birth.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Gender <span class="text-danger">*</span></label>
+                        <select class="form-select" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="M" {% if patient.gender == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if patient.gender == 'F' %}selected{% endif %}>Female</option>
+                            <option value="O" {% if patient.gender == 'O' %}selected{% endif %}>Other</option>
+                        </select>
+                        <div class="invalid-feedback">Please select gender.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Blood Type</label>
+                        <select class="form-select" name="blood_type">
+                            <option value="">Select Blood Type</option>
+                            <option value="A+" {% if patient.blood_type == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if patient.blood_type == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if patient.blood_type == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if patient.blood_type == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if patient.blood_type == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if patient.blood_type == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+" {% if patient.blood_type == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if patient.blood_type == 'O-' %}selected{% endif %}>O-</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-phone text-ethiopia-blue me-2"></i>
+                        Contact Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" name="phone" value="{{ patient.phone }}" required>
+                        <div class="invalid-feedback">Please enter phone number.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" value="{{ patient.email|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Kebele <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="kebele" value="{{ patient.kebele }}" required>
+                        <div class="invalid-feedback">Please enter kebele.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Woreda <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="woreda" value="{{ patient.woreda }}" required>
+                        <div class="invalid-feedback">Please enter woreda.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" name="city" value="{{ patient.city }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Region</label>
+                        <input type="text" class="form-control" name="region" value="{{ patient.region }}">
+                    </div>
+                </div>
+                
+                <!-- Emergency Contact -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-exclamation-triangle text-ethiopia-yellow me-2"></i>
+                        Emergency Contact
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Emergency Contact Name</label>
+                        <input type="text" class="form-control" name="emergency_contact_name" value="{{ patient.emergency_contact_name|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Emergency Contact Phone</label>
+                        <input type="tel" class="form-control" name="emergency_contact_phone" value="{{ patient.emergency_contact_phone|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Relationship</label>
+                        <input type="text" class="form-control" name="emergency_contact_relationship" value="{{ patient.emergency_contact_relationship|default:'' }}" placeholder="e.g., Spouse, Parent, Sibling">
+                    </div>
+                </div>
+                
+                <!-- Medical Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-heartbeat text-ethiopia-red me-2"></i>
+                        Medical Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Allergies</label>
+                        <textarea class="form-control" name="allergies" rows="3" placeholder="List any known allergies...">{{ patient.allergies|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Medical History</label>
+                        <textarea class="form-control" name="medical_history" rows="3" placeholder="Previous medical conditions, surgeries, etc...">{{ patient.medical_history|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Current Medications</label>
+                        <textarea class="form-control" name="current_medications" rows="3" placeholder="List current medications...">{{ patient.current_medications|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Insurance Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-shield-alt text-ethiopia-green me-2"></i>
+                        Insurance Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Insurance Provider</label>
+                        <input type="text" class="form-control" name="insurance_provider" value="{{ patient.insurance_provider|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Insurance Number</label>
+                        <input type="text" class="form-control" name="insurance_number" value="{{ patient.insurance_number|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Insurance Expiry Date</label>
+                        <input type="date" class="form-control" name="insurance_expiry" value="{{ patient.insurance_expiry|date:'Y-m-d' }}">
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update Patient
+                    </button>
+                    <a href="{% url 'patients:patient_detail' patient.pk %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Current Status -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="text-ethiopia-green mb-3">
+                <i class="fas fa-info-circle me-2"></i>Patient Status
+            </h6>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <small class="text-muted">Patient ID</small>
+                    <div class="fw-bold">{{ patient.patient_id }}</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Age</small>
+                    <div class="fw-bold">{{ patient.age }} years</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Registration Date</small>
+                    <div class="fw-bold">{{ patient.created_at|date:"M d, Y" }}</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Last Updated</small>
+                    <div class="fw-bold">{{ patient.updated_at|date:"M d, Y" }}</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Total Visits</small>
+                    <div class="fw-bold">{{ patient.total_appointments|default:0 }}</div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Last Visit</small>
+                    <div class="fw-bold">
+                        {% if patient.last_appointment %}
+                            {{ patient.last_appointment.appointment_date|date:"M d, Y" }}
+                        {% else %}
+                            No visits yet
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form .form-control,
+.mobile-form .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+}
+
+.mobile-form .form-label {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form .invalid-feedback {
+    font-size: 0.875rem;
+}
+
+.mobile-form h6 {
+    color: var(--mobile-primary);
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-form .form-control,
+    .mobile-form .form-select {
+        padding: 0.625rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile patient edit form loaded');
+    
+    // Show mobile notification if coming from detail page
+    if (document.referrer.includes('/patients/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Edit mode activated!', 'info');
+        }
+    }
+    
+    // Date validation - prevent future birth dates
+    const dobInput = document.querySelector('input[name="date_of_birth"]');
+    if (dobInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dobInput.setAttribute('max', today);
+    }
+    
+    // Insurance expiry validation - should be in the future
+    const insuranceExpiryInput = document.querySelector('input[name="insurance_expiry"]');
+    if (insuranceExpiryInput) {
+        const today = new Date().toISOString().split('T')[0];
+        insuranceExpiryInput.setAttribute('min', today);
+    }
+});
+</script>
+{% endblock %}

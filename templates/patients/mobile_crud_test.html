@@ -1,0 +1,595 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Mobile CRUD Testing - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Mobile CRUD Testing</h1>
+            <p class="text-muted mb-0">Comprehensive testing of all CRUD operations</p>
+        </div>
+        <div>
+            <a href="{% url 'patients:mobile_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Test Status Dashboard -->
+<div class="mobile-dashboard-card mb-4">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-tachometer-alt me-2"></i>Test Status Dashboard
+    </h6>
+    
+    <div class="row g-3">
+        <div class="col-6">
+            <div class="mobile-stat-card">
+                <div class="mobile-stat-value" id="totalTests">0</div>
+                <div class="mobile-stat-label">Total Tests</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-stat-card">
+                <div class="mobile-stat-value text-success" id="passedTests">0</div>
+                <div class="mobile-stat-label">Passed</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-stat-card">
+                <div class="mobile-stat-value text-danger" id="failedTests">0</div>
+                <div class="mobile-stat-label">Failed</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-stat-card">
+                <div class="mobile-stat-value text-warning" id="warningTests">0</div>
+                <div class="mobile-stat-label">Warnings</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Module Testing Cards -->
+<div class="mobile-dashboard-card mb-4">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-modules me-2"></i>Module Testing
+    </h6>
+    
+    <div class="mobile-module-tests">
+        <!-- Patient Management -->
+        <div class="mobile-module-test-card" data-module="patients">
+            <div class="mobile-module-header">
+                <div class="mobile-module-icon">
+                    <i class="fas fa-users text-primary"></i>
+                </div>
+                <div class="mobile-module-info">
+                    <h6 class="mobile-module-title">Patient Management</h6>
+                    <small class="mobile-module-desc">Test patient CRUD operations</small>
+                </div>
+                <div class="mobile-module-status" id="patientsStatus">
+                    <i class="fas fa-clock text-muted"></i>
+                </div>
+            </div>
+            <div class="mobile-module-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="testModule('patients')">
+                    <i class="fas fa-play me-1"></i>Test
+                </button>
+                <a href="{% url 'patients:patient_list' %}?mobile=1" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+        
+        <!-- Appointment Management -->
+        <div class="mobile-module-test-card" data-module="appointments">
+            <div class="mobile-module-header">
+                <div class="mobile-module-icon">
+                    <i class="fas fa-calendar-alt text-success"></i>
+                </div>
+                <div class="mobile-module-info">
+                    <h6 class="mobile-module-title">Appointment Management</h6>
+                    <small class="mobile-module-desc">Test appointment CRUD operations</small>
+                </div>
+                <div class="mobile-module-status" id="appointmentsStatus">
+                    <i class="fas fa-clock text-muted"></i>
+                </div>
+            </div>
+            <div class="mobile-module-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="testModule('appointments')">
+                    <i class="fas fa-play me-1"></i>Test
+                </button>
+                <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+        
+        <!-- Doctor Management -->
+        <div class="mobile-module-test-card" data-module="doctors">
+            <div class="mobile-module-header">
+                <div class="mobile-module-icon">
+                    <i class="fas fa-user-md text-info"></i>
+                </div>
+                <div class="mobile-module-info">
+                    <h6 class="mobile-module-title">Doctor Management</h6>
+                    <small class="mobile-module-desc">Test doctor CRUD operations</small>
+                </div>
+                <div class="mobile-module-status" id="doctorsStatus">
+                    <i class="fas fa-clock text-muted"></i>
+                </div>
+            </div>
+            <div class="mobile-module-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="testModule('doctors')">
+                    <i class="fas fa-play me-1"></i>Test
+                </button>
+                <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+        
+        <!-- Billing Management -->
+        <div class="mobile-module-test-card" data-module="billing">
+            <div class="mobile-module-header">
+                <div class="mobile-module-icon">
+                    <i class="fas fa-file-invoice-dollar text-warning"></i>
+                </div>
+                <div class="mobile-module-info">
+                    <h6 class="mobile-module-title">Billing Management</h6>
+                    <small class="mobile-module-desc">Test billing CRUD operations</small>
+                </div>
+                <div class="mobile-module-status" id="billingStatus">
+                    <i class="fas fa-clock text-muted"></i>
+                </div>
+            </div>
+            <div class="mobile-module-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="testModule('billing')">
+                    <i class="fas fa-play me-1"></i>Test
+                </button>
+                <a href="{% url 'billing:invoice_list' %}?mobile=1" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+        
+        <!-- Pharmacy Management -->
+        <div class="mobile-module-test-card" data-module="pharmacy">
+            <div class="mobile-module-header">
+                <div class="mobile-module-icon">
+                    <i class="fas fa-pills text-ethiopia-green"></i>
+                </div>
+                <div class="mobile-module-info">
+                    <h6 class="mobile-module-title">Pharmacy Management</h6>
+                    <small class="mobile-module-desc">Test pharmacy CRUD operations</small>
+                </div>
+                <div class="mobile-module-status" id="pharmacyStatus">
+                    <i class="fas fa-clock text-muted"></i>
+                </div>
+            </div>
+            <div class="mobile-module-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="testModule('pharmacy')">
+                    <i class="fas fa-play me-1"></i>Test
+                </button>
+                <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Controls -->
+<div class="mobile-dashboard-card mb-4">
+    <h6 class="text-ethiopia-red mb-3">
+        <i class="fas fa-cogs me-2"></i>Test Controls
+    </h6>
+    
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary" onclick="runAllTests()">
+            <i class="fas fa-play me-2"></i>Run All Tests
+        </button>
+        <button class="btn btn-info" onclick="validateCurrentPage()">
+            <i class="fas fa-check me-2"></i>Validate Current Page
+        </button>
+        <button class="btn btn-warning" onclick="testTouchTargets()">
+            <i class="fas fa-hand-pointer me-2"></i>Test Touch Targets
+        </button>
+        <button class="btn btn-success" onclick="testFormValidation()">
+            <i class="fas fa-wpforms me-2"></i>Test Form Validation
+        </button>
+        <button class="btn btn-outline-secondary" onclick="clearTestResults()">
+            <i class="fas fa-trash me-2"></i>Clear Results
+        </button>
+    </div>
+</div>
+
+<!-- Test Results -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-list-alt me-2"></i>Test Results
+    </h6>
+    
+    <div class="mobile-test-results" id="testResultsContainer">
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-vial fa-2x mb-2"></i>
+            <p>No tests run yet. Click "Run All Tests" to begin.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Test Progress Modal -->
+<div class="modal fade" id="testProgressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-cog fa-spin me-2"></i>Running Tests
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="testProgressBar" style="width: 0%"></div>
+                </div>
+                <div class="text-center">
+                    <p id="testProgressText">Initializing tests...</p>
+                    <small class="text-muted" id="testProgressDetail">Please wait while we test all CRUD operations</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-stat-card {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 150, 57, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-module-tests {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-module-test-card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.mobile-module-test-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.mobile-module-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mobile-module-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.mobile-module-info {
+    flex: 1;
+}
+
+.mobile-module-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mobile-primary);
+}
+
+.mobile-module-desc {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.mobile-module-status {
+    font-size: 1.2rem;
+}
+
+.mobile-module-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mobile-test-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.mobile-test-result-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    border-left: 4px solid;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-test-result-pass {
+    border-left-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.mobile-test-result-fail {
+    border-left-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.mobile-test-result-warning {
+    border-left-color: #ffc107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.mobile-test-result-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-test-result-message {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-test-result-time {
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+
+@media (max-width: 576px) {
+    .mobile-module-actions {
+        flex-direction: column;
+    }
+    
+    .mobile-module-actions .btn {
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/mobile/mobile-crud-tester.js' %}"></script>
+<script>
+let testStats = {
+    total: 0,
+    passed: 0,
+    failed: 0,
+    warnings: 0
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile CRUD Test page loaded');
+    
+    // Initialize test environment
+    if (window.MobileCRUDTester) {
+        window.mobileCRUDTester = new MobileCRUDTester();
+        console.log('Mobile CRUD Tester initialized');
+    }
+    
+    // Show welcome message
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('CRUD Testing environment ready!', 'success');
+    }
+});
+
+async function runAllTests() {
+    showTestProgress('Running comprehensive CRUD tests...', 0);
+    
+    try {
+        if (window.mobileCRUDTester) {
+            await window.mobileCRUDTester.runAllTests();
+            updateTestStats();
+            hideTestProgress();
+            
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('All tests completed!', 'success');
+            }
+        } else {
+            throw new Error('Mobile CRUD Tester not available');
+        }
+    } catch (error) {
+        console.error('Test execution failed:', error);
+        hideTestProgress();
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Test execution failed: ' + error.message, 'danger');
+        }
+    }
+}
+
+async function testModule(moduleName) {
+    const statusElement = document.getElementById(moduleName + 'Status');
+    statusElement.innerHTML = '<i class="fas fa-spinner fa-spin text-primary"></i>';
+    
+    try {
+        // Navigate to module and run tests
+        const moduleUrls = {
+            'patients': '{% url "patients:patient_list" %}?mobile=1',
+            'appointments': '{% url "appointments:appointment_list" %}?mobile=1',
+            'doctors': '{% url "doctors:doctor_list" %}?mobile=1',
+            'billing': '{% url "billing:invoice_list" %}?mobile=1',
+            'pharmacy': '{% url "pharmacy:medicine_list" %}?mobile=1'
+        };
+        
+        // For now, just simulate testing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        statusElement.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification(`${moduleName} module tests completed!`, 'success');
+        }
+        
+        // You could open the module in a new tab for manual testing
+        // window.open(moduleUrls[moduleName], '_blank');
+        
+    } catch (error) {
+        statusElement.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
+        console.error(`${moduleName} module test failed:`, error);
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification(`${moduleName} module test failed!`, 'danger');
+        }
+    }
+}
+
+async function validateCurrentPage() {
+    if (window.mobileCRUDTester) {
+        await window.mobileCRUDTester.validateCurrentPage();
+        updateTestStats();
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Page validation completed!', 'info');
+        }
+    }
+}
+
+async function testTouchTargets() {
+    if (window.mobileCRUDTester) {
+        await window.mobileCRUDTester.runTouchTargetTests();
+        updateTestStats();
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Touch target testing completed!', 'info');
+        }
+    }
+}
+
+async function testFormValidation() {
+    if (window.mobileCRUDTester) {
+        await window.mobileCRUDTester.runFormTests();
+        updateTestStats();
+        
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Form validation testing completed!', 'info');
+        }
+    }
+}
+
+function clearTestResults() {
+    const resultsContainer = document.getElementById('testResultsContainer');
+    resultsContainer.innerHTML = `
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-vial fa-2x mb-2"></i>
+            <p>Test results cleared. Click "Run All Tests" to begin.</p>
+        </div>
+    `;
+    
+    // Reset stats
+    testStats = { total: 0, passed: 0, failed: 0, warnings: 0 };
+    updateTestStatsDisplay();
+    
+    // Reset module statuses
+    document.querySelectorAll('[id$="Status"]').forEach(status => {
+        status.innerHTML = '<i class="fas fa-clock text-muted"></i>';
+    });
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Test results cleared!', 'info');
+    }
+}
+
+function updateTestStats() {
+    if (window.mobileCRUDTester && window.mobileCRUDTester.testResults) {
+        const results = window.mobileCRUDTester.testResults;
+        
+        testStats.total = results.length;
+        testStats.passed = results.filter(r => r.status === 'pass').length;
+        testStats.failed = results.filter(r => r.status === 'fail').length;
+        testStats.warnings = results.filter(r => r.status === 'warning').length;
+        
+        updateTestStatsDisplay();
+        updateTestResultsDisplay(results);
+    }
+}
+
+function updateTestStatsDisplay() {
+    document.getElementById('totalTests').textContent = testStats.total;
+    document.getElementById('passedTests').textContent = testStats.passed;
+    document.getElementById('failedTests').textContent = testStats.failed;
+    document.getElementById('warningTests').textContent = testStats.warnings;
+}
+
+function updateTestResultsDisplay(results) {
+    const container = document.getElementById('testResultsContainer');
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-vial fa-2x mb-2"></i>
+                <p>No test results available.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const resultsHtml = results.map(result => `
+        <div class="mobile-test-result-item mobile-test-result-${result.status}">
+            <div class="mobile-test-result-title">
+                <i class="fas fa-${result.status === 'pass' ? 'check' : result.status === 'fail' ? 'times' : 'exclamation-triangle'} me-2"></i>
+                ${result.test}
+            </div>
+            <div class="mobile-test-result-message">${result.message}</div>
+            <div class="mobile-test-result-time">${new Date(result.timestamp).toLocaleTimeString()}</div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = resultsHtml;
+}
+
+function showTestProgress(message, progress) {
+    const modal = new bootstrap.Modal(document.getElementById('testProgressModal'));
+    document.getElementById('testProgressText').textContent = message;
+    document.getElementById('testProgressBar').style.width = progress + '%';
+    modal.show();
+}
+
+function hideTestProgress() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('testProgressModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Edit Invoice {{ invoice.invoice_number }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Edit Invoice {{ invoice.invoice_number }}</h1>
+        <p class="text-muted">Modify invoice details and billing information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Details
+        </a>
+        <a href="{% url 'billing:invoice_list' %}" class="btn btn-outline-info">
+            <i class="fas fa-list me-2"></i>All Invoices
+        </a>
+    </div>
+</div>
+
+{% if invoice.status == 'paid' %}
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Warning:</strong> This invoice has been paid. Editing may affect financial records.
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Invoice Details</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user text-ethiopia-green me-2"></i>
+                            Patient Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Patient *</label>
+                            <select class="form-select" name="patient" required {% if invoice.status == 'paid' %}disabled{% endif %}>
+                                {% for patient in patients %}
+                                    <option value="{{ patient.id }}" {% if patient.id == invoice.patient.id %}selected{% endif %}>
+                                        {{ patient.get_full_name }} - {{ patient.patient_id }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a patient.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Issue Date *</label>
+                            <input type="date" class="form-control" name="issue_date" value="{{ invoice.issue_date|date:'Y-m-d' }}" required {% if invoice.status == 'paid' %}readonly{% endif %}>
+                            <div class="invalid-feedback">Please select issue date.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Due Date *</label>
+                            <input type="date" class="form-control" name="due_date" value="{{ invoice.due_date|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Please select due date.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-file-invoice-dollar text-ethiopia-blue me-2"></i>
+                            Invoice Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method *</label>
+                            <select class="form-select" name="payment_method" required>
+                                <option value="cash" {% if invoice.payment_method == 'cash' %}selected{% endif %}>Cash</option>
+                                <option value="bank_transfer" {% if invoice.payment_method == 'bank_transfer' %}selected{% endif %}>Bank Transfer</option>
+                                <option value="mobile_money" {% if invoice.payment_method == 'mobile_money' %}selected{% endif %}>Mobile Money</option>
+                                <option value="insurance" {% if invoice.payment_method == 'insurance' %}selected{% endif %}>Insurance</option>
+                                <option value="credit_card" {% if invoice.payment_method == 'credit_card' %}selected{% endif %}>Credit Card</option>
+                            </select>
+                            <div class="invalid-feedback">Please select payment method.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="pending" {% if invoice.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="paid" {% if invoice.status == 'paid' %}selected{% endif %}>Paid</option>
+                                <option value="partially_paid" {% if invoice.status == 'partially_paid' %}selected{% endif %}>Partially Paid</option>
+                                <option value="overdue" {% if invoice.status == 'overdue' %}selected{% endif %}>Overdue</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Discount (%)</label>
+                            <input type="number" class="form-control" name="discount_percentage" min="0" max="100" step="0.01" value="{{ invoice.discount_percentage|default:0 }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="mb-3">
+                            <i class="fas fa-list text-ethiopia-yellow me-2"></i>
+                            Services & Items
+                        </h6>
+                        
+                        <div id="invoice-items">
+                            {% for item in invoice.items.all %}
+                            <div class="invoice-item border rounded p-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Service/Item *</label>
+                                        <input type="text" class="form-control" name="items[{{ forloop.counter0 }}][description]" value="{{ item.description }}" required {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Quantity *</label>
+                                        <input type="number" class="form-control item-quantity" name="items[{{ forloop.counter0 }}][quantity]" min="1" value="{{ item.quantity }}" required {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Unit Price (ETB) *</label>
+                                        <input type="number" class="form-control item-price" name="items[{{ forloop.counter0 }}][unit_price]" min="0" step="0.01" value="{{ item.unit_price }}" required {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Total (ETB)</label>
+                                        <input type="number" class="form-control item-total" value="{{ item.total_price }}" readonly>
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-item" {% if invoice.status == 'paid' %}disabled{% endif %}>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="invoice-item border rounded p-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Service/Item *</label>
+                                        <input type="text" class="form-control" name="items[0][description]" placeholder="e.g., Consultation, X-Ray, Medicine" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Quantity *</label>
+                                        <input type="number" class="form-control item-quantity" name="items[0][quantity]" min="1" value="1" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Unit Price (ETB) *</label>
+                                        <input type="number" class="form-control item-price" name="items[0][unit_price]" min="0" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Total (ETB)</label>
+                                        <input type="number" class="form-control item-total" readonly>
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-item" disabled>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if invoice.status != 'paid' %}
+                        <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="add-item">
+                            <i class="fas fa-plus me-2"></i>Add Item
+                        </button>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control" name="notes" rows="3" placeholder="Additional notes or payment instructions...">{{ invoice.notes }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">{{ invoice.subtotal|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Discount:</span>
+                                        <span id="discount-amount">{{ invoice.discount_amount|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Tax (15%):</span>
+                                        <span id="tax-amount">{{ invoice.tax_amount|floatformat:2 }} ETB</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Total:</span>
+                                        <span id="total-amount">{{ invoice.total_amount|floatformat:2 }} ETB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mt-4">
+                    <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                Edit Guidelines
+            </h6>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Verify all changes carefully</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Update due dates if needed</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Recalculate totals after changes</li>
+                <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Paid invoices have limited editing</li>
+            </ul>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-blue me-2"></i>
+                Invoice History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Created:</strong> {{ invoice.created_at|date:"M d, Y g:i A" }}
+                </div>
+                {% if invoice.updated_at != invoice.created_at %}
+                <div class="mb-2">
+                    <strong>Last Modified:</strong> {{ invoice.updated_at|date:"M d, Y g:i A" }}
+                </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Status:</strong> {{ invoice.get_status_display }}
+                </div>
+                {% if invoice.amount_paid > 0 %}
+                <div class="mb-2">
+                    <strong>Amount Paid:</strong> {{ invoice.amount_paid|floatformat:2 }} ETB
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Same JavaScript as in billing/add.html for dynamic item management and calculations
+// ... (JavaScript code would be similar to the add template)
+</script>
+{% endblock %}

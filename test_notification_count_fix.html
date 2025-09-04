@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="test-csrf-token">
+    <title>Notification Count Fix Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            min-width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: notificationPulse 2s infinite;
+        }
+        
+        .notification-badge.large-count {
+            min-width: 28px;
+            height: 24px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            padding: 0 4px;
+        }
+        
+        @keyframes notificationPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item.unread {
+            background-color: #f8f9ff;
+            border-left: 4px solid #0d6efd;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .notification-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 150, 57, 0.1);
+            color: #009639;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .notification-action-btn:hover {
+            background: rgba(0, 150, 57, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .notification-unread-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+        }
+        
+        .test-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .count-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #009639;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-center mb-4">
+            <i class="fas fa-bell me-2 text-primary"></i>
+            Notification Count Fix Test
+        </h1>
+        
+        <div class="test-controls">
+            <h5>Test Controls</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary me-2" onclick="addTestNotification()">
+                        <i class="fas fa-plus me-1"></i>Add Notification
+                    </button>
+                    <button class="btn btn-success me-2" onclick="testMarkAllRead()">
+                        <i class="fas fa-check-double me-1"></i>Mark All Read
+                    </button>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="count-display">
+                        Count: <span id="currentCount">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification Badge Test -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5>Notification Badge Test</h5>
+            <div class="position-relative">
+                <button class="btn btn-outline-primary" id="notificationDropdown">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">3</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mock Notifications -->
+        <div id="notificationsList">
+            <div class="notification-item unread" data-notification-id="1">
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon me-3">
+                        <i class="fas fa-user-plus text-success"></i>
+                    </div>
+                    <div class="notification-content flex-grow-1">
+                        <div class="notification-title fw-semibold">New Patient Registration</div>
+                        <div class="notification-message text-muted small">John Doe has been registered</div>
+                        <div class="notification-time text-muted small">2 minutes ago</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn mark-as-read" data-notification-id="1" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="notification-action-btn delete-notification" data-notification-id="1" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="notification-unread-indicator">
+                            <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notification-item unread" data-notification-id="2">
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon me-3">
+                        <i class="fas fa-calendar-alt text-info"></i>
+                    </div>
+                    <div class="notification-content flex-grow-1">
+                        <div class="notification-title fw-semibold">Appointment Scheduled</div>
+                        <div class="notification-message text-muted small">New appointment for tomorrow</div>
+                        <div class="notification-time text-muted small">5 minutes ago</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn mark-as-read" data-notification-id="2" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="notification-action-btn delete-notification" data-notification-id="2" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="notification-unread-indicator">
+                            <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notification-item unread" data-notification-id="3">
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon me-3">
+                        <i class="fas fa-pills text-warning"></i>
+                    </div>
+                    <div class="notification-content flex-grow-1">
+                        <div class="notification-title fw-semibold">Prescription Ready</div>
+                        <div class="notification-message text-muted small">Medication ready for pickup</div>
+                        <div class="notification-time text-muted small">10 minutes ago</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn mark-as-read" data-notification-id="3" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="notification-action-btn delete-notification" data-notification-id="3" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="notification-unread-indicator">
+                            <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h6>Test Log:</h6>
+            <div id="testLog" class="bg-light p-3 rounded" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        let notificationCounter = 3;
+        
+        function log(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            const countDisplay = document.getElementById('currentCount');
+            
+            log(`Updating badge count to: ${count}`);
+            
+            if (!badge) {
+                log('ERROR: Badge element not found');
+                return;
+            }
+
+            if (count === 0) {
+                badge.style.display = 'none';
+                badge.classList.remove('large-count');
+                badge.removeAttribute('data-count');
+                log('Badge hidden (count = 0)');
+            } else {
+                badge.style.display = 'flex';
+
+                // Handle different count ranges
+                if (count > 99) {
+                    badge.textContent = '99+';
+                    badge.setAttribute('data-count', '99+');
+                    badge.classList.add('large-count');
+                    log('Badge set to 99+ (large count)');
+                } else if (count > 9) {
+                    badge.textContent = count;
+                    badge.classList.add('large-count');
+                    badge.removeAttribute('data-count');
+                    log(`Badge set to ${count} (large count)`);
+                } else {
+                    badge.textContent = count;
+                    badge.classList.remove('large-count');
+                    badge.removeAttribute('data-count');
+                    log(`Badge set to ${count} (normal size)`);
+                }
+            }
+            
+            countDisplay.textContent = count;
+        }
+        
+        function updateNotificationCount() {
+            // Simulate server fetch by counting DOM elements
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            log(`Counted ${unreadCount} unread notifications in DOM`);
+            
+            // Simulate server response delay
+            setTimeout(() => {
+                updateNotificationBadge(unreadCount);
+                log('Count update completed');
+            }, 100);
+        }
+        
+        function markNotificationAsRead(notificationId, button) {
+            log(`Marking notification ${notificationId} as read...`);
+            
+            const notificationItem = button.closest('.notification-item');
+            notificationItem.classList.remove('unread');
+            
+            // Remove the unread indicator
+            const unreadIndicator = notificationItem.querySelector('.notification-unread-indicator');
+            if (unreadIndicator) {
+                unreadIndicator.style.transition = 'all 0.3s ease';
+                unreadIndicator.style.transform = 'scale(0)';
+                unreadIndicator.style.opacity = '0';
+                setTimeout(() => unreadIndicator.remove(), 300);
+            }
+            
+            // Remove the mark as read button
+            button.style.transition = 'all 0.3s ease';
+            button.style.transform = 'scale(0)';
+            button.style.opacity = '0';
+            setTimeout(() => {
+                button.remove();
+                log(`Notification ${notificationId} marked as read`);
+                updateNotificationCount();
+            }, 300);
+        }
+        
+        function deleteNotification(notificationId, button) {
+            if (!confirm(`Delete notification ${notificationId}?`)) {
+                return;
+            }
+            
+            log(`Deleting notification ${notificationId}...`);
+            
+            const notificationItem = button.closest('.notification-item');
+            
+            // Animate removal
+            notificationItem.style.transition = 'all 0.3s ease';
+            notificationItem.style.transform = 'translateX(100%)';
+            notificationItem.style.opacity = '0';
+            
+            setTimeout(() => {
+                notificationItem.remove();
+                log(`Notification ${notificationId} deleted`);
+                updateNotificationCount();
+            }, 300);
+        }
+        
+        function addTestNotification() {
+            notificationCounter++;
+            const notificationsList = document.getElementById('notificationsList');
+            
+            const newNotification = document.createElement('div');
+            newNotification.className = 'notification-item unread';
+            newNotification.setAttribute('data-notification-id', notificationCounter);
+            
+            newNotification.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon me-3">
+                        <i class="fas fa-info-circle text-primary"></i>
+                    </div>
+                    <div class="notification-content flex-grow-1">
+                        <div class="notification-title fw-semibold">Test Notification ${notificationCounter}</div>
+                        <div class="notification-message text-muted small">This is a test notification</div>
+                        <div class="notification-time text-muted small">Just now</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn mark-as-read" data-notification-id="${notificationCounter}" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="notification-action-btn delete-notification" data-notification-id="${notificationCounter}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="notification-unread-indicator">
+                            <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            notificationsList.appendChild(newNotification);
+            log(`Added test notification ${notificationCounter}`);
+            updateNotificationCount();
+        }
+        
+        function testMarkAllRead() {
+            log('Marking all notifications as read...');
+            
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+                
+                // Remove unread indicator
+                const unreadIndicator = item.querySelector('.notification-unread-indicator');
+                if (unreadIndicator) {
+                    unreadIndicator.style.transition = 'all 0.3s ease';
+                    unreadIndicator.style.transform = 'scale(0)';
+                    unreadIndicator.style.opacity = '0';
+                    setTimeout(() => unreadIndicator.remove(), 300);
+                }
+                
+                // Remove mark as read button
+                const markBtn = item.querySelector('.mark-as-read');
+                if (markBtn) {
+                    markBtn.style.transition = 'all 0.3s ease';
+                    markBtn.style.transform = 'scale(0)';
+                    markBtn.style.opacity = '0';
+                    setTimeout(() => markBtn.remove(), 300);
+                }
+            });
+            
+            setTimeout(() => {
+                log('All notifications marked as read');
+                updateNotificationCount();
+            }, 300);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Test page loaded');
+            
+            // Mark as read buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.mark-as-read')) {
+                    const button = e.target.closest('.mark-as-read');
+                    const notificationId = button.dataset.notificationId;
+                    markNotificationAsRead(notificationId, button);
+                }
+                
+                if (e.target.closest('.delete-notification')) {
+                    const button = e.target.closest('.delete-notification');
+                    const notificationId = button.dataset.notificationId;
+                    deleteNotification(notificationId, button);
+                }
+            });
+            
+            log('Event listeners attached');
+            updateNotificationCount();
+        });
+    </script>
+</body>
+</html>

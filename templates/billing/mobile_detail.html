@@ -1,0 +1,457 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Invoice {{ invoice.invoice_number }}</h1>
+        <p class="text-muted">Invoice details and payment information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'billing:invoice_list' %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+        {% if invoice.status != 'paid' %}
+            <a href="{% url 'billing:invoice_edit' invoice.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-edit me-1"></i>Edit
+            </a>
+        {% endif %}
+        <a href="{% url 'billing:invoice_pdf' invoice.pk %}" class="btn btn-outline-info btn-sm">
+            <i class="fas fa-file-pdf me-1"></i>PDF
+        </a>
+        {% if invoice.status != 'paid' %}
+            <a href="{% url 'billing:invoice_pay' invoice.pk %}?mobile=1" class="btn btn-success btn-sm">
+                <i class="fas fa-credit-card me-1"></i>Pay
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <!-- Invoice Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Invoice Information</h5>
+                <span class="badge bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'partially_paid' %}warning{% elif invoice.status == 'pending' %}primary{% elif invoice.status == 'overdue' %}danger{% else %}secondary{% endif %} fs-6">
+                    {{ invoice.get_status_display }}
+                </span>
+            </div>
+
+
+            <!-- Patient Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-user text-ethiopia-green me-2"></i>
+                    Patient Information
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Patient Name</label>
+                        <div class="fw-semibold">{{ invoice.patient.get_full_name }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Patient ID</label>
+                        <div>{{ invoice.patient.patient_id }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Phone Number</label>
+                        <div>{{ invoice.patient.phone_number }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Address</label>
+                        <div>{{ invoice.patient.address|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Details Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-file-invoice text-ethiopia-blue me-2"></i>
+                    Invoice Details
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Invoice Number</label>
+                        <div class="fw-semibold">{{ invoice.invoice_number }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Issue Date</label>
+                        <div>{{ invoice.issue_date|date:"F d, Y" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Due Date</label>
+                        <div>{{ invoice.due_date|date:"F d, Y" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Payment Method</label>
+                        <div>{{ invoice.get_payment_method_display }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+
+            <!-- Services & Items Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-list text-ethiopia-yellow me-2"></i>
+                    Services & Items
+                </h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-end">Unit Price (ETB)</th>
+                                <th class="text-end">Total (ETB)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                                <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No items found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+
+            <!-- Notes and Financial Summary Section -->
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    {% if invoice.notes %}
+                    <h6 class="mb-3">
+                        <i class="fas fa-sticky-note text-ethiopia-green me-2"></i>
+                        Notes
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ invoice.notes }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="bg-light p-4 rounded">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>{{ invoice.subtotal|floatformat:2 }} ETB</span>
+                        </div>
+                        {% if invoice.discount_amount > 0 %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Discount ({{ invoice.discount_percentage }}%):</span>
+                            <span class="text-success">-{{ invoice.discount_amount|floatformat:2 }} ETB</span>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (15%):</span>
+                            <span>{{ invoice.tax_amount|floatformat:2 }} ETB</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total Amount:</span>
+                            <span class="text-ethiopia-green">{{ invoice.total_amount|floatformat:2 }} ETB</span>
+                        </div>
+                        {% if invoice.amount_paid > 0 %}
+                        <hr>
+                        <div class="d-flex justify-content-between text-success">
+                            <span>Amount Paid:</span>
+                            <span>{{ invoice.amount_paid|floatformat:2 }} ETB</span>
+                        </div>
+                        {% if invoice.balance_due > 0 %}
+                        <div class="d-flex justify-content-between text-danger fw-bold">
+                            <span>Balance Due:</span>
+                            <span>{{ invoice.balance_due|floatformat:2 }} ETB</span>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Payment Summary -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-chart-pie text-ethiopia-green me-2"></i>
+                Payment Summary
+            </h6>
+            <div class="text-center">
+                <div class="progress mb-3" style="height: 20px;">
+                    {% widthratio invoice.amount_paid invoice.total_amount 100 as payment_percentage %}
+                    <div class="progress-bar bg-success" style="width: {{ payment_percentage }}%"></div>
+                </div>
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Paid:</span>
+                        <span class="text-success">{{ payment_percentage }}%</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Remaining:</span>
+                        <span class="text-danger" id="remainingPercentage">{{ payment_percentage|default:0 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-blue me-2"></i>
+                Payment History
+            </h6>
+            {% if invoice.payments.all %}
+                {% for payment in invoice.payments.all %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div>
+                        <div class="fw-semibold">{{ payment.amount|floatformat:2 }} ETB</div>
+                        <div class="small text-muted">{{ payment.payment_date|date:"M d, Y" }}</div>
+                    </div>
+                    <span class="badge bg-success">{{ payment.get_method_display }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No payments recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-cogs text-ethiopia-yellow me-2"></i>
+                Quick Actions
+            </h6>
+            <div class="d-grid gap-2">
+                {% if invoice.status != 'paid' %}
+                    <a href="{% url 'billing:invoice_pay' invoice.pk %}?mobile=1" class="btn btn-success btn-sm">
+                        <i class="fas fa-credit-card me-2"></i>Process Payment
+                    </a>
+                {% endif %}
+
+                <a href="{% url 'billing:invoice_pdf' invoice.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-download me-2"></i>Download PDF
+                </a>
+
+                <button class="btn btn-outline-info btn-sm" onclick="printInvoice()">
+                    <i class="fas fa-print me-2"></i>Print Invoice
+                </button>
+
+                <button class="btn btn-outline-warning btn-sm" onclick="sendReminder()">
+                    <i class="fas fa-bell me-2"></i>Send Reminder
+                </button>
+
+                {% if invoice.status == 'pending' %}
+                    <a href="{% url 'billing:invoice_edit' invoice.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-2"></i>Edit Invoice
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Status -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                Invoice Status
+            </h6>
+            <div class="small">
+                {% if invoice.status == 'paid' %}
+                    <div class="alert alert-success py-2">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Invoice fully paid on {{ invoice.paid_date|date:"M d, Y" }}
+                    </div>
+                {% elif invoice.status == 'overdue' %}
+                    <div class="alert alert-danger py-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Invoice is overdue by {{ invoice.days_overdue }} days
+                    </div>
+                {% elif invoice.status == 'partially_paid' %}
+                    <div class="alert alert-warning py-2">
+                        <i class="fas fa-clock me-2"></i>
+                        Partial payment received. Balance: {{ invoice.balance_due|floatformat:2 }} ETB
+                    </div>
+                {% else %}
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-clock me-2"></i>
+                        Payment due in {{ invoice.days_until_due }} days
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-dashboard-card h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.badge.fs-6 {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .fs-5 {
+        font-size: 1.1rem !important;
+    }
+
+    .table {
+        font-size: 0.875rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function printInvoice() {
+    window.print();
+}
+
+function sendReminder() {
+    if (confirm('Send payment reminder to {{ invoice.patient.get_full_name }}?')) {
+        // In a real implementation, this would make an AJAX call
+        fetch(`/billing/{{ invoice.pk }}/send-reminder/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification('Reminder sent successfully!', 'success');
+                }
+            } else {
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification('Error sending reminder', 'danger');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Error sending reminder', 'danger');
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile invoice detail loaded');
+
+    // Show mobile notification if coming from list
+    if (document.referrer.includes('/billing/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Invoice details loaded successfully!', 'success');
+        }
+    }
+
+    // Update progress bar animation
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        setTimeout(() => {
+            progressBar.style.width = progressBar.style.width;
+        }, 500);
+    }
+
+    // Calculate remaining percentage
+    const remainingElement = document.getElementById('remainingPercentage');
+    if (remainingElement) {
+        const paidPercentage = {{ payment_percentage|default:0 }};
+        const remainingPercentage = 100 - paidPercentage;
+        remainingElement.textContent = remainingPercentage + '%';
+    }
+});
+</script>
+{% endblock %}

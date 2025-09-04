@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Dashboard Layout Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 150, 57, 0.2);
+            padding-bottom: 0.5rem;
+        }
+        
+        .text-ethiopia-green { color: #009639; }
+        .text-ethiopia-blue { color: #0F47AF; }
+        .text-ethiopia-yellow { color: #FFCD00; }
+        .text-ethiopia-red { color: #DA020E; }
+    </style>
+</head>
+<body class="mobile-dashboard-body">
+    <div class="container-fluid p-3">
+        <h1 class="text-center text-ethiopia-green mb-4">Mobile Dashboard Layout Test</h1>
+        
+        <!-- Test 1: Doctor Information Cards -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-user-md me-2"></i>
+                Doctor Information Cards - 2x2 Layout
+            </h3>
+            
+            <div class="card mobile-doctor-card">
+                <div class="card-body text-center">
+                    <div class="doctor-avatar mb-3">
+                        <div class="bg-ethiopia-green rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user-md text-white fs-2"></i>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-1">Dr. Abebe Kebede</h5>
+                    <p class="text-ethiopia-green fw-semibold mb-2">Cardiologist</p>
+                    
+                    <!-- NEW: Doctor Information Grid - 2x2 Layout -->
+                    <div class="mobile-doctor-info-grid mb-3">
+                        <!-- Row 1: Years Experience and Consultations Today -->
+                        <div class="mobile-doctor-info-row">
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-blue">15</div>
+                                <div class="mobile-doctor-info-label">Years Experience</div>
+                            </div>
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-red">8</div>
+                                <div class="mobile-doctor-info-label">Consultations Today</div>
+                            </div>
+                        </div>
+                        <!-- Row 2: Total Patients and Consultation Fee -->
+                        <div class="mobile-doctor-info-row">
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-green">1,250</div>
+                                <div class="mobile-doctor-info-label">Total Patients</div>
+                            </div>
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-yellow">500 ETB</div>
+                                <div class="mobile-doctor-info-label">Consultation Fee</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-primary mobile-add-doctor-btn">
+                            <i class="fas fa-plus me-2"></i>
+                            <span class="mobile-btn-text">Add Doctor</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test 2: Medicine Information Cards -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-pills me-2"></i>
+                Medicine Information Cards - 2 Items Per Row
+            </h3>
+            
+            <div class="card mobile-medicine-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="medicine-icon">
+                            <i class="fas fa-pills text-ethiopia-green fs-2"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success">Good</span>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-2">Paracetamol</h5>
+                    <p class="text-muted small mb-2">500mg - Tablet</p>
+                    
+                    <!-- NEW: Medicine Information Grid - 2 items per row -->
+                    <div class="mobile-medicine-info-grid mb-3">
+                        <div class="mobile-medicine-info-row">
+                            <div class="mobile-medicine-info-item">
+                                <div class="mobile-medicine-info-value text-ethiopia-blue">250</div>
+                                <div class="mobile-medicine-info-label">In Stock</div>
+                            </div>
+                            <div class="mobile-medicine-info-item">
+                                <div class="mobile-medicine-info-value text-ethiopia-yellow">15 ETB</div>
+                                <div class="mobile-medicine-info-label">Unit Price</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-primary mobile-add-medicine-btn">
+                            <i class="fas fa-plus me-2"></i>
+                            <span class="mobile-btn-text">Add Medicine</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test 3: Button Visibility Test -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-check-circle me-2"></i>
+                Button Text Visibility Test
+            </h3>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <a href="#" class="btn btn-primary mobile-add-doctor-btn w-100">
+                        <i class="fas fa-user-md me-2"></i>
+                        <span class="mobile-btn-text">Add Doctor</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="#" class="btn btn-primary mobile-add-medicine-btn w-100">
+                        <i class="fas fa-pills me-2"></i>
+                        <span class="mobile-btn-text">Add Medicine</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-3 text-center">
+                <small class="text-muted">
+                    ✅ Button text should be clearly visible in white<br>
+                    ✅ Buttons should meet 44px minimum touch target<br>
+                    ✅ Ethiopian Hospital ERP green branding (#009639)
+                </small>
+            </div>
+        </div>
+        
+        <!-- Test 4: Responsive Test -->
+        <div class="test-section">
+            <h3 class="test-title">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Responsive Design Test
+            </h3>
+            
+            <div class="alert alert-info">
+                <strong>Test Instructions:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Resize browser window to test different mobile screen sizes</li>
+                    <li>Verify exactly 2 items per row in all grids</li>
+                    <li>Check touch targets are minimum 44px</li>
+                    <li>Ensure text remains readable at all sizes</li>
+                    <li>Verify Ethiopian green branding is maintained</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Test script to verify functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Dashboard Layout Test Loaded');
+            
+            // Test button clicks
+            document.querySelectorAll('.mobile-add-doctor-btn, .mobile-add-medicine-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Button clicked successfully! Text is visible and functional.');
+                });
+            });
+            
+            // Log viewport dimensions
+            console.log('Viewport width:', window.innerWidth);
+            console.log('Viewport height:', window.innerHeight);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Add Medicine - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Add New Medicine</h1>
+        <p class="text-muted">Register new medicine in pharmacy inventory</p>
+    </div>
+    <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Pharmacy
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Medicine Information</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-pills text-ethiopia-green me-2"></i>
+                            Basic Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Medicine Name *</label>
+                            <input type="text" class="form-control" name="name" placeholder="e.g., Paracetamol" required>
+                            <div class="invalid-feedback">Please enter medicine name.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Generic Name</label>
+                            <input type="text" class="form-control" name="generic_name" placeholder="e.g., Acetaminophen">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Strength *</label>
+                            <input type="text" class="form-control" name="strength" placeholder="e.g., 500mg" required>
+                            <div class="invalid-feedback">Please enter medicine strength.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Form *</label>
+                            <select class="form-select" name="form" required>
+                                <option value="">Select Form</option>
+                                <option value="tablet">Tablet</option>
+                                <option value="capsule">Capsule</option>
+                                <option value="syrup">Syrup</option>
+                                <option value="injection">Injection</option>
+                                <option value="drops">Drops</option>
+                                <option value="cream">Cream</option>
+                                <option value="ointment">Ointment</option>
+                                <option value="powder">Powder</option>
+                            </select>
+                            <div class="invalid-feedback">Please select medicine form.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-tags text-ethiopia-blue me-2"></i>
+                            Classification
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Category *</label>
+                            <select class="form-select" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="analgesic">Analgesic</option>
+                                <option value="antibiotic">Antibiotic</option>
+                                <option value="antiviral">Antiviral</option>
+                                <option value="cardiac">Cardiac</option>
+                                <option value="respiratory">Respiratory</option>
+                                <option value="gastrointestinal">Gastrointestinal</option>
+                                <option value="neurological">Neurological</option>
+                                <option value="vitamin">Vitamin/Supplement</option>
+                                <option value="dermatological">Dermatological</option>
+                                <option value="ophthalmological">Ophthalmological</option>
+                            </select>
+                            <div class="invalid-feedback">Please select medicine category.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Manufacturer</label>
+                            <input type="text" class="form-control" name="manufacturer" placeholder="e.g., Cadila Pharmaceuticals">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Batch Number</label>
+                            <input type="text" class="form-control" name="batch_number" placeholder="e.g., BT2024001">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Prescription Required</label>
+                            <select class="form-select" name="prescription_required">
+                                <option value="false">No</option>
+                                <option value="true">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-warehouse text-ethiopia-yellow me-2"></i>
+                            Inventory Details
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Current Stock *</label>
+                            <input type="number" class="form-control" name="current_stock" min="0" required>
+                            <div class="invalid-feedback">Please enter current stock.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Minimum Stock Level *</label>
+                            <input type="number" class="form-control" name="minimum_stock" min="0" required>
+                            <div class="invalid-feedback">Please enter minimum stock level.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Unit Price (ETB) *</label>
+                            <input type="number" class="form-control" name="unit_price" min="0" step="0.01" required>
+                            <div class="invalid-feedback">Please enter unit price.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-calendar-alt text-ethiopia-red me-2"></i>
+                            Dates & Expiry
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Manufacturing Date</label>
+                            <input type="date" class="form-control" name="manufacturing_date">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Expiry Date *</label>
+                            <input type="date" class="form-control" name="expiry_date" required>
+                            <div class="invalid-feedback">Please enter expiry date.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Storage Temperature</label>
+                            <select class="form-select" name="storage_temperature">
+                                <option value="room_temperature">Room Temperature (15-25°C)</option>
+                                <option value="cool">Cool (2-8°C)</option>
+                                <option value="frozen">Frozen (-20°C)</option>
+                                <option value="controlled">Controlled Temperature</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="mb-3">
+                            <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                            Additional Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Brief description of the medicine and its uses..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Side Effects</label>
+                            <textarea class="form-control" name="side_effects" rows="2" placeholder="Common side effects..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dosage Instructions</label>
+                            <textarea class="form-control" name="dosage_instructions" rows="2" placeholder="Standard dosage instructions..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Medicine
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-green me-2"></i>
+                Medicine Guidelines
+            </h6>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Verify medicine authenticity</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Check expiry dates carefully</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Set appropriate minimum stock levels</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Store according to requirements</li>
+            </ul>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-thermometer-half text-ethiopia-blue me-2"></i>
+                Storage Guidelines
+            </h6>
+            <div class="small">
+                <div class="mb-2"><strong>Room Temperature:</strong> 15-25°C, dry place</div>
+                <div class="mb-2"><strong>Cool Storage:</strong> 2-8°C, refrigerated</div>
+                <div class="mb-2"><strong>Frozen:</strong> -20°C, freezer storage</div>
+                <div class="mb-2"><strong>Controlled:</strong> Specific temperature range</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-exclamation-triangle text-ethiopia-yellow me-2"></i>
+                Important Notes
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">Always verify medicine information with official sources before adding to inventory.</p>
+                <p class="mb-0">Ensure proper documentation for controlled substances and prescription medications.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set minimum expiry date to tomorrow
+document.addEventListener('DOMContentLoaded', function() {
+    const expiryInput = document.querySelector('input[name="expiry_date"]');
+    if (expiryInput) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        expiryInput.min = tomorrow.toISOString().split('T')[0];
+    }
+    
+    // Set maximum manufacturing date to today
+    const mfgInput = document.querySelector('input[name="manufacturing_date"]');
+    if (mfgInput) {
+        const today = new Date().toISOString().split('T')[0];
+        mfgInput.max = today;
+    }
+});
+</script>
+{% endblock %}

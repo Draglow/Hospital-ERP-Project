@@ -1,0 +1,419 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}{{ patient.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">{{ patient.get_full_name }}</h1>
+            <p class="text-muted mb-0">Patient ID: {{ patient.patient_id }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'patients:patient_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="{% url 'patients:patient_edit' patient.pk %}?mobile=1" class="btn btn-sm btn-primary">
+                <i class="fas fa-edit"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Info Card -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="mobile-patient-header">
+        <div class="mobile-patient-avatar-large">
+            {% if patient.profile_image %}
+                <img src="{{ patient.profile_image.url }}" alt="{{ patient.get_full_name }}">
+            {% else %}
+                <div class="patient-avatar-placeholder-large">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="mobile-patient-info-main">
+            <h5 class="patient-name">{{ patient.get_full_name }}</h5>
+            <div class="patient-basic-info">
+                <span class="badge bg-{% if patient.gender == 'M' %}primary{% elif patient.gender == 'F' %}success{% else %}secondary{% endif %}">
+                    {{ patient.get_gender_display }}
+                </span>
+                <span class="mx-2">•</span>
+                <span class="text-muted">{{ patient.age }} years old</span>
+                {% if patient.blood_type %}
+                <span class="mx-2">•</span>
+                <span class="badge bg-danger">{{ patient.blood_type }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="mobile-stats-row mb-4">
+    <div class="mobile-stat-card">
+        <div class="mobile-stat-icon">
+            <i class="fas fa-calendar-check text-ethiopia-green"></i>
+        </div>
+        <div class="mobile-stat-number">{{ appointments.count }}</div>
+        <div class="mobile-stat-label">Total Appointments</div>
+    </div>
+    <div class="mobile-stat-card">
+        <div class="mobile-stat-icon">
+            <i class="fas fa-file-invoice text-ethiopia-blue"></i>
+        </div>
+        <div class="mobile-stat-number">{{ invoices.count }}</div>
+        <div class="mobile-stat-label">Total Invoices</div>
+    </div>
+</div>
+
+<!-- Contact Information -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">Contact Information</h6>
+    <div class="mobile-info-list">
+        {% if patient.phone %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-phone"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Phone</div>
+                <div class="mobile-info-value">
+                    <a href="tel:{{ patient.phone }}" class="text-decoration-none">{{ patient.phone }}</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if patient.email %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Email</div>
+                <div class="mobile-info-value">
+                    <a href="mailto:{{ patient.email }}" class="text-decoration-none">{{ patient.email }}</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if patient.address %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Address</div>
+                <div class="mobile-info-value">{{ patient.address }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if patient.city %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-city"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">City</div>
+                <div class="mobile-info-value">{{ patient.city }}, {{ patient.region|default:"Ethiopia" }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Emergency Contact -->
+{% if patient.emergency_contact_name %}
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">Emergency Contact</h6>
+    <div class="mobile-info-list">
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">{{ patient.emergency_contact_relationship|title|default:"Contact" }}</div>
+                <div class="mobile-info-value">{{ patient.emergency_contact_name }}</div>
+                {% if patient.emergency_contact_phone %}
+                <div class="mobile-info-extra">
+                    <a href="tel:{{ patient.emergency_contact_phone }}" class="text-decoration-none">
+                        <i class="fas fa-phone me-1"></i>{{ patient.emergency_contact_phone }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Medical Information -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">Medical Information</h6>
+    <div class="mobile-info-list">
+        {% if patient.allergies %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Allergies</div>
+                <div class="mobile-info-value">{{ patient.allergies }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if patient.medical_history %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Medical History</div>
+                <div class="mobile-info-value">{{ patient.medical_history }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if patient.current_medications %}
+        <div class="mobile-info-item">
+            <div class="mobile-info-icon">
+                <i class="fas fa-pills"></i>
+            </div>
+            <div class="mobile-info-content">
+                <div class="mobile-info-label">Current Medications</div>
+                <div class="mobile-info-value">{{ patient.current_medications }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Appointments -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="text-ethiopia-green mb-0">Recent Appointments</h6>
+        <a href="{% url 'appointments:appointment_add' %}?mobile=1&patient={{ patient.pk }}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    
+    {% if appointments %}
+        <div class="mobile-appointment-list">
+            {% for appointment in appointments|slice:":3" %}
+            <div class="mobile-appointment-item-small">
+                <div class="mobile-appointment-date">
+                    <i class="fas fa-calendar me-1"></i>
+                    {{ appointment.appointment_date|date:"M d, Y" }}
+                </div>
+                <div class="mobile-appointment-doctor">
+                    <i class="fas fa-user-md me-1"></i>
+                    Dr. {{ appointment.doctor.user.get_full_name }}
+                </div>
+                <div class="mobile-appointment-status">
+                    <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                        {{ appointment.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if appointments.count > 3 %}
+        <div class="text-center mt-3">
+            <a href="{% url 'appointments:appointment_list' %}?mobile=1&patient={{ patient.pk }}" class="btn btn-sm btn-outline-primary">
+                View All Appointments ({{ appointments.count }})
+            </a>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-3">
+            <div class="text-muted">
+                <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                <p class="mb-2">No appointments yet</p>
+                <a href="{% url 'appointments:appointment_add' %}?mobile=1&patient={{ patient.pk }}" class="btn btn-sm btn-primary">
+                    Schedule First Appointment
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid">
+    <a href="{% url 'appointments:appointment_add' %}?mobile=1&patient={{ patient.pk }}" class="mobile-quick-action-card">
+        <i class="fas fa-calendar-plus"></i>
+        <span>New Appointment</span>
+    </a>
+    <a href="{% url 'billing:invoice_add' %}?mobile=1&patient={{ patient.pk }}" class="mobile-quick-action-card">
+        <i class="fas fa-file-invoice"></i>
+        <span>Create Invoice</span>
+    </a>
+    <a href="{% url 'patients:patient_edit' patient.pk %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-edit"></i>
+        <span>Edit Patient</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-patient-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mobile-patient-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--mobile-primary);
+    flex-shrink: 0;
+}
+
+.mobile-patient-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.patient-avatar-placeholder-large {
+    width: 100%;
+    height: 100%;
+    background: var(--mobile-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.patient-name {
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.patient-basic-info {
+    font-size: 0.9rem;
+}
+
+.mobile-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.mobile-info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 150, 57, 0.1);
+    color: var(--mobile-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.mobile-info-content {
+    flex: 1;
+}
+
+.mobile-info-label {
+    font-weight: 500;
+    color: var(--mobile-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-info-value {
+    color: var(--mobile-primary);
+    font-weight: 500;
+}
+
+.mobile-info-extra {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--mobile-secondary);
+}
+
+.mobile-appointment-item-small {
+    padding: 0.75rem;
+    background: rgba(0, 150, 57, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-appointment-date,
+.mobile-appointment-doctor {
+    font-size: 0.85rem;
+    color: var(--mobile-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.mobile-appointment-status {
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-patient-header {
+        gap: 0.75rem;
+    }
+    
+    .mobile-patient-avatar-large {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .patient-avatar-placeholder-large {
+        font-size: 1.5rem;
+    }
+    
+    .mobile-info-item {
+        gap: 0.75rem;
+    }
+    
+    .mobile-info-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile patient detail loaded');
+    
+    // Show mobile notification if coming from add form
+    if (document.referrer.includes('add') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Patient added successfully!', 'success');
+        }
+    }
+});
+</script>
+{% endblock %}

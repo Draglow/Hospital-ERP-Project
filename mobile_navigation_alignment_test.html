@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Navigation Alignment Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+        }
+        
+        .sidebar-demo {
+            position: relative;
+            width: 280px;
+            height: 600px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .alignment-guide {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .spacing-guide {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 24px;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 150, 57, 0.1) 0px,
+                rgba(0, 150, 57, 0.1) 8px,
+                transparent 8px,
+                transparent 16px
+            );
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Mobile Navigation Alignment Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Navigation Alignment Improvements</h5>
+            <ul class="mb-0">
+                <li><strong>Consistent Alignment:</strong> All navigation items start from the same horizontal position</li>
+                <li><strong>Standardized Spacing:</strong> Uniform vertical spacing between navigation links</li>
+                <li><strong>Proper Hierarchy:</strong> Sub-menu items are properly indented relative to parent items</li>
+                <li><strong>Touch Targets:</strong> All links meet 44px minimum touch target requirement</li>
+                <li><strong>Visual Guides:</strong> Red line shows main alignment, green pattern shows spacing consistency</li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-demo">
+            <!-- Alignment and spacing guides -->
+            <div class="alignment-guide"></div>
+            <div class="spacing-guide"></div>
+            
+            <!-- Mobile Sidebar Content -->
+            <div class="mobile-sidebar-content">
+                <!-- User Info -->
+                <div class="mobile-user-info">
+                    <div class="mobile-user-avatar">
+                        <div class="user-avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="mobile-user-details">
+                        <h6 class="user-name">Dr. John Doe</h6>
+                        <small class="user-role">Administrator</small>
+                    </div>
+                </div>
+                
+                <!-- Navigation Menu -->
+                <nav class="mobile-nav-menu">
+                    <ul class="mobile-nav-list">
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link active" href="#">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-users"></i>
+                                <span>Patients</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Appointments</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-user-md"></i>
+                                <span>Doctors</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <span>Billing</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-pills"></i>
+                                <span>Pharmacy</span>
+                            </a>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link mobile-nav-expandable" href="#" data-bs-toggle="collapse" data-bs-target="#testReportsMenu" aria-expanded="true">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports</span>
+                                <i class="fas fa-chevron-down mobile-nav-arrow"></i>
+                            </a>
+                            <div class="collapse show mobile-nav-submenu" id="testReportsMenu">
+                                <ul class="mobile-nav-sublist">
+                                    <li class="mobile-nav-subitem">
+                                        <a class="mobile-nav-sublink" href="#">
+                                            <i class="fas fa-chart-line"></i>Analytics
+                                        </a>
+                                    </li>
+                                    <li class="mobile-nav-subitem">
+                                        <a class="mobile-nav-sublink" href="#">
+                                            <i class="fas fa-file-excel"></i>Export Patients
+                                        </a>
+                                    </li>
+                                    <li class="mobile-nav-subitem">
+                                        <a class="mobile-nav-sublink" href="#">
+                                            <i class="fas fa-database"></i>Export All Data
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="mobile-nav-item">
+                            <a class="mobile-nav-link" href="#">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Mobile Sidebar Footer -->
+                <div class="mobile-sidebar-footer">
+                    <div class="mobile-time-info">
+                        <div class="current-time">
+                            <small class="time-label">Current Time</small>
+                            <small class="time-value">2:30 PM</small>
+                        </div>
+                    </div>
+                    <div class="mobile-logout">
+                        <a href="#" class="mobile-logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description mt-4">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>Alignment Verification</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ Main Navigation Items:</h6>
+                    <ul class="small">
+                        <li>All icons aligned to red guide line</li>
+                        <li>Consistent 24px icon width</li>
+                        <li>Uniform padding and margins</li>
+                        <li>44px minimum touch targets</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Sub-Navigation Items:</h6>
+                    <ul class="small">
+                        <li>Properly indented from main items</li>
+                        <li>Consistent sub-item alignment</li>
+                        <li>Visual hierarchy maintained</li>
+                        <li>Smooth hover transitions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-mobile-alt text-info me-2"></i>Responsive Behavior</h5>
+            <p class="mb-2">The navigation automatically adjusts for different screen sizes:</p>
+            <ul class="small mb-0">
+                <li><strong>320px - 375px:</strong> Compact spacing, smaller icons</li>
+                <li><strong>375px - 768px:</strong> Standard mobile layout</li>
+                <li><strong>768px+:</strong> Enhanced spacing and larger touch targets</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Navigation Alignment Test Loaded');
+            
+            // Test navigation interactions
+            document.querySelectorAll('.mobile-nav-link, .mobile-nav-sublink').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all links
+                    document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+                    
+                    // Add active class to clicked link (only for main nav items)
+                    if (this.classList.contains('mobile-nav-link')) {
+                        this.classList.add('active');
+                    }
+                    
+                    console.log('Navigation item clicked:', this.textContent.trim());
+                });
+            });
+            
+            // Test expandable menu
+            document.querySelectorAll('.mobile-nav-expandable').forEach(expandable => {
+                expandable.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-bs-target');
+                    const submenu = document.querySelector(target);
+                    const arrow = this.querySelector('.mobile-nav-arrow');
+                    
+                    if (submenu.classList.contains('show')) {
+                        submenu.classList.remove('show');
+                        this.setAttribute('aria-expanded', 'false');
+                        arrow.style.transform = 'rotate(0deg)';
+                    } else {
+                        submenu.classList.add('show');
+                        this.setAttribute('aria-expanded', 'true');
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

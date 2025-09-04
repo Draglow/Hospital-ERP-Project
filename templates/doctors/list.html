@@ -1,0 +1,325 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Doctors - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Doctors</h1>
+        <p class="text-muted">Manage medical staff and specialists</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportDoctors()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <a href="{% url 'doctors:doctor_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Doctor
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Medical Staff ({{ total_doctors }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <div class="input-group" style="width: 250px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search doctors..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="specialty" class="form-select" style="width: 150px;" onchange="this.form.submit()">
+                    <option value="">All Specialties</option>
+                    {% for specialty in specialties %}
+                        <option value="{{ specialty }}" {% if specialty_filter == specialty %}selected{% endif %}>{{ specialty|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="availability" class="form-select" style="width: 140px;" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    {% for availability_code, availability_name in availabilities %}
+                        <option value="{{ availability_code }}" {% if availability_filter == availability_code %}selected{% endif %}>{{ availability_name }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or specialty_filter or availability_filter %}
+                    <a href="{% url 'doctors:doctor_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for doctor in page_obj %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 doctor-card hover-lift">
+                <div class="card-body text-center">
+                    <div class="doctor-avatar mb-3">
+                        {% if doctor.user.profile_image %}
+                            <img src="{{ doctor.user.profile_image.url }}" alt="{{ doctor.get_full_name }}" class="rounded-circle" width="60" height="60">
+                        {% else %}
+                            <div class="bg-ethiopia-green rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-user-md text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title mb-1">{{ doctor.get_full_name }}</h5>
+                    <p class="text-ethiopia-green fw-semibold mb-2">{{ doctor.get_specialty_display }}</p>
+                    
+                    {% if doctor.sub_specialty %}
+                        <p class="text-muted small mb-2">{{ doctor.sub_specialty }}</p>
+                    {% endif %}
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-blue mb-0">{{ doctor.years_of_experience }}</div>
+                                <small class="text-muted">Years Exp.</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-yellow mb-0">{{ doctor.consultation_fee }} ETB</div>
+                                <small class="text-muted">Consultation</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-red mb-0">{{ doctor.today_appointments }}</div>
+                                <small class="text-muted">Today</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h6 text-ethiopia-green mb-0">{{ doctor.total_appointments }}</div>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-{% if doctor.availability_status == 'full_time' %}success{% elif doctor.availability_status == 'part_time' %}warning{% elif doctor.availability_status == 'on_call' %}info{% else %}secondary{% endif %}">
+                            {{ doctor.get_availability_status_display }}
+                        </span>
+                        {% if doctor.is_available_today %}
+                            <span class="badge bg-success ms-1">Available Today</span>
+                        {% else %}
+                            <span class="badge bg-secondary ms-1">Not Available</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {% if doctor.languages_spoken %}
+                            <span class="badge bg-ethiopia-blue me-1">{{ doctor.languages_spoken }}</span>
+                        {% else %}
+                            <span class="badge bg-ethiopia-blue me-1">Amharic</span>
+                            <span class="badge bg-ethiopia-blue me-1">English</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{% url 'doctors:doctor_schedule' doctor.pk %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-calendar me-1"></i>Schedule
+                            </a>
+                            <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-plus me-1"></i>Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-id-badge me-1"></i>{{ doctor.license_number }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-graduation-cap me-1"></i>{{ doctor.graduation_year }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                <h5>No doctors found</h5>
+                <p class="text-muted">{% if search_query %}No doctors match your search criteria.{% else %}No doctors have been added yet.{% endif %}</p>
+                <a href="{% url 'doctors:doctor_add' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add First Doctor
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} doctors
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.doctor-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Doctor Avatar Centering and Sizing */
+.doctor-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 1rem auto;
+    width: 100%;
+}
+
+.doctor-profile-image {
+    object-fit: cover;
+    border: 2px solid var(--primary-green);
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 3px 8px rgba(0, 150, 57, 0.2);
+    transition: all 0.3s ease;
+}
+
+.doctor-profile-image:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
+}
+
+.doctor-icon-container {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    border: 2px solid var(--primary-green);
+    box-shadow: 0 3px 8px rgba(0, 150, 57, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.doctor-icon-container:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
+}
+
+.doctor-icon-container i {
+    position: relative;
+    z-index: 1;
+    font-size: 1.5rem !important;
+}
+
+/* Restore original card body layout */
+.doctor-card .card-body {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.doctor-card .card-title {
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+</style>
+
+<script>
+function exportDoctors() {
+    // Create CSV export functionality
+    const doctors = [];
+    const cards = document.querySelectorAll('.doctor-card');
+    
+    // Add header
+    doctors.push(['Name', 'Specialty', 'License', 'Experience', 'Fee', 'Status', 'Languages']);
+    
+    // Add data rows
+    cards.forEach(card => {
+        const name = card.querySelector('.card-title').textContent.trim();
+        const specialty = card.querySelector('.text-ethiopia-green').textContent.trim();
+        const license = card.querySelector('.card-footer small').textContent.replace('🆔', '').trim();
+        const experience = card.querySelector('.text-ethiopia-blue').textContent.trim();
+        const fee = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+        const status = card.querySelector('.badge').textContent.trim();
+        const languages = Array.from(card.querySelectorAll('.badge.bg-ethiopia-blue')).map(badge => badge.textContent.trim()).join(', ');
+        
+        doctors.push([name, specialty, license, experience, fee, status, languages]);
+    });
+    
+    // Create and download CSV
+    const csvContent = doctors.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'doctors_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

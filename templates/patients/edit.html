@@ -1,0 +1,267 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ patient.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Edit Patient: {{ patient.get_full_name }}</h1>
+        <p class="text-muted">Patient ID: {{ patient.patient_id }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Details
+        </a>
+        <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-2"></i>All Patients
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Update Patient Information</h5>
+            
+            <form method="post" data-validate="true">
+                {% csrf_token %}
+                
+                <!-- Personal Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-ethiopia-green mb-3">
+                            <i class="fas fa-user me-2"></i>Personal Information
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ patient.first_name }}" required>
+                            <label for="first_name">First Name *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ patient.last_name }}" required>
+                            <label for="last_name">Last Name *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth|date:'Y-m-d' }}" required>
+                            <label for="date_of_birth">Date of Birth *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="M" {% if patient.gender == 'M' %}selected{% endif %}>Male</option>
+                                <option value="F" {% if patient.gender == 'F' %}selected{% endif %}>Female</option>
+                                <option value="O" {% if patient.gender == 'O' %}selected{% endif %}>Other</option>
+                            </select>
+                            <label for="gender">Gender *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="blood_type" name="blood_type">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+" {% if patient.blood_type == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if patient.blood_type == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if patient.blood_type == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if patient.blood_type == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if patient.blood_type == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if patient.blood_type == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if patient.blood_type == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if patient.blood_type == 'O-' %}selected{% endif %}>O-</option>
+                            </select>
+                            <label for="blood_type">Blood Type</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-ethiopia-green mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Address Information
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="kebele" name="kebele" value="{{ patient.kebele }}" required>
+                            <label for="kebele">Kebele *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="woreda" name="woreda" value="{{ patient.woreda }}" required>
+                            <label for="woreda">Woreda *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="city" name="city" required>
+                                <option value="">Select City</option>
+                                <option value="Addis Ababa" {% if patient.city == 'Addis Ababa' %}selected{% endif %}>Addis Ababa</option>
+                                <option value="Bahir Dar" {% if patient.city == 'Bahir Dar' %}selected{% endif %}>Bahir Dar</option>
+                                <option value="Mekelle" {% if patient.city == 'Mekelle' %}selected{% endif %}>Mekelle</option>
+                                <option value="Hawassa" {% if patient.city == 'Hawassa' %}selected{% endif %}>Hawassa</option>
+                                <option value="Dire Dawa" {% if patient.city == 'Dire Dawa' %}selected{% endif %}>Dire Dawa</option>
+                                <option value="Gondar" {% if patient.city == 'Gondar' %}selected{% endif %}>Gondar</option>
+                                <option value="Adama" {% if patient.city == 'Adama' %}selected{% endif %}>Adama</option>
+                                <option value="Jimma" {% if patient.city == 'Jimma' %}selected{% endif %}>Jimma</option>
+                            </select>
+                            <label for="city">City *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="region" name="region" required>
+                                <option value="">Select Region</option>
+                                <option value="Addis Ababa" {% if patient.region == 'Addis Ababa' %}selected{% endif %}>Addis Ababa</option>
+                                <option value="Amhara" {% if patient.region == 'Amhara' %}selected{% endif %}>Amhara</option>
+                                <option value="Tigray" {% if patient.region == 'Tigray' %}selected{% endif %}>Tigray</option>
+                                <option value="SNNP" {% if patient.region == 'SNNP' %}selected{% endif %}>SNNP</option>
+                                <option value="Oromia" {% if patient.region == 'Oromia' %}selected{% endif %}>Oromia</option>
+                                <option value="Somali" {% if patient.region == 'Somali' %}selected{% endif %}>Somali</option>
+                                <option value="Afar" {% if patient.region == 'Afar' %}selected{% endif %}>Afar</option>
+                                <option value="Benishangul-Gumuz" {% if patient.region == 'Benishangul-Gumuz' %}selected{% endif %}>Benishangul-Gumuz</option>
+                                <option value="Gambela" {% if patient.region == 'Gambela' %}selected{% endif %}>Gambela</option>
+                                <option value="Harari" {% if patient.region == 'Harari' %}selected{% endif %}>Harari</option>
+                                <option value="Dire Dawa" {% if patient.region == 'Dire Dawa' %}selected{% endif %}>Dire Dawa</option>
+                            </select>
+                            <label for="region">Region *</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-ethiopia-green mb-3">
+                            <i class="fas fa-phone me-2"></i>Contact Information
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ patient.phone }}" data-phone required>
+                            <label for="phone">Phone Number *</label>
+                            <div class="form-text">Format: +251 91 234 5678</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" value="{{ patient.email }}">
+                            <label for="email">Email Address</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-ethiopia-green mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Emergency Contact
+                        </h6>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" value="{{ patient.emergency_contact_name }}" required>
+                            <label for="emergency_contact_name">Contact Name *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ patient.emergency_contact_phone }}" data-phone required>
+                            <label for="emergency_contact_phone">Contact Phone *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="emergency_contact_relationship" name="emergency_contact_relationship" required>
+                                <option value="">Select Relationship</option>
+                                <option value="Spouse" {% if patient.emergency_contact_relationship == 'Spouse' %}selected{% endif %}>Spouse</option>
+                                <option value="Parent" {% if patient.emergency_contact_relationship == 'Parent' %}selected{% endif %}>Parent</option>
+                                <option value="Child" {% if patient.emergency_contact_relationship == 'Child' %}selected{% endif %}>Child</option>
+                                <option value="Sibling" {% if patient.emergency_contact_relationship == 'Sibling' %}selected{% endif %}>Sibling</option>
+                                <option value="Friend" {% if patient.emergency_contact_relationship == 'Friend' %}selected{% endif %}>Friend</option>
+                                <option value="Other" {% if patient.emergency_contact_relationship == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                            <label for="emergency_contact_relationship">Relationship *</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-ethiopia-green mb-3">
+                            <i class="fas fa-notes-medical me-2"></i>Medical Information
+                        </h6>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="medical_history" name="medical_history" style="height: 100px">{{ patient.medical_history }}</textarea>
+                            <label for="medical_history">Medical History</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="allergies" name="allergies" style="height: 80px">{{ patient.allergies }}</textarea>
+                            <label for="allergies">Known Allergies</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="current_medications" name="current_medications" style="height: 80px">{{ patient.current_medications }}</textarea>
+                            <label for="current_medications">Current Medications</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update Patient
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="text-ethiopia-green mb-3">
+                <i class="fas fa-info-circle me-2"></i>Patient Information
+            </h6>
+            
+            <div class="alert alert-info">
+                <h6><i class="fas fa-user me-2"></i>Current Patient</h6>
+                <p class="mb-2"><strong>{{ patient.get_full_name }}</strong></p>
+                <p class="mb-2">ID: {{ patient.patient_id }}</p>
+                <p class="mb-0">Age: {{ patient.get_age }} years</p>
+            </div>
+            
+            <div class="alert alert-warning">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Important</h6>
+                <ul class="mb-0 small">
+                    <li>Changes will be saved immediately</li>
+                    <li>Patient ID cannot be changed</li>
+                    <li>All fields marked with * are required</li>
+                    <li>Emergency contact is mandatory</li>
+                </ul>
+            </div>
+            
+            <div class="alert alert-success">
+                <h6><i class="fas fa-shield-alt me-2"></i>Privacy Protected</h6>
+                <p class="mb-0 small">All patient information is confidential and protected under Ethiopian medical privacy laws.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

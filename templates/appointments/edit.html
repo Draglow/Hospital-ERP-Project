@@ -1,0 +1,298 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Edit Appointment - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Edit Appointment</h1>
+        <p class="text-muted">Modify appointment details and schedule</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Details
+        </a>
+        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-info">
+            <i class="fas fa-list me-2"></i>All Appointments
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Appointment Information</h5>
+                <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %} fs-6">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user text-ethiopia-green me-2"></i>
+                            Patient Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Patient *</label>
+                            <select class="form-select" name="patient" required>
+                                {% for patient in patients %}
+                                    <option value="{{ patient.id }}" {% if patient.id == appointment.patient.id %}selected{% endif %}>
+                                        {{ patient.get_full_name }} - {{ patient.patient_id }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a patient.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Date *</label>
+                            <input type="date" class="form-control" name="appointment_date" value="{{ appointment.appointment_date|date:'Y-m-d' }}" required>
+                            <div class="invalid-feedback">Please select an appointment date.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Time *</label>
+                            <input type="time" class="form-control" name="appointment_time" value="{{ appointment.appointment_time|time:'H:i' }}" required>
+                            <div class="invalid-feedback">Please select an appointment time.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-user-md text-ethiopia-blue me-2"></i>
+                            Doctor Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Doctor *</label>
+                            <select class="form-select" name="doctor" required>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}" {% if doctor.id == appointment.doctor.id %}selected{% endif %}>
+                                        Dr. {{ doctor.get_full_name }} - {{ doctor.specialization }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a doctor.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Type *</label>
+                            <select class="form-select" name="appointment_type" required>
+                                <option value="consultation" {% if appointment.appointment_type == 'consultation' %}selected{% endif %}>Consultation</option>
+                                <option value="follow_up" {% if appointment.appointment_type == 'follow_up' %}selected{% endif %}>Follow-up</option>
+                                <option value="emergency" {% if appointment.appointment_type == 'emergency' %}selected{% endif %}>Emergency</option>
+                                <option value="routine_checkup" {% if appointment.appointment_type == 'routine_checkup' %}selected{% endif %}>Routine Checkup</option>
+                                <option value="vaccination" {% if appointment.appointment_type == 'vaccination' %}selected{% endif %}>Vaccination</option>
+                                <option value="surgery" {% if appointment.appointment_type == 'surgery' %}selected{% endif %}>Surgery</option>
+                            </select>
+                            <div class="invalid-feedback">Please select appointment type.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" name="priority">
+                                <option value="normal" {% if appointment.priority == 'normal' %}selected{% endif %}>Normal</option>
+                                <option value="urgent" {% if appointment.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                                <option value="emergency" {% if appointment.priority == 'emergency' %}selected{% endif %}>Emergency</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-cog text-ethiopia-yellow me-2"></i>
+                            Status & Duration
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="scheduled" {% if appointment.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                                <option value="in_progress" {% if appointment.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if appointment.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if appointment.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                <option value="no_show" {% if appointment.status == 'no_show' %}selected{% endif %}>No Show</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" name="duration" value="{{ appointment.duration|default:30 }}" min="15" max="240" step="15">
+                            <div class="form-text">Standard consultation: 30 minutes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="mb-3">
+                            <i class="fas fa-notes-medical text-ethiopia-red me-2"></i>
+                            Additional Information
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Chief Complaint</label>
+                            <textarea class="form-control" name="chief_complaint" rows="3" placeholder="Brief description of the patient's main concern...">{{ appointment.chief_complaint }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="2" placeholder="Additional notes or special instructions...">{{ appointment.notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if appointment.status == 'completed' %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> This appointment has been completed. Changes to date, time, or participants may affect medical records.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    {% if appointment.status == 'scheduled' %}
+                        <button type="button" class="btn btn-warning" onclick="cancelAppointment()">
+                            <i class="fas fa-ban me-2"></i>Cancel Appointment
+                        </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-green me-2"></i>
+                Appointment History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Created:</strong> {{ appointment.created_at|date:"M d, Y g:i A" }}
+                </div>
+                {% if appointment.updated_at != appointment.created_at %}
+                <div class="mb-2">
+                    <strong>Last Modified:</strong> {{ appointment.updated_at|date:"M d, Y g:i A" }}
+                </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Original Date:</strong> {{ appointment.appointment_date|date:"M d, Y" }}
+                </div>
+                <div class="mb-2">
+                    <strong>Original Time:</strong> {{ appointment.appointment_time|time:"g:i A" }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-user text-ethiopia-blue me-2"></i>
+                Patient Summary
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Name:</strong> {{ appointment.patient.get_full_name }}
+                </div>
+                <div class="mb-2">
+                    <strong>Age:</strong> {{ appointment.patient.age }} years
+                </div>
+                <div class="mb-2">
+                    <strong>Phone:</strong> {{ appointment.patient.phone_number }}
+                </div>
+                <div class="mb-2">
+                    <strong>Blood Type:</strong> {{ appointment.patient.blood_type|default:"Not specified" }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-user-md text-ethiopia-yellow me-2"></i>
+                Doctor Summary
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Name:</strong> Dr. {{ appointment.doctor.get_full_name }}
+                </div>
+                <div class="mb-2">
+                    <strong>Specialization:</strong> {{ appointment.doctor.specialization }}
+                </div>
+                <div class="mb-2">
+                    <strong>Department:</strong> {{ appointment.doctor.department }}
+                </div>
+                <div class="mb-2">
+                    <strong>Phone:</strong> {{ appointment.doctor.phone_number }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-exclamation-triangle text-ethiopia-red me-2"></i>
+                Important Notes
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">• Changes to completed appointments may affect medical records</p>
+                <p class="mb-2">• Notify patient of any schedule changes</p>
+                <p class="mb-0">• Emergency appointments take priority over regular slots</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+function cancelAppointment() {
+    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        // Update status to cancelled
+        document.querySelector('select[name="status"]').value = 'cancelled';
+        // Submit the form
+        document.querySelector('form').submit();
+    }
+}
+
+// Set minimum date to today for future appointments
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[name="appointment_date"]');
+    const currentStatus = '{{ appointment.status }}';
+    
+    if (dateInput && currentStatus === 'scheduled') {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+    }
+});
+</script>
+{% endblock %}

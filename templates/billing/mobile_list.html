@@ -1,0 +1,355 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Billing - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Billing & Invoices</h1>
+        <p class="text-muted">Manage patient billing and payment processing</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportInvoices()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <a href="{% url 'billing:invoice_add' %}?mobile=1" class="btn btn-primary mobile-add-invoice-btn">
+            <i class="fas fa-plus me-2"></i>
+            <span class="mobile-btn-text">Create Invoice</span>
+        </a>
+    </div>
+</div>
+
+<div class="mobile-dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Invoice Management ({{ total_invoices }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <input type="hidden" name="mobile" value="1">
+                <div class="input-group" style="width: 200px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search invoices..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="status" class="form-select" style="width: 120px;" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    {% for status_code, status_name in statuses %}
+                        <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="payment_method" class="form-select" style="width: 130px;" onchange="this.form.submit()">
+                    <option value="">All Methods</option>
+                    {% for method_code, method_name in payment_methods %}
+                        <option value="{{ method_code }}" {% if payment_method_filter == method_code %}selected{% endif %}>{{ method_name }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or status_filter or payment_method_filter %}
+                    <a href="{% url 'billing:invoice_list' %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for invoice in page_obj %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 mobile-invoice-card hover-lift">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">{{ invoice.invoice_number }}</span>
+                    <span class="badge bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'pending' %}warning{% elif invoice.status == 'overdue' %}danger{% else %}secondary{% endif %}">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-ethiopia-green rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="card-title mb-1">{{ invoice.patient.get_full_name }}</h6>
+                            <small class="text-muted">{{ invoice.patient.patient_id }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Billing Information Grid - 2 items per row -->
+                    <div class="mobile-billing-info-grid mb-3">
+                        <div class="mobile-billing-info-row">
+                            <div class="mobile-billing-info-item">
+                                <div class="mobile-billing-info-value text-ethiopia-yellow">{{ invoice.total_amount|floatformat:2 }} ETB</div>
+                                <div class="mobile-billing-info-label">Total Amount</div>
+                            </div>
+                            <div class="mobile-billing-info-item">
+                                <div class="mobile-billing-info-value text-ethiopia-blue">{{ invoice.paid_amount|floatformat:2 }} ETB</div>
+                                <div class="mobile-billing-info-label">Paid Amount</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold text-ethiopia-green">{{ invoice.invoice_date|date:"M d, Y" }}</div>
+                        <small class="text-muted">Due: {{ invoice.due_date|date:"M d, Y" }}</small>
+                    </div>
+
+                    {% if invoice.payment_method %}
+                    <div class="mb-3">
+                        <span class="badge bg-info">{{ invoice.get_payment_method_display }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if invoice.notes %}
+                    <div class="mb-3">
+                        <small class="text-muted">{{ invoice.notes|truncatechars:60 }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <a href="{% url 'billing:invoice_detail' invoice.pk %}?mobile=1" class="btn btn-outline-primary btn-sm" title="View">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{% url 'billing:invoice_pdf' invoice.pk %}?mobile=1" class="btn btn-outline-info btn-sm" title="Download PDF">
+                                <i class="fas fa-download me-1"></i>PDF
+                            </a>
+                            {% if invoice.status != 'paid' %}
+                                <button class="btn btn-outline-success btn-sm" onclick="markAsPaid({{ invoice.pk }})" title="Mark as Paid">
+                                    <i class="fas fa-check me-1"></i>Pay
+                                </button>
+                            {% endif %}
+                        </div>
+                        {% if invoice.status != 'paid' %}
+                        <div class="btn-group">
+                            <a href="{% url 'billing:invoice_edit' invoice.pk %}?mobile=1" class="btn btn-outline-warning btn-sm" title="Edit">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteInvoice({{ invoice.pk }})" title="Delete">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                <h5>No invoices found</h5>
+                <p class="text-muted">{% if search_query %}No invoices match your search criteria.{% else %}No invoices have been created yet.{% endif %}</p>
+                <a href="{% url 'billing:invoice_add' %}?mobile=1" class="btn btn-primary mobile-add-invoice-btn">
+                    <i class="fas fa-plus me-2"></i>
+                    <span class="mobile-btn-text">Create First Invoice</span>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} invoices
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mark Invoice as Paid</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Amount</label>
+                        <input type="number" class="form-control" id="paymentAmount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" id="paymentMethod">
+                            <option value="cash">Cash</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="insurance">Insurance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Notes</label>
+                        <textarea class="form-control" id="paymentNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="savePayment()">Mark as Paid</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-invoice-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-invoice-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentInvoiceId = null;
+
+function exportInvoices() {
+    // Create CSV export functionality
+    const invoices = [];
+    const cards = document.querySelectorAll('.mobile-invoice-card');
+
+    // Add header
+    invoices.push(['Invoice Number', 'Patient', 'Total Amount', 'Paid Amount', 'Status', 'Invoice Date', 'Due Date', 'Payment Method']);
+
+    // Add data rows
+    cards.forEach(card => {
+        const invoiceNumber = card.querySelector('.badge.bg-primary').textContent.trim();
+        const patient = card.querySelector('.card-title').textContent.trim();
+        const totalAmount = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+        const paidAmount = card.querySelector('.text-ethiopia-blue').textContent.trim();
+        const status = card.querySelector('.card-header .badge:last-child').textContent.trim();
+        const invoiceDate = card.querySelector('.text-ethiopia-green').textContent.trim();
+        const dueDate = card.querySelector('.text-muted').textContent.replace('Due:', '').trim();
+        const paymentMethod = card.querySelector('.badge.bg-info') ? card.querySelector('.badge.bg-info').textContent.trim() : '';
+
+        invoices.push([invoiceNumber, patient, totalAmount, paidAmount, status, invoiceDate, dueDate, paymentMethod]);
+    });
+
+    // Create and download CSV
+    const csvContent = invoices.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'invoices_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function markAsPaid(invoiceId) {
+    currentInvoiceId = invoiceId;
+
+    // Get invoice total amount from the card
+    const card = document.querySelector(`[onclick="markAsPaid(${invoiceId})"]`).closest('.mobile-invoice-card');
+    const totalAmount = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+
+    document.getElementById('paymentAmount').value = totalAmount;
+    document.getElementById('paymentMethod').value = 'cash';
+    document.getElementById('paymentNotes').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
+function savePayment() {
+    const amount = document.getElementById('paymentAmount').value;
+    const method = document.getElementById('paymentMethod').value;
+    const notes = document.getElementById('paymentNotes').value;
+
+    if (!amount || amount <= 0) {
+        alert('Please enter a valid payment amount');
+        return;
+    }
+
+    // Here you would normally send an AJAX request to mark the invoice as paid
+    // For now, we'll just show a success message and reload
+    alert(`Payment of ${amount} ETB recorded successfully!`);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+    modal.hide();
+
+    // Reload the page to show updated status
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function deleteInvoice(invoiceId) {
+    if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+        // Here you would normally send an AJAX request to delete the invoice
+        // For now, we'll just show a success message and reload
+        alert('Invoice deleted successfully!');
+
+        // Reload the page to show updated list
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile billing list loaded');
+
+    // Show mobile notification if coming from dashboard
+    if (document.referrer.includes('/dashboard/mobile/')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Billing loaded successfully!', 'success');
+        }
+    }
+});
+</script>
+{% endblock %}

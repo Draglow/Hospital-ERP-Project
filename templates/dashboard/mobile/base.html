@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#009639">
+    <title>{% block title %}Mobile Dashboard - Ethiopian Hospital ERP{% endblock %}</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    <link href="{% static 'css/mobile.css' %}" rel="stylesheet">
+    <link href="{% static 'css/mobile/mobile-dashboard.css' %}" rel="stylesheet">
+
+    <!-- Inline CSS to ensure notification panel styles are loaded -->
+    <style>
+        /* Ensure notification panel styles are definitely applied */
+        .mobile-notifications-panel {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            width: 320px !important;
+            max-width: 85vw !important;
+            height: 100vh !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-left: 1px solid rgba(0, 150, 57, 0.1) !important;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1) !important;
+            transform: translateX(100%) !important;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1040 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            /* border: 2px solid red !important; */ /* Debug border removed */
+        }
+
+        .mobile-notifications-panel.active {
+            transform: translateX(0) !important;
+            /* border: 2px solid green !important; */ /* Active state debug border removed */
+        }
+
+        .mobile-notifications-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1035 !important;
+            backdrop-filter: blur(2px) !important;
+            -webkit-backdrop-filter: blur(2px) !important;
+        }
+
+        .mobile-notifications-overlay.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/icons/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/icons/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/icons/favicon-16x16.png' %}">
+</head>
+<body class="mobile-dashboard-body" data-theme="light">
+    <!-- Mobile Top Navigation -->
+    <nav class="mobile-navbar fixed-top">
+        <div class="mobile-navbar-content">
+            <!-- Left: Sidebar Toggle -->
+            <button class="mobile-sidebar-toggle" type="button" id="mobileSidebarToggle" aria-label="Toggle navigation">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <!-- Center: Brand -->
+            
+            <a class="navbar-brand fw-bold navbar-brand-modern" href="/" aria-label="Ethiopian Hospital ERP Home">
+                <div class="brand-icon-wrapper mt-2 mb-0">
+                    <img src="{% static 'images/logo.png' %}" alt="TenaERP Logo" class="brand-logo me-2 mb-0" style="height: 35px; width: auto;">
+                    <span class="brand-text navbar-brand-text ml-0 mb-0">TenaERP</span>
+                </div>
+                <!-- <span class="brand-text navbar-brand-text ml-0 ">TenaERP</span> -->
+            </a>
+             
+            <!-- Right: Actions -->
+            <div class="mobile-navbar-actions">
+                <!-- Search Toggle -->
+                <button class="mobile-action-btn" id="mobileSearchToggle" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <!-- Notifications -->
+                <div class="mobile-notifications">
+                    <button class="mobile-action-btn" id="mobileNotificationToggle" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+                
+                <!-- Profile -->
+                <button class="mobile-action-btn" id="mobileProfileToggle" aria-label="Profile">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Search Bar (Hidden by default) -->
+        <div class="mobile-search-bar" id="mobileSearchBar">
+            <div class="mobile-search-content">
+                <input type="text" class="mobile-search-input" placeholder="Search patients, appointments..." id="mobileGlobalSearch">
+                <button class="mobile-search-close" id="mobileSearchClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Sidebar Drawer -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <div class="mobile-sidebar-content">
+            <!-- User Info -->
+            <div class="mobile-user-info">
+                <div class="mobile-user-avatar">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="Profile" class="user-avatar-img">
+                    {% else %}
+                        <div class="user-avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mobile-user-details">
+                    <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
+                    <small class="user-role">{{ user.role|title }}</small>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="mobile-nav-menu">
+                <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if request.resolver_match.url_name == 'mobile_dashboard' %}active{% endif %}" href="{% url 'patients:mobile_dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if 'patients' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'patients:patient_list' %}?mobile=1">
+                            <i class="fas fa-users"></i>
+                            <span>Patients</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if 'appointments' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'appointments:appointment_list' %}?mobile=1">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if 'doctors' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'doctors:doctor_list' %}?mobile=1">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctors</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'billing:invoice_list' %}?mobile=1">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link {% if 'pharmacy' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'pharmacy:medicine_list' %}?mobile=1">
+                            <i class="fas fa-pills"></i>
+                            <span>Pharmacy</span>
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a class="mobile-nav-link mobile-nav-expandable" href="#" data-bs-toggle="collapse" data-bs-target="#mobileReportsMenu" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                            <i class="fas fa-chevron-down mobile-nav-arrow"></i>
+                        </a>
+                        <div class="collapse mobile-nav-submenu" id="mobileReportsMenu">
+                            <ul class="mobile-nav-sublist">
+                                <li class="mobile-nav-subitem">
+                                    <a class="mobile-nav-sublink" href="{% url 'patients:mobile_dashboard' %}#analytics">
+                                        <i class="fas fa-chart-line"></i>Analytics
+                                    </a>
+                                </li>
+                                <li class="mobile-nav-subitem">
+                                    <a class="mobile-nav-sublink" href="{% url 'patients:patient_export' %}">
+                                        <i class="fas fa-file-excel"></i>Export Patients
+                                    </a>
+                                </li>
+                                <li class="mobile-nav-subitem">
+                                    <a class="mobile-nav-sublink" href="#" onclick="exportAllData()">
+                                        <i class="fas fa-database"></i>Export All Data
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Mobile Sidebar Footer -->
+            <div class="mobile-sidebar-footer">
+                <div class="mobile-time-info">
+                    <div class="current-time">
+                        <small class="time-label">Current Time</small>
+                        <small class="time-value" id="mobileCurrentTime">--:--:--</small>
+                    </div>
+                    <div class="ethiopian-date">
+                        <small class="date-label">Today</small>
+                        <small class="date-value" id="mobileEthiopianDate">Loading...</small>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="mobile-quick-actions">
+                    <a href="{% url 'accounts:profile' %}?mobile=1" class="mobile-quick-action">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="{% url 'accounts:settings' %}?mobile=1" class="mobile-quick-action">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                    <a href="{% url 'accounts:logout' %}?mobile=1" class="mobile-quick-action" onclick="clearWelcomeSession()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+
+    <!-- Mobile Notifications Panel -->
+    <div class="mobile-notifications-panel" id="mobileNotificationsPanel">
+        <div class="mobile-notifications-header">
+            <h6 class="mobile-notifications-title">Notifications</h6>
+            <button class="mobile-notifications-close" id="mobileNotificationsClose" aria-label="Close notifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Notifications actions - moved to top -->
+        <div class="mobile-notifications-actions mobile-notifications-actions-top" id="mobileNotificationsActions" style="display: none;">
+            <div class="d-flex gap-2 p-3 border-bottom">
+                <button class="btn btn-sm btn-ethiopia-green flex-fill" id="mobileViewAllNotificationsBtn">
+                    <i class="fas fa-list me-1"></i>
+                    View All
+                </button>
+                <button class="btn btn-sm btn-outline-ethiopia-green flex-fill" id="mobileMarkAllReadBtn">
+                    <i class="fas fa-check-double me-1"></i>
+                    Mark as Read
+                </button>
+            </div>
+        </div>
+
+        <div class="mobile-notifications-content" id="mobileNotificationsContent">
+            <!-- Loading state -->
+            <div class="mobile-notifications-loading" id="mobileNotificationsLoading">
+                <div class="d-flex justify-content-center align-items-center py-4">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="text-muted">Loading notifications...</span>
+                </div>
+            </div>
+
+            <!-- Notifications list -->
+            <div class="mobile-notifications-list" id="mobileNotificationsList" style="display: none;">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+
+            <!-- Empty state -->
+            <div class="mobile-notifications-empty" id="mobileNotificationsEmpty" style="display: none;">
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                    <h6 class="text-muted mb-2">No notifications</h6>
+                    <p class="text-muted small mb-0">You're all caught up!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Notifications Overlay -->
+    <div class="mobile-notifications-overlay" id="mobileNotificationsOverlay"></div>
+    
+    <!-- Mobile Profile Panel -->
+    <div class="mobile-profile-panel" id="mobileProfilePanel">
+        <div class="mobile-profile-header">
+            <h6>Profile</h6>
+            <button class="mobile-profile-close" id="mobileProfileClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-profile-content">
+            <div class="mobile-profile-info">
+                <div class="mobile-profile-avatar">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="Profile">
+                    {% else %}
+                        <div class="profile-avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <h6>{{ user.get_full_name|default:user.username }}</h6>
+                <small>{{ user.role|title }}</small>
+            </div>
+            <div class="mobile-profile-actions">
+                <a href="{% url 'accounts:profile' %}?mobile=1" class="mobile-profile-action">
+                    <i class="fas fa-user me-2"></i>View Profile
+                </a>
+                <a href="{% url 'accounts:settings' %}?mobile=1" class="mobile-profile-action">
+                    <i class="fas fa-cog me-2"></i>Settings
+                </a>
+                <a href="{% url 'accounts:logout' %}?mobile=1" class="mobile-profile-action" onclick="clearWelcomeSession()">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="mobile-main-content">
+        <div class="mobile-content-container">
+            {% if messages %}
+                <div class="mobile-messages">
+                    {% for message in messages %}
+                        <div class="mobile-alert mobile-alert-{{ message.tags }}">
+                            {{ message }}
+                            <button type="button" class="mobile-alert-close" data-dismiss="alert">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation (5-Section Navigation) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="{% url 'patients:patient_list' %}?mobile=1" class="mobile-bottom-nav-item {% if 'patients' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>Patients</span>
+        </a>
+        <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="mobile-bottom-nav-item {% if 'appointments' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Appointments</span>
+        </a>
+        <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="mobile-bottom-nav-item {% if 'doctors' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-user-md"></i>
+            <span>Doctors</span>
+        </a>
+        <a href="{% url 'billing:invoice_list' %}?mobile=1" class="mobile-bottom-nav-item {% if 'billing' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Billing</span>
+        </a>
+        <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="mobile-bottom-nav-item {% if 'pharmacy' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-pills"></i>
+            <span>Pharmacy</span>
+        </a>
+    </nav>
+
+    <!-- Global Error Handler -->
+    {% include 'errors/error_handler.html' %}
+    
+    <!-- CSRF Token -->
+    {% csrf_token %}
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/mobile/mobile-dashboard.js' %}"></script>
+
+    <script>
+        // Clear welcome session storage on logout
+        function clearWelcomeSession() {
+            sessionStorage.removeItem('mobileWelcomeShown');
+            localStorage.removeItem('lastMobileWelcome');
+            console.log('Welcome session cleared for fresh login experience');
+        }
+
+        // Global function for backward compatibility
+        function toggleNotificationPanel() {
+            console.log('toggleNotificationPanel called - delegating to MobileDashboard');
+
+            if (window.mobileDashboard && typeof window.mobileDashboard.toggleMobileNotificationPanel === 'function') {
+                window.mobileDashboard.toggleMobileNotificationPanel();
+            } else {
+                console.warn('MobileDashboard not available, using fallback');
+                fallbackToggleNotificationPanel();
+            }
+        }
+
+        // Fallback implementation for when MobileDashboard is not available
+        function fallbackToggleNotificationPanel() {
+            const panel = document.getElementById('mobileNotificationsPanel');
+            const overlay = document.getElementById('mobileNotificationsOverlay');
+
+            if (!panel || !overlay) {
+                console.error('Notification panel elements not found');
+                return;
+            }
+
+            const isActive = panel.classList.contains('active');
+
+            if (isActive) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            } else {
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                fallbackLoadNotifications();
+            }
+        }
+
+        // Global functions for backward compatibility - delegate to MobileDashboard
+        function markAllNotificationsAsRead() {
+            console.log('markAllNotificationsAsRead called - delegating to MobileDashboard');
+
+            if (window.mobileDashboard && typeof window.mobileDashboard.markAllNotificationsAsRead === 'function') {
+                window.mobileDashboard.markAllNotificationsAsRead();
+            } else {
+                console.warn('MobileDashboard not available for markAllNotificationsAsRead');
+                // Simple fallback - just hide the badge
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+                alert('All notifications marked as read');
+            }
+        }
+
+        function viewAllNotifications() {
+            console.log('viewAllNotifications called - delegating to MobileDashboard');
+
+            // Close panel first
+            if (window.mobileDashboard && typeof window.mobileDashboard.closeMobileNotificationPanel === 'function') {
+                window.mobileDashboard.closeMobileNotificationPanel();
+            } else {
+                toggleNotificationPanel(); // Use fallback to close
+            }
+
+            // Navigate to notifications page
+            setTimeout(() => {
+                window.location.href = '/notifications/?mobile=1';
+            }, 300);
+        }
+
+        // Fallback notification loading function
+        function fallbackLoadNotifications() {
+            console.log('Loading notifications using fallback method...');
+
+            const loadingElement = document.getElementById('mobileNotificationsLoading');
+            const listElement = document.getElementById('mobileNotificationsList');
+            const emptyElement = document.getElementById('mobileNotificationsEmpty');
+            const actionsElement = document.getElementById('mobileNotificationsActions');
+
+            // Show loading state
+            if (loadingElement) loadingElement.style.display = 'block';
+            if (listElement) listElement.style.display = 'none';
+            if (emptyElement) emptyElement.style.display = 'none';
+            if (actionsElement) actionsElement.style.display = 'none';
+
+            // Fetch notifications from the server
+            fetch('/notifications/dropdown/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                console.log('Notifications loaded successfully');
+
+                // Hide loading state
+                if (loadingElement) loadingElement.style.display = 'none';
+
+                // Parse the HTML response to extract notifications
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const notifications = doc.querySelectorAll('.dropdown-item, .notification-item');
+
+                if (notifications.length > 0) {
+                    // Show notifications list
+                    if (listElement) {
+                        listElement.innerHTML = '';
+
+                        notifications.forEach((notification, index) => {
+                            if (index >= 10) return; // Limit to 10 notifications
+
+                            // Create mobile-friendly notification item
+                            const mobileNotification = createFallbackNotificationItem(notification, index);
+                            listElement.appendChild(mobileNotification);
+                        });
+
+                        listElement.style.display = 'block';
+                    }
+
+                    // Show actions
+                    if (actionsElement) actionsElement.style.display = 'block';
+                } else {
+                    // Show empty state
+                    if (emptyElement) emptyElement.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+
+                // Hide loading state and show error state
+                if (loadingElement) loadingElement.style.display = 'none';
+                if (emptyElement) {
+                    emptyElement.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-exclamation-triangle text-warning mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                            <h6 class="text-muted mb-2">Error loading notifications</h6>
+                            <p class="text-muted small mb-0">Please try again later</p>
+                        </div>
+                    `;
+                    emptyElement.style.display = 'block';
+                }
+            });
+        }
+
+        // Create fallback mobile-friendly notification item
+        function createFallbackNotificationItem(notification, index) {
+            const div = document.createElement('div');
+            div.className = 'mobile-notification-item p-3 border-bottom';
+
+            // Extract notification data from different possible structures
+            const title = notification.textContent?.trim() ||
+                         notification.querySelector('.notification-title')?.textContent ||
+                         'Notification';
+            const isUnread = notification.classList.contains('unread') || Math.random() > 0.5; // Mock unread status
+            const notificationId = notification.dataset?.notificationId || index;
+
+            // Generate appropriate icon and message based on title content
+            let icon = 'fas fa-bell';
+            let message = 'You have a new notification';
+
+            if (title.toLowerCase().includes('appointment')) {
+                icon = 'fas fa-calendar-alt';
+                message = 'Appointment related notification';
+            } else if (title.toLowerCase().includes('patient')) {
+                icon = 'fas fa-user-plus';
+                message = 'Patient related notification';
+            } else if (title.toLowerCase().includes('billing') || title.toLowerCase().includes('invoice')) {
+                icon = 'fas fa-file-invoice';
+                message = 'Billing related notification';
+            } else if (title.toLowerCase().includes('pharmacy') || title.toLowerCase().includes('medicine')) {
+                icon = 'fas fa-pills';
+                message = 'Pharmacy related notification';
+            }
+
+            const timeAgo = 'Just now'; // Simplified time
+
+            div.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon me-3">
+                        <i class="${icon} text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 ${isUnread ? 'fw-bold' : ''}">${title.substring(0, 50)}${title.length > 50 ? '...' : ''}</h6>
+                        <p class="mb-1 text-muted small">${message}</p>
+                        <small class="text-muted">${timeAgo}</small>
+                    </div>
+                    <div class="notification-actions">
+                        ${isUnread ? '<div class="bg-primary rounded-circle" style="width: 8px; height: 8px;"></div>' : ''}
+                    </div>
+                </div>
+            `;
+
+            // Add click handler
+            div.addEventListener('click', function() {
+                console.log('Notification clicked:', title);
+                if (isUnread) {
+                    // Mark as read visually
+                    div.querySelector('.fw-bold')?.classList.remove('fw-bold');
+                    const indicator = div.querySelector('.bg-primary');
+                    if (indicator) indicator.remove();
+                }
+            });
+
+            return div;
+        }
+
+        // Test function for notification click (backward compatibility)
+        function testNotificationClick() {
+            console.log('testNotificationClick called');
+
+            const panel = document.getElementById('mobileNotificationsPanel');
+            const overlay = document.getElementById('mobileNotificationsOverlay');
+
+            if (!panel || !overlay) {
+                console.error('Panel or overlay not found!');
+                alert('Panel or overlay not found! Check console for details.');
+                return;
+            }
+
+            console.log('Toggling panel manually...');
+
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                console.log('Panel closed');
+            } else {
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('Panel opened');
+
+                // Show loading state
+                const loadingElement = document.getElementById('mobileNotificationsLoading');
+                const listElement = document.getElementById('mobileNotificationsList');
+                const emptyElement = document.getElementById('mobileNotificationsEmpty');
+
+                if (loadingElement) loadingElement.style.display = 'block';
+                if (listElement) listElement.style.display = 'none';
+                if (emptyElement) emptyElement.style.display = 'none';
+
+                // Simulate loading and show empty state after 2 seconds
+                setTimeout(() => {
+                    if (loadingElement) loadingElement.style.display = 'none';
+                    if (emptyElement) emptyElement.style.display = 'block';
+                }, 2000);
+            }
+        }
+
+        // Initialize notification system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile notification template loaded');
+
+            // The MobileDashboard class will handle all notification functionality
+            // This script just provides fallback functions for backward compatibility
+
+            // Check if MobileDashboard is available after a short delay
+            setTimeout(() => {
+                if (window.mobileDashboard) {
+                    console.log('✅ MobileDashboard instance is available - notification system ready');
+                } else {
+                    console.warn('⚠️ MobileDashboard instance not found - using fallback functions');
+                }
+            }, 1000);
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

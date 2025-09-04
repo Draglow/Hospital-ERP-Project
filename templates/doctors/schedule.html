@@ -1,0 +1,247 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dr. {{ doctor.get_full_name }} Schedule - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dr. {{ doctor.get_full_name }} - Schedule</h1>
+        <p class="text-muted">{{ doctor.specialization }} - {{ doctor.department }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Profile
+        </a>
+        <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}" class="btn btn-primary">
+            <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Weekly Schedule</h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" onclick="showWeek('current')">This Week</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="showWeek('next')">Next Week</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered schedule-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 100px;">Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hour in schedule_hours %}
+                        <tr>
+                            <td class="text-center fw-semibold">{{ hour }}</td>
+                            {% for day in days_of_week %}
+                            <td class="schedule-cell" data-day="{{ day }}" data-hour="{{ hour }}">
+                                {% for appointment in appointments %}
+                                    {% if appointment.day == day and appointment.hour == hour %}
+                                        <div class="appointment-slot bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %} text-white p-2 rounded mb-1">
+                                            <div class="small fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                                            <div class="small">{{ appointment.patient.get_full_name }}</div>
+                                            <div class="small">{{ appointment.get_appointment_type_display }}</div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-calendar-day text-ethiopia-green me-2"></i>
+                Today's Appointments
+            </h6>
+            {% if todays_appointments %}
+                {% for appointment in todays_appointments %}
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+                    <div>
+                        <div class="fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                        <div class="text-muted">{{ appointment.patient.get_full_name }}</div>
+                        <div class="small text-muted">{{ appointment.get_appointment_type_display }}</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                            {{ appointment.get_status_display }}
+                        </span>
+                        <div class="mt-1">
+                            <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No appointments scheduled for today.</p>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-chart-bar text-ethiopia-blue me-2"></i>
+                Weekly Statistics
+            </h6>
+            <div class="row text-center">
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-green">{{ weekly_appointments|default:0 }}</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-blue">{{ avg_daily_appointments|default:0 }}</div>
+                    <div class="stat-label">Daily Average</div>
+                </div>
+            </div>
+            <hr>
+            <div class="row text-center">
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-yellow">{{ completed_this_week|default:0 }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-red">{{ cancelled_this_week|default:0 }}</div>
+                    <div class="stat-label">Cancelled</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-clock text-ethiopia-yellow me-2"></i>
+                Working Hours
+            </h6>
+            <div class="small">
+                <div class="d-flex justify-content-between mb-2">
+                    <span><strong>Monday - Friday:</strong></span>
+                    <span>8:00 AM - 6:00 PM</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><strong>Saturday:</strong></span>
+                    <span>9:00 AM - 4:00 PM</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><strong>Sunday:</strong></span>
+                    <span>Emergency Only</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span><strong>Lunch Break:</strong></span>
+                    <span>12:00 PM - 1:00 PM</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                Schedule Legend
+            </h6>
+            <div class="small">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2">Scheduled</span>
+                    <span>Upcoming appointments</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-warning me-2">In Progress</span>
+                    <span>Currently ongoing</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2">Completed</span>
+                    <span>Finished appointments</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-secondary me-2">Cancelled</span>
+                    <span>Cancelled appointments</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.schedule-table {
+    font-size: 0.875rem;
+}
+
+.schedule-cell {
+    height: 80px;
+    vertical-align: top;
+    position: relative;
+}
+
+.appointment-slot {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.appointment-slot:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+</style>
+
+<script>
+function showWeek(week) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+    
+    // In a real implementation, this would load different week data
+    if (week === 'next') {
+        // Load next week's schedule
+        console.log('Loading next week schedule...');
+    } else {
+        // Load current week's schedule
+        console.log('Loading current week schedule...');
+    }
+}
+
+// Add click handlers to appointment slots
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.appointment-slot').forEach(slot => {
+        slot.addEventListener('click', function() {
+            // In a real implementation, this would show appointment details
+            const patientName = this.querySelector('.small:nth-child(2)').textContent;
+            const time = this.querySelector('.small:first-child').textContent;
+            alert(`Appointment: ${patientName} at ${time}`);
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1698 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+
+
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Notifications</h1>
+            <p class="text-muted mb-0">
+                {% if unread_count > 0 %}
+                    {{ unread_count }} unread notification{{ unread_count|pluralize }}
+                {% else %}
+                    All caught up!
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'notifications:preferences' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Action Buttons - Top Position -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="mobile-notification-top-actions">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="text-ethiopia-green mb-0">
+                <i class="fas fa-bell me-2"></i>Quick Actions
+            </h6>
+            <div class="d-flex gap-2">
+                {% if unread_count > 0 %}
+                <button class="btn btn-primary btn-sm" id="mobileMarkAllAsRead">
+                    <i class="fas fa-check-double me-2"></i>Mark All Read
+                </button>
+                {% endif %}
+                <button class="btn btn-outline-primary btn-sm" id="mobileViewAllNotifications">
+                    <i class="fas fa-list me-2"></i>View All
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="mobile-notification-stats mt-3">
+            <div class="row g-2">
+                <div class="col-3">
+                    <div class="mobile-stat-mini">
+                        <div class="mobile-stat-mini-number text-primary">{{ page_obj.paginator.count }}</div>
+                        <div class="mobile-stat-mini-label">Total</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="mobile-stat-mini">
+                        <div class="mobile-stat-mini-number text-warning">{{ unread_count }}</div>
+                        <div class="mobile-stat-mini-label">Unread</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="mobile-stat-mini">
+                        <div class="mobile-stat-mini-number text-success">{{ page_obj.paginator.count|add:unread_count|add:"-"|add:unread_count }}</div>
+                        <div class="mobile-stat-mini-label">Read</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="mobile-stat-mini">
+                        <div class="mobile-stat-mini-number text-info">{{ page_obj|length }}</div>
+                        <div class="mobile-stat-mini-label">Showing</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filters -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-filter me-2"></i>Filters
+    </h6>
+    <form method="get" class="mobile-form">
+        <div class="row g-3">
+            <div class="col-6">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All</option>
+                    <option value="unread" {% if status_filter == 'unread' %}selected{% endif %}>Unread</option>
+                    <option value="read" {% if status_filter == 'read' %}selected{% endif %}>Read</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <label for="type" class="form-label">Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="">All Types</option>
+                    {% for value, label in notification_types %}
+                    <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority" name="priority">
+                    <option value="">All Priorities</option>
+                    {% for value, label in priority_choices %}
+                    <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6">
+                <label for="sort" class="form-label">Sort By</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Latest First</option>
+                    <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Oldest First</option>
+                    <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>By Priority</option>
+                    <option value="type" {% if sort_by == 'type' %}selected{% endif %}>By Type</option>
+                    <option value="unread_first" {% if sort_by == 'unread_first' %}selected{% endif %}>Unread First</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label for="search" class="form-label">Search</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search notifications...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="mobile" value="1">
+    </form>
+</div>
+
+<!-- Mobile Notifications List -->
+{% if page_obj %}
+    <div class="mobile-notifications-list">
+        {% for notification in page_obj %}
+        <div class="mobile-notification-card {% if not notification.is_read %}unread{% endif %}"
+             data-notification-id="{{ notification.pk }}">
+            <div class="mobile-notification-header">
+                <div class="mobile-notification-icon">
+                    <i class="{{ notification.get_icon }} text-ethiopia-green"></i>
+                </div>
+                <div class="mobile-notification-meta">
+                    <div class="mobile-notification-type">
+                        <span class="badge bg-secondary">{{ notification.get_notification_type_display }}</span>
+                        <span class="badge bg-{{ notification.priority }}">{{ notification.get_priority_display }}</span>
+                    </div>
+                    <div class="mobile-notification-time">
+                        {{ notification.created_at|timesince }} ago
+                    </div>
+                </div>
+                <div class="mobile-notification-header-actions">
+                    {% if not notification.is_read %}
+                    <button class="mobile-notification-action-btn mobile-mark-as-read"
+                            data-notification-id="{{ notification.pk }}"
+                            aria-label="Mark as read">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    {% endif %}
+                    <button class="mobile-notification-action-btn mobile-delete-notification"
+                            data-notification-id="{{ notification.pk }}"
+                            aria-label="Delete notification"
+                            onclick="handleMobileDeleteClick(this)"
+                            type="button">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    {% if not notification.is_read %}
+                    <div class="mobile-notification-unread-indicator">
+                        <span class="badge bg-ethiopia-green rounded-pill"></span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mobile-notification-content">
+                <h6 class="mobile-notification-title">{{ notification.title|truncatechars:18 }}</h6>
+                <p class="mobile-notification-message">{{ notification.message|truncatechars:18 }}</p>
+            </div>
+
+            {% if notification.action_url %}
+            <div class="mobile-notification-footer">
+                <a href="{{ notification.action_url }}?mobile=1" class="mobile-notification-link">
+                    <i class="fas fa-external-link-alt me-1"></i>View Details
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Mobile Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mobile-dashboard-card mt-3">
+        <div class="mobile-pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}&mobile=1" 
+                   class="btn btn-outline-primary">
+                    <i class="fas fa-chevron-left me-2"></i>Previous
+                </a>
+            {% endif %}
+            
+            <span class="mobile-pagination-info">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}&mobile=1" 
+                   class="btn btn-outline-primary">
+                    Next<i class="fas fa-chevron-right ms-2"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="mobile-dashboard-card text-center py-5">
+        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No notifications found</h5>
+        <p class="text-muted">You're all caught up! No notifications match your current filters.</p>
+        <a href="{% url 'patients:mobile_dashboard' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-tachometer-alt me-2"></i>Back to Dashboard
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Mobile Notification Top Actions */
+.mobile-notification-top-actions {
+    padding: var(--mobile-spacing-md);
+}
+
+.mobile-notification-stats {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-md);
+    padding: var(--mobile-spacing-md);
+}
+
+.mobile-stat-mini {
+    text-align: center;
+    padding: var(--mobile-spacing-sm);
+    background: white;
+    border-radius: var(--mobile-radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-stat-mini-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-stat-mini-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Responsive adjustments for top action buttons */
+@media (max-width: 375px) {
+    .mobile-notification-top-actions .d-flex {
+        flex-direction: column;
+        gap: var(--mobile-spacing-sm);
+    }
+
+    .mobile-notification-top-actions .btn {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .mobile-notification-top-actions h6 {
+        text-align: center;
+        margin-bottom: var(--mobile-spacing-sm);
+    }
+
+    .mobile-stat-mini-number {
+        font-size: 1rem;
+    }
+
+    .mobile-stat-mini-label {
+        font-size: 0.65rem;
+    }
+}
+
+.mobile-notifications-list {
+    margin-bottom: var(--mobile-spacing-lg);
+}
+
+.mobile-notification-card {
+    background: white;
+    border-radius: 12px;
+    padding: var(--mobile-spacing-md);
+    margin-bottom: var(--mobile-spacing-md);
+    box-shadow: var(--mobile-shadow-sm);
+    border: 1px solid #e9ecef;
+    transition: all var(--mobile-transition-medium);
+    position: relative;
+    transform: translateX(0);
+    opacity: 1;
+    animation: slideInFromRight 0.4s ease-out;
+    min-height: 120px; /* Consistent card height */
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--mobile-shadow-md);
+}
+
+.mobile-notification-card:active {
+    transform: translateY(0);
+    transition: transform 0.1s ease;
+}
+
+.mobile-notification-card.unread {
+    background: linear-gradient(135deg, rgba(0, 150, 57, 0.05), rgba(0, 150, 57, 0.02));
+    border-left: 4px solid #009639;
+    animation: slideInFromRight 0.4s ease-out, unreadGlow 3s ease-in-out infinite;
+}
+
+.mobile-notification-card.urgent {
+    border-left: 4px solid #ff4757;
+    animation: slideInFromRight 0.4s ease-out, urgentPulse 2s ease-in-out infinite;
+}
+
+.mobile-notification-card.urgent.unread {
+    background: linear-gradient(135deg, rgba(255, 71, 87, 0.05), rgba(255, 71, 87, 0.02));
+}
+
+.mobile-notification-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--mobile-spacing-sm);
+    gap: var(--mobile-spacing-sm);
+    position: relative;
+}
+
+.mobile-notification-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 150, 57, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.mobile-notification-meta {
+    flex: 1;
+    margin-left: var(--mobile-spacing-sm);
+    margin-right: var(--mobile-spacing-sm);
+    min-width: 0;
+}
+
+.mobile-notification-type .badge {
+    font-size: 0.7rem;
+    margin-right: 0.25rem;
+}
+
+.mobile-notification-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.mobile-notification-unread-indicator {
+    width: 12px;
+    height: 12px;
+}
+
+.mobile-notification-unread-indicator {
+    position: relative;
+}
+
+.mobile-notification-unread-indicator .badge {
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    animation: unreadPulse 2s infinite;
+}
+
+/* Text consistency improvements */
+.mobile-notification-title,
+.mobile-notification-message {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Ensure consistent spacing */
+.mobile-notification-meta {
+    flex: 1;
+    margin-left: var(--mobile-spacing-sm);
+    margin-right: var(--mobile-spacing-xs);
+    min-width: 0; /* Allow text truncation */
+}
+
+/* Mobile Notification Header Actions */
+.mobile-notification-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.mobile-notification-action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(0, 150, 57, 0.1);
+    color: #009639;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 150, 57, 0.2);
+    position: relative;
+    -webkit-tap-highlight-color: rgba(0, 150, 57, 0.3);
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.mobile-notification-action-btn:hover,
+.mobile-notification-action-btn:focus {
+    background: rgba(0, 150, 57, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 150, 57, 0.4);
+}
+
+.mobile-notification-action-btn:active {
+    transform: translateY(0) scale(0.95);
+    transition: transform 0.1s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-delete-notification {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+.mobile-delete-notification:hover,
+.mobile-delete-notification:focus {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.4);
+}
+
+.mobile-mark-as-read {
+    background: rgba(40, 167, 69, 0.15) !important;
+    color: #28a745 !important;
+    border-color: rgba(40, 167, 69, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+.mobile-mark-as-read:hover,
+.mobile-mark-as-read:focus {
+    background: rgba(40, 167, 69, 0.25) !important;
+    border-color: rgba(40, 167, 69, 0.5) !important;
+    color: #1e7e34 !important;
+}
+
+/* Button Loading States */
+.mobile-notification-action-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.mobile-notification-action-btn .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button Success/Error States */
+.mobile-notification-action-btn.success {
+    animation: buttonSuccess 0.6s ease;
+}
+
+.mobile-notification-action-btn.error {
+    animation: buttonError 0.6s ease;
+}
+
+.mobile-delete-notification:hover {
+    background: rgba(220, 53, 69, 0.25);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+/* Enhanced delete button visibility and clickability */
+.mobile-delete-notification {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    z-index: 100 !important;
+    position: relative !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Ensure the icon doesn't block clicks */
+.mobile-delete-notification i {
+    pointer-events: none !important;
+    font-size: 14px !important;
+}
+
+/* Add visual feedback on touch */
+.mobile-delete-notification:active {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    transform: scale(0.95) !important;
+}
+
+.mobile-delete-notification:active {
+    background: rgba(220, 53, 69, 0.4) !important;
+    transform: scale(0.9) !important;
+}
+
+/* Mobile Notification Content */
+.mobile-notification-content {
+    flex: 1;
+    min-width: 0; /* Allows text truncation */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 48px; /* Consistent content height */
+}
+
+.mobile-notification-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    height: 1.3em; /* Fixed height for consistency */
+}
+
+.mobile-notification-message {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    height: 1.4em; /* Fixed height for consistency */
+}
+
+/* Mobile Notification Footer */
+.mobile-notification-footer {
+    margin-top: var(--mobile-spacing-sm);
+    padding-top: var(--mobile-spacing-sm);
+    border-top: 1px solid #e9ecef;
+}
+
+.mobile-notification-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #009639;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--mobile-transition-fast);
+}
+
+.mobile-notification-link:hover {
+    color: #007a2e;
+    text-decoration: none;
+}
+
+.mobile-notification-content {
+    margin-bottom: var(--mobile-spacing-md);
+}
+
+.mobile-notification-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.mobile-notification-message {
+    font-size: 0.9rem;
+    color: #6c757d;
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+.mobile-notification-actions {
+    display: flex;
+    gap: var(--mobile-spacing-sm);
+    flex-wrap: wrap;
+}
+
+.mobile-notification-actions .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    min-height: var(--mobile-touch-target);
+}
+
+.mobile-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-pagination-info {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.bg-ethiopia-green {
+    background-color: #009639 !important;
+}
+
+.text-ethiopia-green {
+    color: #009639 !important;
+}
+
+/* Priority badge colors */
+.badge.bg-low {
+    background-color: #6c757d !important;
+}
+
+.badge.bg-normal {
+    background-color: #17a2b8 !important;
+}
+
+.badge.bg-high {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-urgent {
+    background-color: #dc3545 !important;
+}
+
+/* Text truncation consistency */
+.mobile-notification-title,
+.mobile-notification-message {
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    box-sizing: border-box;
+}
+
+/* Ensure consistent spacing and alignment */
+.mobile-notification-card .mobile-notification-content {
+    padding: 0;
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 375px) {
+    .mobile-notification-card {
+        padding: var(--mobile-spacing-sm);
+        margin-bottom: var(--mobile-spacing-sm);
+        min-height: 110px;
+    }
+
+    .mobile-notification-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .mobile-notification-action-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .mobile-notification-header-actions {
+        gap: 4px;
+    }
+
+    .mobile-notification-title {
+        font-size: 0.9rem;
+        height: 1.2em; /* Adjusted for smaller screens */
+    }
+
+    .mobile-notification-message {
+        font-size: 0.8rem;
+        height: 1.3em; /* Adjusted for smaller screens */
+    }
+
+    .mobile-notification-header {
+        gap: var(--mobile-spacing-xs);
+    }
+
+    .mobile-notification-content {
+        min-height: 44px; /* Adjusted for smaller screens */
+    }
+}
+
+/* Ensure proper contrast for accessibility */
+@media (prefers-contrast: high) {
+    .mobile-notification-action-btn {
+        border: 2px solid currentColor;
+        background: white;
+    }
+
+    .mobile-delete-notification {
+        background: white;
+        border-color: #dc3545;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .mobile-mark-as-read {
+        background: rgba(40, 167, 69, 0.15) !important;
+        color: #28a745 !important;
+        border: 2px solid rgba(40, 167, 69, 0.3) !important;
+        min-width: 44px;
+        min-height: 44px;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+    }
+
+    /* Enhanced touch feedback for mobile */
+    .mobile-notification-action-btn:active {
+        transform: translateY(0) scale(0.95);
+        transition: transform 0.1s ease;
+    }
+
+    /* Loading state styles */
+    .mobile-notification-action-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .mobile-notification-action-btn .fa-spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Card processing state */
+    .mobile-notification-card.processing {
+        opacity: 0.6;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Enhanced empty state */
+    .empty-state {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Force visibility for mark as read buttons - Debug Fix */
+.mobile-mark-as-read {
+    background: rgba(40, 167, 69, 0.15) !important;
+    color: #28a745 !important;
+    border: 2px solid rgba(40, 167, 69, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.mobile-mark-as-read:hover {
+    background: rgba(40, 167, 69, 0.25) !important;
+    border-color: rgba(40, 167, 69, 0.5) !important;
+    color: #1e7e34 !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-mark-as-read i {
+    color: inherit !important;
+    opacity: 1 !important;
+    font-size: 0.9rem !important;
+}
+
+/* Animation Keyframes */
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes unreadGlow {
+    0%, 100% {
+        box-shadow: var(--mobile-shadow-sm);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(0, 150, 57, 0.2);
+    }
+}
+
+@keyframes urgentPulse {
+    0%, 100% {
+        box-shadow: var(--mobile-shadow-sm);
+        border-left-color: #ff4757;
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(255, 71, 87, 0.3);
+        border-left-color: #ff3742;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes markAsReadTransition {
+    0% {
+        background: linear-gradient(135deg, rgba(0, 150, 57, 0.05), rgba(0, 150, 57, 0.02));
+    }
+    100% {
+        background: white;
+    }
+}
+
+@keyframes unreadPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes buttonSuccess {
+    0% {
+        background: rgba(40, 167, 69, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        background: rgba(40, 167, 69, 0.3);
+        transform: scale(1.1);
+    }
+    100% {
+        background: rgba(40, 167, 69, 0.1);
+        transform: scale(1);
+    }
+}
+
+@keyframes buttonError {
+    0% {
+        background: rgba(220, 53, 69, 0.1);
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+    100% {
+        background: rgba(220, 53, 69, 0.1);
+        transform: translateX(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== MOBILE NOTIFICATIONS LIST LOADED ===');
+    console.log('Current URL:', window.location.href);
+    console.log('User agent:', navigator.userAgent);
+    console.log('Document ready state:', document.readyState);
+
+    // Check for MobileDashboard availability
+    const checkMobileDashboard = () => {
+        if (window.mobileDashboard) {
+            console.log('✅ MobileDashboard instance available for notifications');
+
+            // Only show navigation success message if explicitly requested
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('show_success') === '1') {
+                window.mobileDashboard.showMobileNotification('Notifications loaded successfully!', 'success');
+            }
+        } else {
+            console.log('⚠️ MobileDashboard not available, using fallback messaging');
+        }
+    };
+
+    // Check immediately and after a delay
+    checkMobileDashboard();
+    setTimeout(checkMobileDashboard, 1000);
+    
+    // Mark individual notification as read
+    document.querySelectorAll('.mobile-mark-as-read').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const notificationId = this.dataset.notificationId;
+            markNotificationAsRead(notificationId, this);
+        });
+    });
+
+    // Delete individual notification
+    const mobileDeleteButtons = document.querySelectorAll('.mobile-delete-notification');
+    console.log('Mobile delete buttons found:', mobileDeleteButtons.length);
+
+    mobileDeleteButtons.forEach((button, index) => {
+        console.log(`Setting up mobile delete button ${index + 1}:`, {
+            element: button,
+            id: button.dataset.notificationId,
+            classes: button.className
+        });
+
+        // Add multiple event listeners to ensure one works
+        button.addEventListener('click', function(e) {
+            console.log('Mobile delete button clicked via click event!', this);
+            e.stopPropagation();
+            e.preventDefault();
+
+            const notificationId = this.dataset.notificationId;
+
+            if (!notificationId) {
+                console.error('No notification ID found on mobile delete button');
+                return;
+            }
+
+            deleteNotification(notificationId, this);
+        });
+
+        // Add touchend event for mobile devices
+        button.addEventListener('touchend', function(e) {
+            console.log('Mobile delete button touched!', this);
+            e.stopPropagation();
+            e.preventDefault();
+
+            const notificationId = this.dataset.notificationId;
+
+            if (!notificationId) {
+                console.error('No notification ID found on mobile delete button (touch)');
+                return;
+            }
+
+            deleteNotification(notificationId, this);
+        });
+
+        // Add a simple test click
+        button.addEventListener('mousedown', function(e) {
+            console.log('Mobile delete button mousedown detected!', this);
+        });
+    });
+
+    // Handle sort dropdown change
+    const sortSelect = document.getElementById('sort');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const form = this.closest('form');
+            if (form) {
+                form.submit();
+            }
+        });
+    }
+
+    // Handle priority and type filter changes
+    const prioritySelect = document.getElementById('priority');
+    const typeSelect = document.getElementById('type');
+
+    if (prioritySelect) {
+        prioritySelect.addEventListener('change', function() {
+            const form = this.closest('form');
+            if (form) {
+                form.submit();
+            }
+        });
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            const form = this.closest('form');
+            if (form) {
+                form.submit();
+            }
+        });
+    }
+
+    // Add priority-based styling to notification cards
+    document.querySelectorAll('.mobile-notification-card').forEach(card => {
+        const priorityBadge = card.querySelector('.badge.bg-urgent');
+        if (priorityBadge) {
+            card.classList.add('urgent');
+        }
+    });
+
+    // Enhanced touch handling for action buttons
+    document.querySelectorAll('.mobile-notification-action-btn').forEach(btn => {
+        // Add visual feedback for touch devices
+        btn.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'translateY(0) scale(0.95)';
+            this.style.transition = 'transform 0.1s ease';
+        });
+
+        btn.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'translateY(-1px) scale(1)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+
+        btn.addEventListener('touchcancel', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'translateY(-1px) scale(1)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+
+        // Prevent double-tap zoom on buttons
+        btn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+        });
+    });
+    
+    // Mark all notifications as read with enhanced handling
+    const markAllBtn = document.getElementById('mobileMarkAllAsRead');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!this.disabled) {
+                console.log('Mark all as read button clicked');
+                markAllNotificationsAsRead();
+            }
+        });
+    }
+
+    // View All notifications button
+    const viewAllBtn = document.getElementById('mobileViewAllNotifications');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!this.disabled) {
+                console.log('View all notifications button clicked');
+                viewAllNotifications();
+            }
+        });
+    }
+
+    // Initialize page state
+    updateUnreadCount();
+    updateNotificationBadge();
+
+    // Debug: Check mark as read buttons visibility
+    const markAsReadButtons = document.querySelectorAll('.mobile-mark-as-read');
+    console.log(`Found ${markAsReadButtons.length} mark as read buttons`);
+
+    markAsReadButtons.forEach((button, index) => {
+        const computedStyle = window.getComputedStyle(button);
+        console.log(`Button ${index + 1}:`, {
+            display: computedStyle.display,
+            visibility: computedStyle.visibility,
+            opacity: computedStyle.opacity,
+            backgroundColor: computedStyle.backgroundColor,
+            color: computedStyle.color,
+            borderColor: computedStyle.borderColor
+        });
+
+        // Force visibility as a fallback
+        button.style.display = 'flex';
+        button.style.visibility = 'visible';
+        button.style.opacity = '1';
+        button.style.background = 'rgba(40, 167, 69, 0.15)';
+        button.style.color = '#28a745';
+        button.style.border = '2px solid rgba(40, 167, 69, 0.3)';
+    });
+
+    // Add stagger animation to notification cards for better UX
+    const cards = document.querySelectorAll('.mobile-notification-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'slideInFromRight 0.5s ease-out forwards';
+    });
+
+    // Add haptic feedback for supported devices
+    if ('vibrate' in navigator) {
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.mobile-notification-action-btn')) {
+                navigator.vibrate(10); // Short vibration for button press
+            }
+        });
+    }
+
+    console.log('Mobile notifications page initialization complete');
+});
+
+function markNotificationAsRead(notificationId, button) {
+    console.log('Marking notification as read:', notificationId);
+
+    // Add loading state with enhanced visual feedback
+    const originalIcon = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
+    button.style.opacity = '0.7';
+
+    // Get CSRF token using the same method as the notification panel
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        restoreButtonState(button, originalIcon);
+        showErrorMessage('Security token not found. Please refresh the page.');
+        return;
+    }
+
+    fetch(`/notifications/mark-read/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const notificationCard = button.closest('.mobile-notification-card');
+
+            // Enhanced animation with better mobile performance
+            notificationCard.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            notificationCard.style.transform = 'scale(0.98)';
+            notificationCard.classList.remove('unread');
+
+            // Remove unread indicator with smooth fade
+            const unreadIndicator = notificationCard.querySelector('.mobile-notification-unread-indicator');
+            if (unreadIndicator) {
+                unreadIndicator.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                unreadIndicator.style.opacity = '0';
+                unreadIndicator.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    unreadIndicator.remove();
+                }, 300);
+            }
+
+            // Remove the button with enhanced animation
+            button.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            button.style.transform = 'scale(0)';
+            button.style.opacity = '0';
+
+            setTimeout(() => {
+                button.remove();
+                // Reset card transform
+                notificationCard.style.transform = 'scale(1)';
+            }, 300);
+
+            // Show success notification with consistent messaging
+            showSuccessMessage('Notification marked as read');
+
+            // Update unread count and notification badge
+            updateUnreadCount();
+            updateNotificationBadge();
+
+            console.log('Notification marked as read successfully');
+        } else {
+            throw new Error(data.message || 'Failed to mark notification as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+        restoreButtonState(button, originalIcon);
+        showErrorMessage('Failed to mark notification as read. Please try again.');
+    });
+}
+
+function markAllNotificationsAsRead() {
+    const unreadCount = document.querySelectorAll('.mobile-notification-card.unread').length;
+
+    if (unreadCount === 0) {
+        showSuccessMessage('All notifications are already read');
+        return;
+    }
+
+    if (!confirm(`Mark all ${unreadCount} unread notifications as read?`)) {
+        return;
+    }
+
+    console.log('Marking all notifications as read');
+
+    const markAllBtn = document.getElementById('mobileMarkAllAsRead');
+    let originalContent = '';
+
+    // Add loading state to button
+    if (markAllBtn) {
+        originalContent = markAllBtn.innerHTML;
+        markAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        markAllBtn.disabled = true;
+    }
+
+    // Get CSRF token using the same method as other functions
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        if (markAllBtn) {
+            markAllBtn.innerHTML = originalContent;
+            markAllBtn.disabled = false;
+        }
+        showErrorMessage('Security token not found. Please refresh the page.');
+        return;
+    }
+
+    fetch('/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            console.log('All notifications marked as read successfully');
+
+            // Update UI immediately without page reload
+            const unreadCards = document.querySelectorAll('.mobile-notification-card.unread');
+            unreadCards.forEach(card => {
+                card.classList.remove('unread');
+
+                // Remove unread indicators
+                const indicator = card.querySelector('.mobile-notification-unread-indicator');
+                if (indicator) {
+                    indicator.style.transition = 'opacity 0.3s ease';
+                    indicator.style.opacity = '0';
+                    setTimeout(() => indicator.remove(), 300);
+                }
+
+                // Remove mark as read buttons
+                const markBtn = card.querySelector('.mobile-mark-as-read');
+                if (markBtn) {
+                    markBtn.style.transition = 'all 0.3s ease';
+                    markBtn.style.transform = 'scale(0)';
+                    markBtn.style.opacity = '0';
+                    setTimeout(() => markBtn.remove(), 300);
+                }
+            });
+
+            // Update counts and show success message
+            updateUnreadCount();
+            updateNotificationBadge();
+            showSuccessMessage(`${unreadCount} notifications marked as read`);
+
+            // Reset button
+            if (markAllBtn) {
+                setTimeout(() => {
+                    markAllBtn.innerHTML = originalContent;
+                    markAllBtn.disabled = false;
+                    markAllBtn.style.display = 'none'; // Hide since no unread notifications
+                }, 500);
+            }
+        } else {
+            throw new Error(data.message || 'Failed to mark all notifications as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+
+        // Restore button state
+        if (markAllBtn) {
+            markAllBtn.innerHTML = originalContent;
+            markAllBtn.disabled = false;
+        }
+
+        showErrorMessage('Failed to mark all notifications as read. Please try again.');
+    });
+}
+
+function deleteNotification(notificationId, button) {
+    console.log('Deleting notification:', notificationId);
+
+    // Enhanced mobile-friendly confirmation dialog
+    const notificationCard = button.closest('.mobile-notification-card');
+
+    if (!notificationCard) {
+        console.error('Could not find notification card');
+        return;
+    }
+
+    const notificationTitle = notificationCard.querySelector('.mobile-notification-title')?.textContent || 'this notification';
+
+    if (!confirm(`Delete "${notificationTitle}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    const originalIcon = button.innerHTML;
+
+    // Add loading state with enhanced visual feedback
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
+    button.style.opacity = '0.7';
+
+    // Dim the entire card to show it's being processed
+    notificationCard.style.opacity = '0.6';
+    notificationCard.style.pointerEvents = 'none';
+
+    // Get CSRF token using the same method as the notification panel
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        restoreCardState(notificationCard, button, originalIcon);
+        showErrorMessage('Security token not found. Please refresh the page.');
+        return;
+    }
+
+    fetch(`/notifications/delete/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            console.log('Notification deleted successfully');
+
+            // Enhanced mobile-optimized slide-out animation
+            notificationCard.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            notificationCard.style.transform = 'translateX(100%)';
+            notificationCard.style.opacity = '0';
+            notificationCard.style.height = notificationCard.offsetHeight + 'px';
+
+            // Animate height collapse after slide-out
+            setTimeout(() => {
+                notificationCard.style.height = '0';
+                notificationCard.style.marginBottom = '0';
+                notificationCard.style.paddingTop = '0';
+                notificationCard.style.paddingBottom = '0';
+            }, 200);
+
+            setTimeout(() => {
+                notificationCard.remove();
+
+                // Show success notification with better messaging
+                showSuccessMessage(`"${notificationTitle}" deleted successfully`);
+
+                // Update counts and badges
+                updateUnreadCount();
+                updateNotificationBadge();
+                updateMobileSidebarNotification(notificationId, notificationCard.classList.contains('unread'));
+
+                // Check if no notifications left and show empty state
+                const remainingCards = document.querySelectorAll('.mobile-notification-card');
+                if (remainingCards.length === 0) {
+                    showEmptyState();
+                }
+
+                console.log('Notification deletion completed');
+            }, 400);
+        } else {
+            throw new Error(data.message || 'Failed to delete notification');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting notification:', error);
+
+        // Show user-friendly error message
+        let errorMessage = 'Failed to delete notification';
+
+        if (error.message.includes('404')) {
+            errorMessage = 'Notification not found. It may have already been deleted.';
+        } else if (error.message.includes('403')) {
+            errorMessage = 'Permission denied. Please refresh the page and try again.';
+        } else if (error.message.includes('500')) {
+            errorMessage = 'Server error. Please try again later.';
+        }
+
+        restoreCardState(notificationCard, button, originalIcon);
+        showErrorMessage(errorMessage);
+    });
+}
+
+function updateUnreadCount() {
+    const unreadCards = document.querySelectorAll('.mobile-notification-card.unread').length;
+    const headerText = document.querySelector('.mobile-page-header p');
+    const markAllBtn = document.getElementById('mobileMarkAllAsRead');
+
+    if (headerText) {
+        if (unreadCards === 0) {
+            headerText.textContent = 'All caught up!';
+            // Hide mark all button if no unread notifications
+            if (markAllBtn) {
+                markAllBtn.style.display = 'none';
+            }
+        } else {
+            headerText.textContent = `${unreadCards} unread notification${unreadCards > 1 ? 's' : ''}`;
+            // Show mark all button if there are unread notifications
+            if (markAllBtn) {
+                markAllBtn.style.display = 'block';
+            }
+        }
+    }
+}
+
+function updateMobileSidebarNotification(notificationId, wasUnread) {
+    console.log('Updating mobile sidebar for notification:', notificationId);
+
+    // Update mobile sidebar if it exists and is available
+    if (window.mobileDashboard && typeof window.mobileDashboard.removeNotificationFromSidebar === 'function') {
+        window.mobileDashboard.removeNotificationFromSidebar(notificationId, wasUnread);
+    }
+
+    // Also update any mobile notification panels that might be open
+    const mobileNotificationItem = document.querySelector(`.mobile-notification-item[data-notification-id="${notificationId}"]`);
+    if (mobileNotificationItem) {
+        mobileNotificationItem.style.transition = 'all 0.3s ease';
+        mobileNotificationItem.style.transform = 'translateX(100%)';
+        mobileNotificationItem.style.opacity = '0';
+        setTimeout(() => {
+            mobileNotificationItem.remove();
+        }, 300);
+    }
+
+    console.log('Mobile sidebar notification update completed');
+}
+
+// Helper function to update notification badge in navbar (if present)
+function updateNotificationBadge() {
+    console.log('Updating notification badge...');
+
+    const unreadCount = document.querySelectorAll('.mobile-notification-card.unread').length;
+    console.log('Current unread count:', unreadCount);
+
+    // Update various badge elements that might exist
+    const badgeSelectors = [
+        '.notification-badge',
+        '#mobileNotificationToggle .badge',
+        '.mobile-notification-badge',
+        '[data-notification-badge]'
+    ];
+
+    badgeSelectors.forEach(selector => {
+        const badge = document.querySelector(selector);
+        if (badge) {
+            if (unreadCount === 0) {
+                badge.style.display = 'none';
+                console.log(`Hidden badge: ${selector}`);
+            } else {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+                console.log(`Updated badge ${selector} to: ${unreadCount}`);
+            }
+        }
+    });
+
+    // Also try to update the mobile dashboard if available
+    if (window.mobileDashboard && typeof window.mobileDashboard.updateNotificationBadge === 'function') {
+        console.log('Updating mobile dashboard badge...');
+        window.mobileDashboard.updateNotificationBadge();
+    }
+}
+
+// Helper function to restore button state after error
+function restoreButtonState(button, originalIcon) {
+    button.innerHTML = originalIcon;
+    button.disabled = false;
+    button.style.pointerEvents = 'auto';
+    button.style.opacity = '1';
+}
+
+// Helper function to restore card state after error
+function restoreCardState(card, button, originalIcon) {
+    card.style.opacity = '1';
+    card.style.pointerEvents = 'auto';
+    restoreButtonState(button, originalIcon);
+}
+
+// Helper function to show success messages
+function showSuccessMessage(message) {
+    if (window.mobileDashboard && typeof window.mobileDashboard.showMobileNotification === 'function') {
+        window.mobileDashboard.showMobileNotification(message, 'success');
+    } else {
+        // Fallback for when MobileDashboard is not available
+        console.log('Success:', message);
+        // Could add a simple toast notification here
+    }
+}
+
+// Helper function to show error messages
+function showErrorMessage(message) {
+    if (window.mobileDashboard && typeof window.mobileDashboard.showMobileNotification === 'function') {
+        window.mobileDashboard.showMobileNotification(message, 'danger');
+    } else {
+        // Fallback for when MobileDashboard is not available
+        console.error('Error:', message);
+        alert(message); // Simple fallback
+    }
+}
+
+// Helper function to show empty state
+function showEmptyState() {
+    const container = document.querySelector('.mobile-notifications-list');
+    if (container) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-bell-slash fa-3x text-muted mb-3" style="opacity: 0.5;"></i>
+                <h6 class="text-muted mb-2">No notifications</h6>
+                <p class="text-muted small mb-3">You're all caught up!</p>
+                <a href="/dashboard/mobile/" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        `;
+    }
+}
+
+// View All notifications function
+function viewAllNotifications() {
+    console.log('View all notifications clicked');
+
+    const viewAllBtn = document.getElementById('mobileViewAllNotifications');
+    let originalContent = '';
+
+    // Add loading state to button
+    if (viewAllBtn) {
+        originalContent = viewAllBtn.innerHTML;
+        viewAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+        viewAllBtn.disabled = true;
+    }
+
+    // Clear all filters to show all notifications
+    const currentUrl = new URL(window.location.href);
+    const baseUrl = currentUrl.pathname;
+
+    // Remove all filter parameters but keep mobile=1
+    const newUrl = `${baseUrl}?mobile=1`;
+
+    // Show loading message
+    if (window.mobileDashboard && typeof window.mobileDashboard.showMobileNotification === 'function') {
+        window.mobileDashboard.showMobileNotification('Loading all notifications...', 'info');
+    }
+
+    // Navigate to show all notifications
+    setTimeout(() => {
+        window.location.href = newUrl;
+    }, 500);
+}
+
+// Global function for debugging mobile delete
+window.deleteMobileNotificationById = function(notificationId) {
+    const button = document.querySelector(`[data-notification-id="${notificationId}"]`);
+    if (button) {
+        deleteNotification(notificationId, button);
+    } else {
+        console.error('Mobile delete button not found for notification ID:', notificationId);
+    }
+};
+
+// Global test function for mobile delete buttons
+window.testMobileDeleteButtons = function() {
+    console.log('=== TESTING MOBILE DELETE BUTTONS ===');
+    const buttons = document.querySelectorAll('.mobile-delete-notification');
+    console.log('Found', buttons.length, 'mobile delete buttons');
+
+    buttons.forEach((button, index) => {
+        console.log(`Mobile Button ${index + 1}:`, {
+            element: button,
+            id: button.dataset.notificationId,
+            visible: button.offsetParent !== null,
+            clickable: !button.disabled
+        });
+    });
+
+    if (buttons.length > 0) {
+        console.log('Testing first mobile button click...');
+        const firstButton = buttons[0];
+        console.log('Simulating click on:', firstButton);
+        firstButton.click();
+    }
+
+    return buttons.length;
+};
+
+// Direct onclick handler for mobile delete buttons
+function handleMobileDeleteClick(button) {
+    console.log('=== MOBILE DELETE ONCLICK HANDLER CALLED ===');
+    console.log('Button:', button);
+
+    const notificationId = button.dataset.notificationId;
+    console.log('Notification ID:', notificationId);
+
+    if (!notificationId) {
+        console.error('No notification ID found!');
+        alert('Error: No notification ID found');
+        return;
+    }
+
+    // Check if deleteNotification function exists
+    if (typeof deleteNotification !== 'function') {
+        console.error('deleteNotification function not found!');
+        alert('Error: Delete function not available');
+        return;
+    }
+
+    console.log('Calling deleteNotification...');
+    deleteNotification(notificationId, button);
+}
+
+// Make mobile functions available globally
+window.deleteNotification = deleteNotification;
+window.handleMobileDeleteClick = handleMobileDeleteClick;
+
+
+
+
+
+
+
+
+</script>
+{% endblock %}

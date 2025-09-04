@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.invoice_number }} - Ethiopian Hospital ERP</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #009639;
+        }
+        
+        .logo-section {
+            flex: 1;
+        }
+        
+        .logo-section h1 {
+            color: #009639;
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logo-section p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .invoice-info {
+            text-align: right;
+            flex: 1;
+        }
+        
+        .invoice-info h2 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .invoice-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .billing-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .billing-section {
+            flex: 1;
+            margin-right: 20px;
+        }
+        
+        .billing-section:last-child {
+            margin-right: 0;
+        }
+        
+        .billing-section h3 {
+            color: #009639;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .billing-section p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .items-table th {
+            background-color: #009639;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .items-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .items-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .totals-section {
+            float: right;
+            width: 300px;
+            margin-bottom: 30px;
+        }
+        
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .totals-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .totals-table .total-row {
+            background-color: #009639;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .payment-info {
+            clear: both;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .payment-info h3 {
+            color: #009639;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .ethiopian-flag {
+            color: #009639;
+            font-weight: bold;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .invoice-container {
+                border: none;
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <h1>🏥 Ethiopian Hospital ERP</h1>
+                <p>Advanced Healthcare Management System</p>
+                <p>📍 Addis Ababa, Ethiopia</p>
+                <p>📞 +251-11-XXX-XXXX | 📧 info@ethiopianhospital.et</p>
+            </div>
+            <div class="invoice-info">
+                <h2>INVOICE</h2>
+                <p><strong>Invoice #:</strong> {{ invoice.invoice_number }}</p>
+                <p><strong>Date:</strong> {{ invoice.created_at|date:"F d, Y" }}</p>
+                <p><strong>Due Date:</strong> {{ invoice.due_date|date:"F d, Y"|default:"N/A" }}</p>
+                <p><strong>Status:</strong> 
+                    <span class="status-badge {% if invoice.status == 'paid' %}status-paid{% elif invoice.status == 'pending' %}status-pending{% else %}status-overdue{% endif %}">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Billing Details -->
+        <div class="billing-details">
+            <div class="billing-section">
+                <h3>Bill To:</h3>
+                <p><strong>{{ invoice.patient.get_full_name }}</strong></p>
+                <p>Patient ID: {{ invoice.patient.patient_id }}</p>
+                <p>Phone: {{ invoice.patient.phone|default:"N/A" }}</p>
+                <p>Email: {{ invoice.patient.email|default:"N/A" }}</p>
+                {% if invoice.patient.address %}
+                    <p>Address: {{ invoice.patient.address }}</p>
+                {% endif %}
+                {% if invoice.patient.emergency_contact %}
+                    <p>Emergency Contact: {{ invoice.patient.emergency_contact }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="billing-section">
+                <h3>Hospital Information:</h3>
+                <p><strong>Ethiopian Hospital ERP</strong></p>
+                <p>License #: ETH-HOSP-2024-001</p>
+                <p>Tax ID: 123456789</p>
+                <p>Addis Ababa, Ethiopia</p>
+                <p>Phone: +251-11-XXX-XXXX</p>
+                <p>Email: billing@ethiopianhospital.et</p>
+            </div>
+            
+            <div class="billing-section">
+                <h3>Payment Information:</h3>
+                <p><strong>Payment Method:</strong> {{ invoice.get_payment_method_display|default:"Not specified" }}</p>
+                <p><strong>Payment Status:</strong> {{ invoice.get_status_display }}</p>
+                {% if invoice.payment_date %}
+                    <p><strong>Payment Date:</strong> {{ invoice.payment_date|date:"F d, Y" }}</p>
+                {% endif %}
+                {% if invoice.created_by %}
+                    <p><strong>Created By:</strong> {{ invoice.created_by.get_full_name }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-right">Unit Price (ETB)</th>
+                    <th class="text-right">Total (ETB)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <strong>{{ item.description }}</strong>
+                        {% if item.notes %}
+                            <br><small style="color: #666;">{{ item.notes }}</small>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-right">{{ item.unit_price|floatformat:2 }} Br</td>
+                    <td class="text-right">{{ item.total_price|floatformat:2 }} Br</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center" style="color: #666; font-style: italic;">No items found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td><strong>Subtotal:</strong></td>
+                    <td class="text-right">{{ invoice.subtotal|floatformat:2 }} Br</td>
+                </tr>
+                {% if invoice.tax_amount %}
+                <tr>
+                    <td><strong>Tax ({{ invoice.tax_rate|default:15 }}%):</strong></td>
+                    <td class="text-right">{{ invoice.tax_amount|floatformat:2 }} Br</td>
+                </tr>
+                {% endif %}
+                {% if invoice.discount_amount %}
+                <tr>
+                    <td><strong>Discount:</strong></td>
+                    <td class="text-right">-{{ invoice.discount_amount|floatformat:2 }} Br</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                    <td><strong>TOTAL:</strong></td>
+                    <td class="text-right"><strong>{{ invoice.total_amount|floatformat:2 }} Br</strong></td>
+                </tr>
+                {% if invoice.amount_paid %}
+                <tr>
+                    <td><strong>Amount Paid:</strong></td>
+                    <td class="text-right">{{ invoice.amount_paid|floatformat:2 }} Br</td>
+                </tr>
+                <tr>
+                    <td><strong>Balance Due:</strong></td>
+                    <td class="text-right">{{ invoice.balance_due|floatformat:2 }} Br</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="payment-info">
+            <h3>Payment Instructions</h3>
+            <p><strong>Bank Transfer:</strong> Commercial Bank of Ethiopia - Account: 1000XXXXXXXX</p>
+            <p><strong>Mobile Payment:</strong> CBE Birr - +251-9XX-XXX-XXX</p>
+            <p><strong>Cash Payment:</strong> Accepted at hospital reception</p>
+            
+            {% if invoice.notes %}
+            <h3>Notes</h3>
+            <p>{{ invoice.notes }}</p>
+            {% endif %}
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">
+                <strong>Terms & Conditions:</strong> Payment is due within 30 days of invoice date. 
+                Late payments may incur additional charges. For questions about this invoice, 
+                please contact our billing department at billing@ethiopianhospital.et
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p class="ethiopian-flag">🇪🇹 Ethiopian Hospital ERP - Serving Ethiopia with Excellence</p>
+            <p>This is a computer-generated invoice and does not require a signature.</p>
+            <p>Generated on {{ "now"|date:"F d, Y \a\\t g:i A" }} | Page 1 of 1</p>
+        </div>
+    </div>
+</body>
+</html>

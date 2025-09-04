@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .notification-item {
+            padding: 1rem;
+            border: none !important;
+            transition: background-color 0.2s ease;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f8ff;
+            border-left: 4px solid #007bff !important;
+        }
+
+        .delete-notification {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+
+        .delete-notification:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <!-- CSRF Token -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="test-csrf-token-123">
+        
+        <!-- Debug Panel -->
+        <div class="alert alert-info mb-4">
+            <h5>Debug Panel</h5>
+            <div id="debugOutput">Loading...</div>
+            <div class="mt-2">
+                <button class="btn btn-sm btn-primary" onclick="runDebug()">Run Debug</button>
+                <button class="btn btn-sm btn-success" onclick="testDelete()">Test Delete</button>
+            </div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">Notifications</h1>
+                <p class="text-muted mb-0">Manage your notifications and alerts</p>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <!-- Sample Notification 1 -->
+                    <div class="list-group-item notification-item unread" data-notification-id="1">
+                        <div class="d-flex align-items-start">
+                            <div class="notification-icon me-3">
+                                <i class="fas fa-user-plus text-primary"></i>
+                            </div>
+                            <div class="notification-content flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="notification-title mb-0">New Patient Registration</h6>
+                                    <small class="text-muted">2 minutes ago</small>
+                                </div>
+                                <p class="notification-message text-muted mb-2">John Doe has been registered as a new patient</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="notification-meta">
+                                        <span class="badge bg-secondary">Patient</span>
+                                        <span class="badge bg-warning">Normal</span>
+                                    </div>
+                                    <div class="notification-actions">
+                                        <button class="btn btn-sm btn-outline-primary mark-as-read" 
+                                                data-notification-id="1">
+                                            <i class="fas fa-check me-1"></i>Mark as Read
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-notification"
+                                                data-notification-id="1"
+                                                data-notification-title="New Patient Registration">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Notification 2 -->
+                    <div class="list-group-item notification-item" data-notification-id="2">
+                        <div class="d-flex align-items-start">
+                            <div class="notification-icon me-3">
+                                <i class="fas fa-calendar-alt text-success"></i>
+                            </div>
+                            <div class="notification-content flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="notification-title mb-0">Appointment Scheduled</h6>
+                                    <small class="text-muted">15 minutes ago</small>
+                                </div>
+                                <p class="notification-message text-muted mb-2">Dr. Smith has a new appointment at 3:00 PM</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="notification-meta">
+                                        <span class="badge bg-secondary">Appointment</span>
+                                        <span class="badge bg-danger">High</span>
+                                    </div>
+                                    <div class="notification-actions">
+                                        <button class="btn btn-sm btn-outline-danger delete-notification"
+                                                data-notification-id="2"
+                                                data-notification-title="Appointment Scheduled">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== NOTIFICATION DELETE DEBUG SCRIPT LOADED ===');
+
+        // Simple debug function
+        function debugLog(message) {
+            console.log('DEBUG: ' + message);
+            const output = document.getElementById('debugOutput');
+            if (output) {
+                output.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM loaded, initializing...');
+            
+            // Find all delete buttons
+            const deleteButtons = document.querySelectorAll('.delete-notification');
+            debugLog('Found ' + deleteButtons.length + ' delete buttons');
+
+            // Attach event listeners
+            deleteButtons.forEach(function(button, index) {
+                debugLog('Attaching listener to button ' + (index + 1));
+                
+                button.addEventListener('click', function(e) {
+                    debugLog('Button clicked: ' + this.dataset.notificationId);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const id = this.dataset.notificationId;
+                    const title = this.dataset.notificationTitle;
+                    
+                    debugLog('Calling deleteNotification(' + id + ', "' + title + '")');
+                    deleteNotification(id, this, title);
+                });
+            });
+
+            debugLog('Initialization complete');
+        });
+
+        // Delete notification function
+        function deleteNotification(notificationId, button, notificationTitle) {
+            debugLog('deleteNotification called with ID: ' + notificationId);
+            
+            if (!confirm('Delete "' + notificationTitle + '"?\n\nThis action cannot be undone.')) {
+                debugLog('User cancelled deletion');
+                return;
+            }
+
+            debugLog('User confirmed deletion, proceeding...');
+
+            const notificationItem = button.closest('.notification-item');
+            const originalContent = button.innerHTML;
+
+            // Add loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+            button.disabled = true;
+            notificationItem.style.opacity = '0.6';
+
+            debugLog('Added loading state, simulating API call...');
+
+            // Simulate API call (replace with real API call)
+            setTimeout(function() {
+                debugLog('Simulated API call completed, removing notification...');
+                
+                // Animate removal
+                notificationItem.style.transition = 'all 0.3s ease';
+                notificationItem.style.transform = 'translateX(-100%)';
+                notificationItem.style.opacity = '0';
+
+                setTimeout(function() {
+                    notificationItem.remove();
+                    debugLog('Notification removed from DOM');
+                    alert('Notification "' + notificationTitle + '" deleted successfully!');
+                }, 300);
+            }, 1000);
+        }
+
+        // Debug functions
+        function runDebug() {
+            debugLog('=== RUNNING DIAGNOSTICS ===');
+            
+            const notifications = document.querySelectorAll('.notification-item');
+            const deleteButtons = document.querySelectorAll('.delete-notification');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            
+            debugLog('Notifications found: ' + notifications.length);
+            debugLog('Delete buttons found: ' + deleteButtons.length);
+            debugLog('CSRF token found: ' + (csrfToken ? 'Yes' : 'No'));
+            debugLog('deleteNotification function exists: ' + (typeof deleteNotification === 'function'));
+            
+            if (deleteButtons.length > 0) {
+                const firstButton = deleteButtons[0];
+                debugLog('First button ID: ' + firstButton.dataset.notificationId);
+                debugLog('First button title: ' + firstButton.dataset.notificationTitle);
+            }
+            
+            debugLog('=== DIAGNOSTICS COMPLETE ===');
+        }
+
+        function testDelete() {
+            debugLog('=== TESTING DELETE FUNCTION ===');
+            const firstButton = document.querySelector('.delete-notification');
+            if (firstButton) {
+                debugLog('Found first delete button, triggering click...');
+                firstButton.click();
+            } else {
+                debugLog('No delete button found!');
+            }
+        }
+
+        // Make functions global for console testing
+        window.deleteNotification = deleteNotification;
+        window.runDebug = runDebug;
+        window.testDelete = testDelete;
+        window.debugLog = debugLog;
+
+        debugLog('Script initialization complete');
+    </script>
+</body>
+</html>

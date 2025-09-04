@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Mobile Patient Cards Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            color: #009639;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid #009639;
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .before, .after {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+        }
+        
+        .before {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        
+        .after {
+            background: #f0fff4;
+            border-color: #28a745;
+        }
+        
+        .mobile-demo-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+        }
+        
+        /* Old card styles for comparison */
+        .old-stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .old-stat-card .stat-icon {
+            font-size: 1.5rem;
+            color: #009639;
+            margin-bottom: 0.5rem;
+        }
+        
+        .old-stat-card .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #009639;
+            margin-bottom: 0.25rem;
+        }
+        
+        .old-stat-card .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+        
+        .old-stat-card .stat-change {
+            font-size: 0.75rem;
+            color: #28a745;
+        }
+        
+        /* Enhanced card styles (copied from template) */
+        .mobile-patient-stat-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92));
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 150, 57, 0.1);
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 
+                0 8px 32px rgba(0, 150, 57, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-patient-stat-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 
+                0 12px 40px rgba(0, 150, 57, 0.12),
+                0 6px 20px rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 150, 57, 0.2);
+        }
+
+        .mobile-patient-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #009639, #007a2e);
+            z-index: 1;
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1rem 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-icon-container {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon-container.total-patients {
+            background: linear-gradient(135deg, #009639, #007a2e);
+        }
+
+        .stat-icon-container.new-patients {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .stat-trend-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-body {
+            flex: 1;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .stat-number-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #009639;
+            line-height: 1;
+            display: block;
+        }
+
+        .stat-unit {
+            font-size: 0.75rem;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 0.25rem;
+        }
+
+        .stat-label-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 0.25rem 0;
+            line-height: 1.2;
+        }
+
+        .stat-subtitle {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .stat-card-footer {
+            padding: 0.5rem 1rem 1rem;
+        }
+
+        .stat-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s ease-in-out;
+        }
+
+        .progress-fill.total-progress {
+            background: linear-gradient(90deg, #009639, #28a745);
+            width: 85%;
+        }
+
+        .progress-fill.new-progress {
+            background: linear-gradient(90deg, #17a2b8, #20c997);
+            width: 60%;
+        }
+
+        .stat-description {
+            font-size: 0.7rem;
+            color: #6c757d;
+            text-align: center;
+            display: block;
+            font-weight: 500;
+        }
+        
+        .mobile-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Enhanced Mobile Patient Cards Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Enhanced Patient Statistics Cards UI</h5>
+            <ul class="mb-0">
+                <li><strong>Organized Layout:</strong> Better structured header, body, and footer sections</li>
+                <li><strong>Enhanced Icons:</strong> Gradient backgrounds with proper positioning and trend indicators</li>
+                <li><strong>Improved Typography:</strong> Clear hierarchy with titles, subtitles, and units</li>
+                <li><strong>Progress Indicators:</strong> Visual progress bars showing data trends</li>
+                <li><strong>Professional Design:</strong> Glass morphism effects with Ethiopian Hospital ERP branding</li>
+                <li><strong>Responsive Layout:</strong> Optimized for all mobile screen sizes</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Before vs After Comparison -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-chart-bar me-2"></i>
+                Patient Statistics Cards - Before vs After
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Basic Layout)</h6>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div class="old-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-number">1,247</div>
+                            <div class="stat-label">Total Patients</div>
+                            <div class="stat-change">All registered</div>
+                        </div>
+                        <div class="old-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">New This Month</div>
+                            <div class="stat-change">Growing</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Basic layout with simple styling</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Enhanced UI)</h6>
+                    <div class="mobile-stats-row">
+                        <div class="mobile-patient-stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon-container total-patients">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-trend-indicator">
+                                    <i class="fas fa-arrow-up text-success"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-body">
+                                <div class="stat-number-container">
+                                    <span class="stat-number">1,247</span>
+                                    <span class="stat-unit">patients</span>
+                                </div>
+                                <div class="stat-label-container">
+                                    <h6 class="stat-title">Total Patients</h6>
+                                    <p class="stat-subtitle">All registered</p>
+                                </div>
+                            </div>
+                            <div class="stat-card-footer">
+                                <div class="stat-progress-bar">
+                                    <div class="progress-fill total-progress"></div>
+                                </div>
+                                <small class="stat-description">Active in system</small>
+                            </div>
+                        </div>
+                        <div class="mobile-patient-stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon-container new-patients">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="stat-trend-indicator">
+                                    <i class="fas fa-arrow-up text-success"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-body">
+                                <div class="stat-number-container">
+                                    <span class="stat-number">45</span>
+                                    <span class="stat-unit">new</span>
+                                </div>
+                                <div class="stat-label-container">
+                                    <h6 class="stat-title">New This Month</h6>
+                                    <p class="stat-subtitle">Growing</p>
+                                </div>
+                            </div>
+                            <div class="stat-card-footer">
+                                <div class="stat-progress-bar">
+                                    <div class="progress-fill new-progress"></div>
+                                </div>
+                                <small class="stat-description">This month</small>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Enhanced layout with organized structure</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Complete Mobile Patient Page -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Complete Mobile Patient Page Interface
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <!-- Mobile Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-1">Patients</h5>
+                        <p class="text-muted mb-0 small">Manage patient records</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Enhanced Patient Statistics -->
+                <div class="mobile-stats-row mb-3">
+                    <div class="mobile-patient-stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-icon-container total-patients">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-trend-indicator">
+                                <i class="fas fa-arrow-up text-success"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-number-container">
+                                <span class="stat-number">1,247</span>
+                                <span class="stat-unit">patients</span>
+                            </div>
+                            <div class="stat-label-container">
+                                <h6 class="stat-title">Total Patients</h6>
+                                <p class="stat-subtitle">All registered</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <div class="stat-progress-bar">
+                                <div class="progress-fill total-progress"></div>
+                            </div>
+                            <small class="stat-description">Active in system</small>
+                        </div>
+                    </div>
+                    <div class="mobile-patient-stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-icon-container new-patients">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="stat-trend-indicator">
+                                <i class="fas fa-arrow-up text-success"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-number-container">
+                                <span class="stat-number">45</span>
+                                <span class="stat-unit">new</span>
+                            </div>
+                            <div class="stat-label-container">
+                                <h6 class="stat-title">New This Month</h6>
+                                <p class="stat-subtitle">Growing</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <div class="stat-progress-bar">
+                                <div class="progress-fill new-progress"></div>
+                            </div>
+                            <small class="stat-description">This month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sample Patient List Item -->
+                <div class="mobile-dashboard-card">
+                    <h6 class="text-ethiopia-green mb-2">Recent Patients</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="mobile-patient-avatar me-3">
+                            <div class="patient-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="mobile-patient-name">Abebe Kebede</div>
+                            <div class="mobile-patient-details">
+                                <small class="text-muted">ID: P001 • Age: 35 • Male</small>
+                            </div>
+                        </div>
+                        <div class="mobile-patient-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>Enhanced UI Features Applied</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ Visual Enhancements:</h6>
+                    <ul class="small">
+                        <li>Glass morphism effects with backdrop blur</li>
+                        <li>Gradient icon containers with proper shadows</li>
+                        <li>Trend indicators with status colors</li>
+                        <li>Progress bars showing data visualization</li>
+                        <li>Smooth hover animations and transforms</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Organization Improvements:</h6>
+                    <ul class="small">
+                        <li>Structured header, body, footer layout</li>
+                        <li>Clear typography hierarchy</li>
+                        <li>Organized text with titles and subtitles</li>
+                        <li>Proper spacing and alignment</li>
+                        <li>Ethiopian Hospital ERP branding maintained</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Enhanced Mobile Patient Cards Test Loaded');
+            
+            // Test card interactions
+            document.querySelectorAll('.mobile-patient-stat-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const title = this.querySelector('.stat-title').textContent;
+                    alert(`${title} card clicked!\n\nEnhanced UI features:\n• Organized layout structure\n• Better icon positioning\n• Clear text hierarchy\n• Progress indicators\n• Professional animations`);
+                });
+            });
+            
+            // Animate progress bars on load
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    bar.style.opacity = '1';
+                    bar.style.transform = 'scaleX(1)';
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

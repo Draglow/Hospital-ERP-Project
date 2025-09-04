@@ -1,0 +1,237 @@
+<!-- Global Error Handler Component -->
+<div id="errorHandler" class="position-fixed" style="top: 20px; right: 20px; z-index: 9999; display: none;">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <div>
+                <strong>Error!</strong>
+                <span id="errorMessage">An unexpected error occurred.</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<div id="successHandler" class="position-fixed" style="top: 20px; right: 20px; z-index: 9999; display: none;">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+                <strong>Success!</strong>
+                <span id="successMessage">Operation completed successfully.</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<div id="warningHandler" class="position-fixed" style="top: 20px; right: 20px; z-index: 9999; display: none;">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <div>
+                <strong>Warning!</strong>
+                <span id="warningMessage">Please review your action.</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<script>
+// Global error handling functions
+window.ErrorHandler = {
+    show: function(message, type = 'error', duration = 5000) {
+        const handlers = {
+            'error': 'errorHandler',
+            'success': 'successHandler',
+            'warning': 'warningHandler'
+        };
+        
+        const handlerId = handlers[type] || 'errorHandler';
+        const messageId = type + 'Message';
+        
+        // Hide all other handlers first
+        Object.values(handlers).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+        
+        // Show the appropriate handler
+        const handler = document.getElementById(handlerId);
+        const messageElement = document.getElementById(messageId);
+        
+        if (handler && messageElement) {
+            messageElement.textContent = message;
+            handler.style.display = 'block';
+            
+            // Auto-hide after duration
+            setTimeout(() => {
+                handler.style.display = 'none';
+            }, duration);
+        }
+    },
+    
+    showError: function(message, duration = 5000) {
+        this.show(message, 'error', duration);
+    },
+    
+    showSuccess: function(message, duration = 3000) {
+        this.show(message, 'success', duration);
+    },
+    
+    showWarning: function(message, duration = 4000) {
+        this.show(message, 'warning', duration);
+    },
+    
+    hide: function() {
+        ['errorHandler', 'successHandler', 'warningHandler'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+    }
+};
+
+// Global AJAX error handler
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle AJAX errors globally
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        return originalFetch.apply(this, args)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response;
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                if (!error.handled) {
+                    ErrorHandler.showError('Network error: ' + error.message);
+                }
+                throw error;
+            });
+    };
+    
+    // Handle form submission errors
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (form.classList.contains('ajax-form')) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const url = form.action || window.location.href;
+            const method = form.method || 'POST';
+            
+            fetch(url, {
+                method: method,
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ErrorHandler.showSuccess(data.message || 'Operation completed successfully');
+                    if (data.redirect) {
+                        setTimeout(() => window.location.href = data.redirect, 1000);
+                    }
+                } else {
+                    ErrorHandler.showError(data.message || 'Operation failed');
+                }
+            })
+            .catch(error => {
+                ErrorHandler.showError('Form submission failed: ' + error.message);
+            });
+        }
+    });
+    
+    // Handle validation errors
+    const forms = document.querySelectorAll('.needs-validation');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                ErrorHandler.showWarning('Please fill in all required fields correctly.');
+            }
+            form.classList.add('was-validated');
+        });
+    });
+});
+
+// Utility function for API calls with error handling
+window.apiCall = function(url, options = {}) {
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+        }
+    };
+    
+    const mergedOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+            ...defaultOptions.headers,
+            ...options.headers
+        }
+    };
+    
+    return fetch(url, mergedOptions)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success === false) {
+                throw new Error(data.message || 'Operation failed');
+            }
+            return data;
+        })
+        .catch(error => {
+            error.handled = true;
+            ErrorHandler.showError(error.message);
+            throw error;
+        });
+};
+</script>
+
+<style>
+.alert {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 8px;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border-left: 4px solid #a71e2a;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+    border-left: 4px solid #155724;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+    border-left: 4px solid #d39e00;
+}
+
+.alert .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.alert-warning .btn-close {
+    filter: none;
+}
+</style>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Text Overflow Fix Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            color: #009639;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 8px;
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .before, .after {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .before {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        
+        .after {
+            background: #f0fff4;
+            border-color: #28a745;
+        }
+        
+        .mobile-demo-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+        
+        /* Broken card simulation */
+        .broken-card {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+            overflow: visible;
+            background: white;
+            border-radius: 8px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .broken-text {
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: visible;
+            color: #6c757d;
+        }
+        
+        .broken-change {
+            font-size: 0.6rem;
+            white-space: nowrap;
+            overflow: visible;
+            color: #28a745;
+        }
+        
+        .screen-size-demo {
+            border: 2px solid #009639;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Mobile Text Overflow Fix Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Patient Statistics Card Text Overflow Fixes</h5>
+            <ul class="mb-0">
+                <li><strong>Text Containment:</strong> All text content now stays within card boundaries</li>
+                <li><strong>Perfect Centering:</strong> Text is properly centered within each card</li>
+                <li><strong>Proper Wrapping:</strong> Long text wraps to multiple lines instead of overflowing</li>
+                <li><strong>Line Clamping:</strong> Text is limited to 2 lines with proper truncation</li>
+                <li><strong>Responsive Design:</strong> Works across all mobile screen sizes (320px - 768px)</li>
+                <li><strong>Ethiopian Branding:</strong> Maintains professional medical interface aesthetics</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Before vs After Comparison -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-chart-bar me-2"></i>
+                Text Overflow - Before vs After
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Broken)</h6>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div class="broken-card">
+                            <div style="font-size: 1.5rem; color: #009639;">150</div>
+                            <div class="broken-text">All Registered Patients Growing Rapidly</div>
+                            <div class="broken-change">15% increase this month from last month</div>
+                        </div>
+                        <div class="broken-card">
+                            <div style="font-size: 1.5rem; color: #009639;">25</div>
+                            <div class="broken-text">Today's Appointments Scheduled</div>
+                            <div class="broken-change">5% increase from yesterday</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Text overflows card boundaries</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Fixed)</h6>
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-users text-ethiopia-blue"></i>
+                            </div>
+                            <div class="mobile-stat-number">150</div>
+                            <div class="mobile-stat-label">All Registered Patients Growing</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>15% this month
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-calendar-check text-ethiopia-green"></i>
+                            </div>
+                            <div class="mobile-stat-number">25</div>
+                            <div class="mobile-stat-label">Today's Appointments</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>5% from yesterday
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Text properly centered and contained within card boundaries</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Patient Statistics Cards -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-users me-2"></i>
+                Patient Statistics Cards - Fixed Layout
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <!-- Mobile Patient Stats - Two Cards Per Row -->
+                <div class="mobile-stats-grid">
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-users text-ethiopia-green"></i>
+                            </div>
+                            <div class="mobile-stat-number">1,247</div>
+                            <div class="mobile-stat-label">Total Patients</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>
+                                    All registered
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-user-plus text-ethiopia-blue"></i>
+                            </div>
+                            <div class="mobile-stat-number">45</div>
+                            <div class="mobile-stat-label">New This Month</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>Growing
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 3: Different Screen Sizes -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Responsive Design - Different Screen Sizes
+            </h3>
+            
+            <!-- Extra Small Mobile (320px) -->
+            <div class="screen-size-demo">
+                <h6 class="text-primary">📱 Extra Small Mobile (320px)</h6>
+                <div style="max-width: 320px; margin: 0 auto;">
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-heartbeat text-ethiopia-red"></i>
+                            </div>
+                            <div class="mobile-stat-number">89</div>
+                            <div class="mobile-stat-label">Critical Patients Monitored</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>Needs attention
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-pills text-ethiopia-yellow"></i>
+                            </div>
+                            <div class="mobile-stat-number">12</div>
+                            <div class="mobile-stat-label">Low Stock Medicines</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-danger">
+                                    <i class="fas fa-arrow-down"></i>Reorder needed
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Standard Mobile (375px) -->
+            <div class="screen-size-demo">
+                <h6 class="text-success">📱 Standard Mobile (375px)</h6>
+                <div style="max-width: 375px; margin: 0 auto;">
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-money-bill-wave text-ethiopia-yellow"></i>
+                            </div>
+                            <div class="mobile-stat-number">125,000</div>
+                            <div class="mobile-stat-label">Monthly Revenue (ETB)</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>15% from last month
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-calendar-check text-ethiopia-green"></i>
+                            </div>
+                            <div class="mobile-stat-number">342</div>
+                            <div class="mobile-stat-label">Today's Appointments</div>
+                            <div class="mobile-stat-change">
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i>8% from yesterday
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 4: Long Text Examples -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-text-width me-2"></i>
+                Long Text Handling - Line Clamping
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <div class="mobile-stats-row">
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-user-injured text-ethiopia-red"></i>
+                        </div>
+                        <div class="mobile-stat-number">23</div>
+                        <div class="mobile-stat-label">Emergency Department Patients Waiting for Treatment</div>
+                        <div class="mobile-stat-change">
+                            <small class="text-warning">
+                                <i class="fas fa-clock"></i>Average wait time 45 minutes
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-bed text-ethiopia-blue"></i>
+                        </div>
+                        <div class="mobile-stat-number">156</div>
+                        <div class="mobile-stat-label">Hospital Beds Currently Occupied by Patients</div>
+                        <div class="mobile-stat-change">
+                            <small class="text-info">
+                                <i class="fas fa-info-circle"></i>85% occupancy rate this week
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>Text Centering & Overflow Fixes Applied</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ CSS Improvements:</h6>
+                    <ul class="small">
+                        <li>Perfect text centering with `text-align: center` and `width: 100%`</li>
+                        <li>Removed `white-space: nowrap` causing overflow</li>
+                        <li>Added proper text wrapping with `white-space: normal`</li>
+                        <li>Implemented line clamping with `-webkit-line-clamp: 2`</li>
+                        <li>Added proper padding to prevent text touching edges</li>
+                        <li>Improved line-height for better readability</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Layout Enhancements:</h6>
+                    <ul class="small">
+                        <li>Changed card layout to `justify-content: center`</li>
+                        <li>Ensured all elements have `width: 100%` for proper centering</li>
+                        <li>Adjusted font sizes for different screen sizes</li>
+                        <li>Optimized padding and spacing for small screens</li>
+                        <li>Maintained 2-line text limit across all breakpoints</li>
+                        <li>Ethiopian green branding preserved</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Text Overflow Fix Test Loaded');
+            
+            // Test card interactions
+            document.querySelectorAll('.mobile-stat-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const label = this.querySelector('.mobile-stat-label').textContent;
+                    alert(`Card clicked: ${label}\n\nText is now properly contained within card boundaries!`);
+                });
+            });
+            
+            // Demonstrate responsive behavior
+            function checkScreenSize() {
+                const width = window.innerWidth;
+                let sizeCategory = '';
+                
+                if (width <= 375) {
+                    sizeCategory = 'Extra Small Mobile';
+                } else if (width <= 414) {
+                    sizeCategory = 'Small Mobile';
+                } else if (width <= 768) {
+                    sizeCategory = 'Standard Mobile';
+                } else {
+                    sizeCategory = 'Tablet/Desktop';
+                }
+                
+                console.log(`Current screen size: ${width}px (${sizeCategory})`);
+            }
+            
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+        });
+    </script>
+</body>
+</html>

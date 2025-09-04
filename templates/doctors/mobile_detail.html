@@ -1,0 +1,385 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Dr. {{ doctor.get_full_name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Dr. {{ doctor.get_full_name }}</h1>
+        <p class="text-muted">{{ doctor.specialty }} - {{ doctor.sub_specialty|default:"General Practice" }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+        <a href="{% url 'doctors:doctor_edit' doctor.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-edit me-1"></i>Edit
+        </a>
+        <a href="{% url 'doctors:doctor_schedule' doctor.pk %}?mobile=1" class="btn btn-primary btn-sm">
+            <i class="fas fa-calendar me-1"></i>Schedule
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <!-- Doctor Profile Header -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-ethiopia-green rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-user-md text-white fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1">Dr. {{ doctor.get_full_name }}</h5>
+                    <p class="text-muted mb-1">{{ doctor.get_specialty_display }}</p>
+                    <span class="badge bg-{% if doctor.is_available_today %}success{% else %}secondary{% endif %}">
+                        {% if doctor.is_available_today %}Available{% else %}Unavailable{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-id-card text-ethiopia-green me-2"></i>
+                    Personal Information
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Full Name</label>
+                        <div class="fw-semibold">{{ doctor.get_full_name }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Doctor ID</label>
+                        <div>{{ doctor.doctor_id|default:"Not assigned" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Gender</label>
+                        <div>{{ doctor.get_gender_display|default:"Not specified" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Date of Birth</label>
+                        <div>{{ doctor.date_of_birth|date:"F d, Y"|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-phone text-ethiopia-blue me-2"></i>
+                    Contact Information
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Phone Number</label>
+                        <div>{{ doctor.user.phone|default:"Not provided" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Email</label>
+                        <div>{{ doctor.user.email|default:"Not provided" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Emergency Contact</label>
+                        <div>{{ doctor.emergency_contact|default:"Not provided" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Address</label>
+                        <div>{{ doctor.address|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Professional Information Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-graduation-cap text-ethiopia-yellow me-2"></i>
+                    Professional Information
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Specialization</label>
+                        <div class="fw-semibold">{{ doctor.get_specialty_display }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Sub-Specialty</label>
+                        <div>{{ doctor.sub_specialty|default:"General Practice" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">License Number</label>
+                        <div>{{ doctor.license_number|default:"Not provided" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Years of Experience</label>
+                        <div>{{ doctor.years_of_experience|default:"Not specified" }} years</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Medical School</label>
+                        <div>{{ doctor.medical_school|default:"Not provided" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Graduation Year</label>
+                        <div>{{ doctor.graduation_year|default:"Not provided" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Details Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-briefcase text-ethiopia-red me-2"></i>
+                    Employment Details
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Availability Status</label>
+                        <div>{{ doctor.get_availability_status_display|default:"Not specified" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Join Date</label>
+                        <div>{{ doctor.created_at|date:"F d, Y"|default:"Not specified" }}</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Consultation Fee</label>
+                        <div>{{ doctor.consultation_fee|default:"Not set" }} ETB</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-muted">Languages Spoken</label>
+                        <div>{{ doctor.languages_spoken|default:"Amharic, English" }}</div>
+                    </div>
+                </div>
+            </div>
+
+
+            {% if doctor.certifications %}
+            <hr>
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-certificate text-ethiopia-green me-2"></i>
+                    Certifications
+                </h6>
+                <div class="bg-light p-3 rounded">
+                    {{ doctor.certifications }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if doctor.bio %}
+            <hr>
+            <div class="mb-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-user text-ethiopia-blue me-2"></i>
+                    Biography
+                </h6>
+                <div class="bg-light p-3 rounded">
+                    {{ doctor.bio }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-chart-bar text-ethiopia-green me-2"></i>
+                Statistics
+            </h6>
+            <div class="row text-center g-3">
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-green">{{ total_appointments|default:0 }}</div>
+                    <div class="stat-label">Total Appointments</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-blue">{{ today_appointments|default:0 }}</div>
+                    <div class="stat-label">Today's Appointments</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-yellow">{{ completed_appointments|default:0 }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-number text-ethiopia-red">{{ cancelled_appointments|default:0 }}</div>
+                    <div class="stat-label">Cancelled</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Schedule -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-calendar-check text-ethiopia-blue me-2"></i>
+                Today's Schedule
+            </h6>
+            {% if todays_appointments %}
+                {% for appointment in todays_appointments %}
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div>
+                        <div class="fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                        <div class="small text-muted">{{ appointment.patient.get_full_name }}</div>
+                    </div>
+                    <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                        {{ appointment.get_status_display }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No appointments scheduled for today.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-cogs text-ethiopia-yellow me-2"></i>
+                Quick Actions
+            </h6>
+            <div class="d-grid gap-2">
+                <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}&mobile=1" class="btn btn-primary btn-sm">
+                    <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+                </a>
+                <a href="{% url 'doctors:doctor_schedule' doctor.pk %}?mobile=1" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-calendar me-2"></i>View Full Schedule
+                </a>
+                <button class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-chart-line me-2"></i>Performance Report
+                </button>
+                <button class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-bell me-2"></i>Send Notification
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Feedback -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-star text-ethiopia-red me-2"></i>
+                Patient Feedback
+            </h6>
+            <div class="text-center">
+                <div class="display-6 text-ethiopia-green">4.8</div>
+                <div class="text-muted">Average Rating</div>
+                <div class="mt-2">
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                </div>
+                <div class="small text-muted mt-1">Based on {{ total_reviews|default:0 }} reviews</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-dashboard-card h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile doctor detail loaded');
+
+    // Show mobile notification if coming from list
+    if (document.referrer.includes('/doctors/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Doctor profile loaded successfully!', 'success');
+        }
+    }
+
+    // Handle quick action buttons
+    const actionButtons = document.querySelectorAll('.btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.textContent.includes('Performance Report')) {
+                e.preventDefault();
+                alert('Performance report feature coming soon!');
+            } else if (this.textContent.includes('Send Notification')) {
+                e.preventDefault();
+                alert('Notification feature coming soon!');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

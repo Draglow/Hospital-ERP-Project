@@ -1,0 +1,373 @@
+{% extends "base_mobile.html" %}
+{% load static %}
+
+{% block title %}Mobile Notification Text Length Test{% endblock %}
+
+{% block content %}
+<div class="mobile-page-header">
+    <h4 class="mobile-page-title">
+        <i class="fas fa-bell me-2 text-ethiopia-green"></i>
+        Notification Text Length Test
+    </h4>
+    <p class="mobile-page-subtitle">Testing 15-20 character limit standardization</p>
+</div>
+
+<!-- Test Notification Cards -->
+<div class="mobile-notifications-list">
+    <!-- Test Case 1: Short text (within limit) -->
+    <div class="mobile-notification-card unread" data-test="short-text">
+        <div class="mobile-notification-header">
+            <div class="mobile-notification-icon">
+                <i class="fas fa-info-circle text-ethiopia-green"></i>
+            </div>
+            <div class="mobile-notification-meta">
+                <div class="mobile-notification-type">
+                    <span class="badge bg-secondary">System</span>
+                    <span class="badge bg-normal">Normal</span>
+                </div>
+                <div class="mobile-notification-time">
+                    <small class="text-muted">2 min ago</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-notification-content">
+            <h6 class="mobile-notification-title">{{ "Short Title"|truncatechars:18 }}</h6>
+            <p class="mobile-notification-message">{{ "Short message"|truncatechars:18 }}</p>
+        </div>
+    </div>
+
+    <!-- Test Case 2: Medium text (exactly at limit) -->
+    <div class="mobile-notification-card" data-test="medium-text">
+        <div class="mobile-notification-header">
+            <div class="mobile-notification-icon">
+                <i class="fas fa-calendar-alt text-ethiopia-green"></i>
+            </div>
+            <div class="mobile-notification-meta">
+                <div class="mobile-notification-type">
+                    <span class="badge bg-secondary">Appointment</span>
+                    <span class="badge bg-high">High</span>
+                </div>
+                <div class="mobile-notification-time">
+                    <small class="text-muted">5 min ago</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-notification-content">
+            <h6 class="mobile-notification-title">{{ "Exactly 18 chars!!"|truncatechars:18 }}</h6>
+            <p class="mobile-notification-message">{{ "Exactly 18 chars!!"|truncatechars:18 }}</p>
+        </div>
+    </div>
+
+    <!-- Test Case 3: Long text (should be truncated) -->
+    <div class="mobile-notification-card urgent" data-test="long-text">
+        <div class="mobile-notification-header">
+            <div class="mobile-notification-icon">
+                <i class="fas fa-exclamation-triangle text-ethiopia-green"></i>
+            </div>
+            <div class="mobile-notification-meta">
+                <div class="mobile-notification-type">
+                    <span class="badge bg-secondary">System</span>
+                    <span class="badge bg-urgent">Urgent</span>
+                </div>
+                <div class="mobile-notification-time">
+                    <small class="text-muted">10 min ago</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-notification-content">
+            <h6 class="mobile-notification-title">{{ "This is a very long notification title that should be truncated"|truncatechars:18 }}</h6>
+            <p class="mobile-notification-message">{{ "This is a very long notification message that should be truncated to maintain visual consistency"|truncatechars:18 }}</p>
+        </div>
+    </div>
+
+    <!-- Test Case 4: Very long text (extreme case) -->
+    <div class="mobile-notification-card" data-test="very-long-text">
+        <div class="mobile-notification-header">
+            <div class="mobile-notification-icon">
+                <i class="fas fa-user-plus text-ethiopia-green"></i>
+            </div>
+            <div class="mobile-notification-meta">
+                <div class="mobile-notification-type">
+                    <span class="badge bg-secondary">Patient</span>
+                    <span class="badge bg-normal">Normal</span>
+                </div>
+                <div class="mobile-notification-time">
+                    <small class="text-muted">15 min ago</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-notification-content">
+            <h6 class="mobile-notification-title">{{ "This is an extremely long notification title that definitely exceeds the character limit and should be properly truncated with ellipsis"|truncatechars:18 }}</h6>
+            <p class="mobile-notification-message">{{ "This is an extremely long notification message that definitely exceeds the character limit and should be properly truncated with ellipsis to maintain visual consistency across all notification cards"|truncatechars:18 }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Test Controls -->
+<div class="mobile-dashboard-card mt-4">
+    <h6 class="text-ethiopia-blue mb-3">
+        <i class="fas fa-cogs me-2"></i>Test Controls
+    </h6>
+    
+    <div class="row g-2">
+        <div class="col-6">
+            <button class="btn btn-outline-primary btn-sm w-100" onclick="testJavaScriptTruncation()">
+                <i class="fas fa-code me-1"></i>Test JS Truncation
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-outline-success btn-sm w-100" onclick="measureTextLengths()">
+                <i class="fas fa-ruler me-1"></i>Measure Lengths
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-outline-warning btn-sm w-100" onclick="testCardHeights()">
+                <i class="fas fa-arrows-alt-v me-1"></i>Check Heights
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-outline-info btn-sm w-100" onclick="runAllTests()">
+                <i class="fas fa-play me-1"></i>Run All Tests
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Test Results -->
+<div class="mobile-dashboard-card mt-3">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-clipboard-check me-2"></i>Test Results
+    </h6>
+    <div id="test-results" class="test-results-container">
+        <p class="text-muted">Click "Run All Tests" to see results...</p>
+    </div>
+</div>
+
+<!-- Back to Notifications -->
+<div class="mobile-bottom-actions">
+    <a href="{% url 'notifications:notification_list' %}?mobile=1" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Notifications
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Test-specific styles */
+.test-results-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: var(--mobile-spacing-md);
+    background: #f8f9fa;
+}
+
+.test-result-item {
+    padding: var(--mobile-spacing-sm);
+    margin-bottom: var(--mobile-spacing-xs);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.test-result-item.success {
+    background: rgba(40, 167, 69, 0.1);
+    border-left: 3px solid #28a745;
+}
+
+.test-result-item.warning {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #ffc107;
+}
+
+.test-result-item.error {
+    background: rgba(220, 53, 69, 0.1);
+    border-left: 3px solid #dc3545;
+}
+
+.test-result-item.info {
+    background: rgba(0, 123, 255, 0.1);
+    border-left: 3px solid #007bff;
+}
+
+/* Highlight test cards */
+.mobile-notification-card[data-test] {
+    position: relative;
+}
+
+.mobile-notification-card[data-test]::before {
+    content: attr(data-test);
+    position: absolute;
+    top: -8px;
+    right: 8px;
+    background: #009639;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function testJavaScriptTruncation() {
+    if (window.mobileDashboard && window.mobileDashboard.truncateText) {
+        const testCases = [
+            { input: "Short", expected: "Short" },
+            { input: "Exactly 18 chars!!", expected: "Exactly 18 chars!!" },
+            { input: "This is longer than 18 characters", expected: "This is longer..." },
+            { input: "Very very very long text that exceeds limit", expected: "Very very very..." }
+        ];
+        
+        let results = [];
+        testCases.forEach((testCase, index) => {
+            const result = mobileDashboard.truncateText(testCase.input, 18);
+            const passed = result === testCase.expected;
+            results.push({
+                test: `JS Truncation Test ${index + 1}`,
+                input: testCase.input,
+                expected: testCase.expected,
+                actual: result,
+                passed: passed
+            });
+        });
+        
+        displayTestResults(results, 'JavaScript Truncation Tests');
+        
+        // Show notification
+        mobileDashboard.showMobileNotification('JS truncation tested!', 'info');
+    } else {
+        addTestResult('JavaScript Truncation', 'error', 'mobileDashboard.truncateText not available');
+    }
+}
+
+function measureTextLengths() {
+    const cards = document.querySelectorAll('.mobile-notification-card[data-test]');
+    let results = [];
+    
+    cards.forEach(card => {
+        const testName = card.dataset.test;
+        const title = card.querySelector('.mobile-notification-title').textContent;
+        const message = card.querySelector('.mobile-notification-message').textContent;
+        
+        const titleLength = title.length;
+        const messageLength = message.length;
+        const titlePassed = titleLength <= 18;
+        const messagePassed = messageLength <= 18;
+        
+        results.push({
+            test: `${testName} - Title Length`,
+            actual: `${titleLength} chars: "${title}"`,
+            passed: titlePassed
+        });
+        
+        results.push({
+            test: `${testName} - Message Length`,
+            actual: `${messageLength} chars: "${message}"`,
+            passed: messagePassed
+        });
+    });
+    
+    displayTestResults(results, 'Text Length Measurements');
+}
+
+function testCardHeights() {
+    const cards = document.querySelectorAll('.mobile-notification-card[data-test]');
+    let heights = [];
+    let results = [];
+    
+    cards.forEach(card => {
+        const height = card.offsetHeight;
+        heights.push(height);
+        
+        results.push({
+            test: `${card.dataset.test} Height`,
+            actual: `${height}px`,
+            passed: true
+        });
+    });
+    
+    // Check if all heights are similar (within 10px tolerance)
+    const minHeight = Math.min(...heights);
+    const maxHeight = Math.max(...heights);
+    const heightDifference = maxHeight - minHeight;
+    
+    results.push({
+        test: 'Height Consistency',
+        actual: `Difference: ${heightDifference}px (${minHeight}px - ${maxHeight}px)`,
+        passed: heightDifference <= 10
+    });
+    
+    displayTestResults(results, 'Card Height Tests');
+}
+
+function runAllTests() {
+    clearTestResults();
+    addTestResult('Test Suite', 'info', 'Running all notification text length tests...');
+    
+    setTimeout(() => measureTextLengths(), 500);
+    setTimeout(() => testCardHeights(), 1000);
+    setTimeout(() => testJavaScriptTruncation(), 1500);
+    
+    setTimeout(() => {
+        addTestResult('Test Suite', 'success', 'All tests completed! Check results above.');
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('All tests completed!', 'success');
+        }
+    }, 2000);
+}
+
+function displayTestResults(results, suiteName) {
+    addTestResult(suiteName, 'info', `Running ${results.length} tests...`);
+    
+    results.forEach(result => {
+        const status = result.passed ? 'success' : 'error';
+        const message = result.expected ? 
+            `Expected: "${result.expected}", Got: "${result.actual}"` : 
+            result.actual;
+        addTestResult(result.test, status, message);
+    });
+}
+
+function addTestResult(testName, status, message) {
+    const container = document.getElementById('test-results');
+    const resultItem = document.createElement('div');
+    resultItem.className = `test-result-item ${status}`;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    resultItem.innerHTML = `
+        <strong>${testName}</strong> <small class="text-muted">[${timestamp}]</small><br>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(resultItem);
+    container.scrollTop = container.scrollHeight;
+}
+
+function clearTestResults() {
+    const container = document.getElementById('test-results');
+    container.innerHTML = '';
+}
+
+// Auto-run tests on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile notification text length test page loaded');
+    
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Test page loaded!', 'info');
+    }
+    
+    // Auto-run basic measurements
+    setTimeout(() => {
+        addTestResult('Page Load', 'info', 'Test page loaded successfully');
+        measureTextLengths();
+    }, 1000);
+});
+</script>
+{% endblock %}

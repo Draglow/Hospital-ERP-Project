@@ -1,0 +1,575 @@
+/* Ethiopian Hospital ERP - Mobile-First Responsive Design */
+/* Comprehensive Mobile Optimization for Native App Experience */
+
+/* ===== MOBILE DESIGN SYSTEM ===== */
+:root {
+    /* Mobile-specific variables */
+    --mobile-touch-target: 44px;
+    --mobile-spacing-xs: 0.5rem;
+    --mobile-spacing-sm: 0.75rem;
+    --mobile-spacing-md: 1rem;
+    --mobile-spacing-lg: 1.5rem;
+    --mobile-spacing-xl: 2rem;
+    
+    /* Mobile typography scale */
+    --mobile-font-xs: 0.75rem;
+    --mobile-font-sm: 0.875rem;
+    --mobile-font-base: 1rem;
+    --mobile-font-lg: 1.125rem;
+    --mobile-font-xl: 1.25rem;
+    --mobile-font-2xl: 1.5rem;
+    --mobile-font-3xl: 1.875rem;
+    
+    /* Mobile-optimized shadows */
+    --mobile-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --mobile-shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --mobile-shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --mobile-shadow-xl: 0 15px 35px rgba(0, 0, 0, 0.2);
+    
+    /* Mobile-optimized border radius */
+    --mobile-radius-sm: 8px;
+    --mobile-radius-md: 12px;
+    --mobile-radius-lg: 16px;
+    --mobile-radius-xl: 20px;
+    
+    /* Mobile-optimized transitions */
+    --mobile-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --mobile-transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --mobile-transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Mobile text colors */
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --text-muted: #8e9aaf;
+}
+
+/* ===== GLOBAL MOBILE OPTIMIZATIONS ===== */
+
+/* ===== FLOATING ACTION BUTTON MOBILE OPTIMIZATIONS ===== */
+
+/* Mobile-specific floating button adjustments */
+@media (max-width: 767px) {
+    .floating-action-btn {
+        width: 160px !important;
+        height: 50px !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        font-size: 12px !important;
+        border-radius: 25px !important;
+        padding: 0 1rem !important;
+        z-index: 1001 !important; /* Higher than mobile panels */
+    }
+
+    .floating-action-btn i {
+        font-size: 14px !important;
+    }
+
+    /* Ensure button doesn't interfere with mobile navigation */
+    .floating-action-btn {
+        transition: transform var(--mobile-transition-base), opacity var(--mobile-transition-base) !important;
+    }
+
+    /* Hide floating button when mobile panels are open */
+    body.mobile-panel-open .floating-action-btn {
+        opacity: 0;
+        transform: translateY(100px);
+        pointer-events: none;
+    }
+
+    /* Adjust glow animation for mobile performance */
+    .floating-action-btn {
+        animation: mobileGlow 3s ease-in-out infinite alternate !important;
+    }
+
+    @keyframes mobileGlow {
+        from {
+            box-shadow: 0 0 15px rgba(0, 150, 57, 0.3), 0 0 25px rgba(0, 150, 57, 0.2) !important;
+        }
+        to {
+            box-shadow: 0 0 25px rgba(0, 150, 57, 0.5), 0 0 35px rgba(0, 150, 57, 0.3) !important;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-action-btn {
+        width: 140px !important;
+        height: 45px !important;
+        bottom: 15px !important;
+        right: 15px !important;
+        font-size: 11px !important;
+        border-radius: 22px !important;
+    }
+
+    .floating-action-btn i {
+        font-size: 12px !important;
+    }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+    .floating-action-btn:active {
+        transform: scale(0.95) !important;
+        transition: transform 0.1s ease !important;
+    }
+
+    .floating-action-btn:hover::before {
+        display: none; /* Disable hover shimmer on touch devices */
+    }
+}
+
+/* Mobile viewport optimization */
+@media (max-width: 767px) {
+    * {
+        -webkit-tap-highlight-color: rgba(0, 150, 57, 0.2);
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    input, textarea, select, button {
+        -webkit-user-select: auto;
+        user-select: auto;
+    }
+    
+    /* Prevent horizontal scroll */
+    html, body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    /* Optimize scrolling performance */
+    body {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Mobile-first container */
+    .container {
+        padding-left: var(--mobile-spacing-md);
+        padding-right: var(--mobile-spacing-md);
+        max-width: 100%;
+    }
+    
+    /* Touch-friendly interactive elements */
+    .btn,
+    .nav-link,
+    .dropdown-item,
+    .form-control,
+    .form-check-input,
+    .card[role="button"],
+    a[role="button"],
+    button {
+        min-height: var(--mobile-touch-target);
+        min-width: var(--mobile-touch-target);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 150, 57, 0.2);
+    }
+    
+    /* Mobile typography optimization */
+    h1, .h1 {
+        font-size: var(--mobile-font-3xl);
+        line-height: 1.2;
+        font-weight: 700;
+        margin-bottom: var(--mobile-spacing-lg);
+    }
+    
+    h2, .h2 {
+        font-size: var(--mobile-font-2xl);
+        line-height: 1.3;
+        font-weight: 600;
+        margin-bottom: var(--mobile-spacing-md);
+    }
+    
+    h3, .h3 {
+        font-size: var(--mobile-font-xl);
+        line-height: 1.3;
+        font-weight: 600;
+        margin-bottom: var(--mobile-spacing-md);
+    }
+    
+    h4, .h4 {
+        font-size: var(--mobile-font-lg);
+        line-height: 1.4;
+        font-weight: 600;
+        margin-bottom: var(--mobile-spacing-sm);
+    }
+    
+    p, .lead {
+        font-size: var(--mobile-font-base);
+        line-height: 1.6;
+        margin-bottom: var(--mobile-spacing-md);
+    }
+    
+    small, .small {
+        font-size: var(--mobile-font-sm);
+        line-height: 1.4;
+    }
+    
+    /* Mobile button optimization */
+    .btn {
+        padding: var(--mobile-spacing-sm) var(--mobile-spacing-lg);
+        font-size: var(--mobile-font-base);
+        font-weight: 600;
+        border-radius: var(--mobile-radius-md);
+        transition: all var(--mobile-transition-base);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: var(--mobile-shadow-sm);
+    }
+    
+    .btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: #000000;
+        box-shadow: var(--mobile-shadow-md);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background: var(--gradient-primary);
+        transform: translateY(-1px);
+        box-shadow: var(--mobile-shadow-lg);
+        color: #000000;
+    }
+
+    /* Mobile button text visibility fixes */
+    .mobile-add-doctor-btn,
+    .mobile-add-medicine-btn,
+    .mobile-add-invoice-btn,
+    .mobile-add-appointment-btn,
+    .mobile-add-patient-btn,
+    .mobile-add-quick-btn,
+    .mobile-search-btn {
+        background: linear-gradient(135deg, #009639, rgba(0, 150, 57, 0.8)) !important;
+        border: none !important;
+        color: #000000 !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+    }
+
+    .mobile-add-doctor-btn:hover,
+    .mobile-add-doctor-btn:focus,
+    .mobile-add-medicine-btn:hover,
+    .mobile-add-medicine-btn:focus,
+    .mobile-add-invoice-btn:hover,
+    .mobile-add-invoice-btn:focus,
+    .mobile-add-appointment-btn:hover,
+    .mobile-add-appointment-btn:focus,
+    .mobile-add-patient-btn:hover,
+    .mobile-add-patient-btn:focus,
+    .mobile-add-quick-btn:hover,
+    .mobile-add-quick-btn:focus,
+    .mobile-search-btn:hover,
+    .mobile-search-btn:focus {
+        background: linear-gradient(135deg, #007a2e, #006b28) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .mobile-btn-text {
+        color: #000000 !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline !important;
+        text-shadow: none !important;
+    }
+
+    /* Mobile info grids for all module cards */
+    .mobile-doctor-info-grid,
+    .mobile-medicine-info-grid,
+    .mobile-billing-info-grid,
+    .mobile-appointment-info-grid,
+    .mobile-patient-info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--mobile-spacing-sm);
+        width: 100%;
+    }
+
+    .mobile-doctor-info-row,
+    .mobile-medicine-info-row,
+    .mobile-billing-info-row,
+    .mobile-appointment-info-row,
+    .mobile-patient-info-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--mobile-spacing-sm);
+        width: 100%;
+    }
+
+    .mobile-doctor-info-item,
+    .mobile-medicine-info-item,
+    .mobile-billing-info-item,
+    .mobile-appointment-info-item,
+    .mobile-patient-info-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--mobile-spacing-sm);
+        background: rgba(0, 150, 57, 0.05);
+        border-radius: var(--mobile-radius-md);
+        border: 1px solid rgba(0, 150, 57, 0.1);
+        transition: all var(--mobile-transition-base);
+        min-height: 60px;
+    }
+
+    .mobile-patient-info-item {
+        padding: var(--mobile-spacing-xs);
+        min-height: 45px;
+    }
+
+    .mobile-doctor-info-item:hover,
+    .mobile-medicine-info-item:hover,
+    .mobile-billing-info-item:hover,
+    .mobile-appointment-info-item:hover,
+    .mobile-patient-info-item:hover {
+        background: rgba(0, 150, 57, 0.1);
+        transform: translateY(-1px);
+        box-shadow: var(--mobile-shadow-sm);
+    }
+
+    .mobile-doctor-info-value,
+    .mobile-medicine-info-value,
+    .mobile-billing-info-value,
+    .mobile-appointment-info-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+
+    .mobile-patient-info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.2;
+        margin-bottom: 0.125rem;
+    }
+
+    .mobile-doctor-info-label,
+    .mobile-medicine-info-label,
+    .mobile-billing-info-label,
+    .mobile-appointment-info-label {
+        font-size: 0.75rem;
+        color: #000000;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .mobile-patient-info-label {
+        font-size: 0.625rem;
+        color: #000000;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.2;
+    }
+    
+    /* Mobile form optimization */
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: var(--mobile-radius-md);
+        padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+        font-size: 16px; /* Prevent zoom on iOS */
+        min-height: var(--mobile-touch-target);
+        transition: all var(--mobile-transition-base);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(0, 150, 57, 0.15);
+        background: white;
+        transform: translateY(-1px);
+    }
+    
+    /* Mobile card optimization */
+    .card {
+        border-radius: var(--mobile-radius-lg);
+        border: none;
+        box-shadow: var(--mobile-shadow-md);
+        transition: all var(--mobile-transition-base);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--mobile-shadow-lg);
+    }
+    
+    /* Mobile navigation optimization */
+    .navbar-nav .nav-link {
+        padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+        font-size: var(--mobile-font-base);
+        font-weight: 500;
+        border-radius: var(--mobile-radius-sm);
+        margin: var(--mobile-spacing-xs) 0;
+        transition: all var(--mobile-transition-base);
+        min-height: var(--mobile-touch-target);
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        background: rgba(0, 150, 57, 0.1);
+        color: #000000;
+        transform: translateX(3px);
+    }
+    
+    /* Mobile modal optimization */
+    .modal-dialog {
+        margin: var(--mobile-spacing-md);
+        max-width: calc(100% - 2rem);
+    }
+    
+    .modal-content {
+        border-radius: var(--mobile-radius-lg);
+        border: none;
+        box-shadow: var(--mobile-shadow-xl);
+    }
+    
+    /* Mobile alert optimization */
+    .alert {
+        border-radius: var(--mobile-radius-md);
+        padding: var(--mobile-spacing-md);
+        margin-bottom: var(--mobile-spacing-lg);
+        font-size: var(--mobile-font-sm);
+        border: none;
+        box-shadow: var(--mobile-shadow-sm);
+    }
+    
+    /* Mobile table optimization */
+    .table-responsive {
+        border-radius: var(--mobile-radius-md);
+        box-shadow: var(--mobile-shadow-sm);
+    }
+    
+    .table {
+        font-size: var(--mobile-font-sm);
+    }
+    
+    .table th,
+    .table td {
+        padding: var(--mobile-spacing-sm);
+        vertical-align: middle;
+    }
+}
+
+/* ===== SMALL MOBILE DEVICES (320px - 480px) ===== */
+@media (max-width: 480px) {
+    .container {
+        padding-left: var(--mobile-spacing-sm);
+        padding-right: var(--mobile-spacing-sm);
+    }
+    
+    h1, .h1 {
+        font-size: var(--mobile-font-2xl);
+    }
+    
+    h2, .h2 {
+        font-size: var(--mobile-font-xl);
+    }
+    
+    .btn {
+        padding: var(--mobile-spacing-xs) var(--mobile-spacing-md);
+        font-size: var(--mobile-font-sm);
+    }
+    
+    .form-control {
+        padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm);
+        font-size: 16px;
+    }
+}
+
+/* ===== TABLET OPTIMIZATION (768px - 1024px) ===== */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .container {
+        padding-left: var(--mobile-spacing-xl);
+        padding-right: var(--mobile-spacing-xl);
+    }
+    
+    /* Tablet-specific touch targets */
+    .btn,
+    .nav-link,
+    .form-control {
+        min-height: 48px;
+    }
+    
+    /* Tablet typography */
+    h1, .h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2, .h2 {
+        font-size: 2rem;
+    }
+    
+    /* Tablet button sizing */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* ===== LANDSCAPE ORIENTATION OPTIMIZATION ===== */
+@media (max-width: 767px) and (orientation: landscape) {
+    /* Optimize for landscape mobile */
+    .container {
+        padding-left: var(--mobile-spacing-xl);
+        padding-right: var(--mobile-spacing-xl);
+    }
+    
+    /* Reduce vertical spacing in landscape */
+    section {
+        padding: var(--mobile-spacing-lg) 0;
+    }
+    
+    h1, .h1 {
+        font-size: var(--mobile-font-2xl);
+        margin-bottom: var(--mobile-spacing-md);
+    }
+    
+    h2, .h2 {
+        font-size: var(--mobile-font-xl);
+        margin-bottom: var(--mobile-spacing-sm);
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (max-width: 767px) {
+    /* Enhanced focus states for mobile */
+    .btn:focus,
+    .form-control:focus,
+    .nav-link:focus {
+        outline: 3px solid rgba(0, 150, 57, 0.5);
+        outline-offset: 2px;
+    }
+    
+    /* Improved contrast for mobile */
+    .text-muted {
+        color: #495057 !important;
+    }
+    
+    /* Better spacing for screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+}

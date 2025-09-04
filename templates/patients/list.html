@@ -1,0 +1,169 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Patients - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Patients</h1>
+        <p class="text-muted">Manage patient records and information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'patients:patient_export' %}" class="btn btn-outline-primary">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </a>
+        <a href="{% url 'patients:patient_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Patient
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Patient Records ({{ total_patients }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search patients..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="gender" class="form-select" style="width: 120px;" onchange="this.form.submit()">
+                    <option value="">All Genders</option>
+                    <option value="M" {% if gender_filter == 'M' %}selected{% endif %}>Male</option>
+                    <option value="F" {% if gender_filter == 'F' %}selected{% endif %}>Female</option>
+                    <option value="O" {% if gender_filter == 'O' %}selected{% endif %}>Other</option>
+                </select>
+                <select name="city" class="form-select" style="width: 150px;" onchange="this.form.submit()">
+                    <option value="">All Cities</option>
+                    {% for city in cities %}
+                        <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or gender_filter or city_filter or blood_type_filter %}
+                    <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Last Visit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in page_obj %}
+                <tr>
+                    <td><span class="badge bg-primary">{{ patient.patient_id }}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-ethiopia-green rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">{{ patient.get_full_name }}</div>
+                                <small class="text-muted">{{ patient.email|default:"No email" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.get_age }}</td>
+                    <td>
+                        <span class="badge {% if patient.gender == 'M' %}bg-info{% elif patient.gender == 'F' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ patient.get_gender_display }}
+                        </span>
+                    </td>
+                    <td>{{ patient.phone }}</td>
+                    <td>{{ patient.city }}</td>
+                    <td>{{ patient.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-primary" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'patients:patient_edit' patient.pk %}" class="btn btn-outline-success" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'appointments:appointment_add' %}?patient={{ patient.pk }}" class="btn btn-outline-info" title="Book Appointment">
+                                <i class="fas fa-calendar"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <h5>No patients found</h5>
+                            <p>{% if search_query %}No patients match your search criteria.{% else %}No patients have been added yet.{% endif %}</p>
+                            <a href="{% url 'patients:patient_add' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add First Patient
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} patients
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if gender_filter %}&gender={{ gender_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if gender_filter %}&gender={{ gender_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if gender_filter %}&gender={{ gender_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

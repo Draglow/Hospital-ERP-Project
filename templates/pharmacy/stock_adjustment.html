@@ -1,0 +1,183 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Stock Adjustment - {{ medicine.name }} - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Stock Adjustment</h1>
+        <p class="text-muted">{{ medicine.name }} - Current Stock: {{ medicine.stock_quantity }} units</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Medicine
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Adjust Stock Quantity</h5>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Adjustment Type *</label>
+                            <select class="form-select" name="adjustment_type" required>
+                                <option value="">Select adjustment type</option>
+                                <option value="add">Add Stock</option>
+                                <option value="remove">Remove Stock</option>
+                            </select>
+                            <div class="invalid-feedback">Please select an adjustment type.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" name="quantity" min="1" required>
+                            <div class="form-text">Enter the number of units to add or remove</div>
+                            <div class="invalid-feedback">Please enter a valid quantity.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Reason for Adjustment</label>
+                    <textarea class="form-control" name="reason" rows="3" placeholder="Enter reason for stock adjustment (optional)"></textarea>
+                    <div class="form-text">Provide a reason for this stock adjustment for audit purposes</div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Apply Adjustment
+                    </button>
+                    <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-pills text-ethiopia-green me-2"></i>
+                Medicine Information
+            </h6>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Name:</span>
+                    <span class="fw-semibold">{{ medicine.name }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Strength:</span>
+                    <span>{{ medicine.strength }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Form:</span>
+                    <span>{{ medicine.get_form_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Category:</span>
+                    <span>{{ medicine.get_category_display }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-warehouse text-ethiopia-blue me-2"></i>
+                Current Stock Status
+            </h6>
+            <div class="text-center mb-3">
+                <div class="h2 text-primary mb-0">{{ medicine.stock_quantity }}</div>
+                <small class="text-muted">Units in Stock</small>
+            </div>
+            
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Minimum Level:</span>
+                    <span class="fw-semibold">{{ medicine.minimum_stock_level }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Unit Price:</span>
+                    <span>{{ medicine.unit_price }} ETB</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Cost Price:</span>
+                    <span>{{ medicine.cost_price }} ETB</span>
+                </div>
+            </div>
+            
+            {% if medicine.is_low_stock %}
+            <div class="alert alert-warning small">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                This medicine is below minimum stock level!
+            </div>
+            {% endif %}
+            
+            {% if medicine.is_expiring_soon %}
+            <div class="alert alert-warning small">
+                <i class="fas fa-calendar-times me-2"></i>
+                This medicine is expiring soon ({{ medicine.expiry_date }})!
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle text-ethiopia-yellow me-2"></i>
+                Stock Adjustment Guidelines
+            </h6>
+            <div class="small text-muted">
+                <ul class="mb-0">
+                    <li>Add stock when receiving new inventory</li>
+                    <li>Remove stock for damaged or expired items</li>
+                    <li>Always provide a reason for audit purposes</li>
+                    <li>Verify quantities before confirming</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Update quantity validation based on adjustment type
+document.querySelector('select[name="adjustment_type"]').addEventListener('change', function() {
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    const currentStock = {{ medicine.stock_quantity }};
+    
+    if (this.value === 'remove') {
+        quantityInput.max = currentStock;
+        quantityInput.placeholder = `Max: ${currentStock} units`;
+    } else {
+        quantityInput.removeAttribute('max');
+        quantityInput.placeholder = 'Enter quantity to add';
+    }
+});
+</script>
+{% endblock %}

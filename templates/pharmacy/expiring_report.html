@@ -1,0 +1,325 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Expiring Medicines Report - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-warning">Expiring Medicines Report</h1>
+        <p class="text-muted">{{ total_count }} medicine{{ total_count|pluralize }} expiring within {{ warning_days }} days</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportExpiring()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <button class="btn btn-outline-success" onclick="printReport()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+        <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Pharmacy
+        </a>
+    </div>
+</div>
+
+<!-- Alert Banner -->
+<div class="alert alert-warning d-flex align-items-center mb-4">
+    <i class="fas fa-clock me-3 fs-4"></i>
+    <div>
+        <h6 class="alert-heading mb-1">Expiry Alert</h6>
+        <p class="mb-0">The following medicines are expiring soon. Consider using them first or disposing of expired items safely.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-warning">{{ total_count }}</div>
+            <div class="stat-label">Expiring Soon</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-danger">
+                {% for medicine in medicines %}
+                    {% if medicine.expiry_date <= today %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Already Expired</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-info">
+                {% for medicine in medicines %}
+                    {% if medicine.expiry_date > today and medicine.expiry_date <= next_week %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Expiring This Week</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card text-center">
+            <div class="stat-number text-success">
+                {% for medicine in medicines %}
+                    {% if medicine.expiry_date > next_week %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Expiring Later</div>
+        </div>
+    </div>
+</div>
+
+<!-- Expiring Medicines List -->
+{% if medicines %}
+    <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Expiring Medicines</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="selectAll()">
+                    <i class="fas fa-check-square me-1"></i>Select All
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="bulkDispose()">
+                    <i class="fas fa-trash me-1"></i>Bulk Dispose
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                        </th>
+                        <th>Medicine</th>
+                        <th>Category</th>
+                        <th>Batch Number</th>
+                        <th>Expiry Date</th>
+                        <th>Days Left</th>
+                        <th>Stock Quantity</th>
+                        <th>Value at Risk</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in medicines %}
+                    {% load custom_filters %}
+                    <tr class="{% if medicine.expiry_date <= today %}table-danger{% elif medicine.expiry_date <= next_week %}table-warning{% endif %}">
+                        <td>
+                            <input type="checkbox" class="medicine-checkbox" value="{{ medicine.pk }}">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="medicine-icon me-3">
+                                    <i class="fas fa-pills text-ethiopia-green"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ medicine.name }}</div>
+                                    <small class="text-muted">{{ medicine.manufacturer }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-ethiopia-blue">{{ medicine.get_category_display }}</span>
+                        </td>
+                        <td>
+                            <span class="font-monospace">{{ medicine.batch_number|default:"N/A" }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold {% if medicine.expiry_date <= today %}text-danger{% elif medicine.expiry_date <= next_week %}text-warning{% endif %}">
+                                {{ medicine.expiry_date|date:"M d, Y" }}
+                            </div>
+                        </td>
+                        <td>
+                            {% with days_left=medicine.expiry_date|days_until %}
+                                <span class="badge {% if days_left <= 0 %}bg-danger{% elif days_left <= 7 %}bg-warning{% else %}bg-info{% endif %}">
+                                    {% if days_left <= 0 %}
+                                        Expired
+                                    {% elif days_left == 1 %}
+                                        1 day
+                                    {% else %}
+                                        {{ days_left }} days
+                                    {% endif %}
+                                </span>
+                            {% endwith %}
+                        </td>
+                        <td>
+                            <span class="fw-bold">{{ medicine.stock_quantity }}</span>
+                            <small class="text-muted">{{ medicine.unit }}</small>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-danger">
+                                {{ medicine.stock_quantity|mul:medicine.cost_price|floatformat:2 }} ETB
+                            </span>
+                        </td>
+                        <td>
+                            {% if medicine.expiry_date <= today %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% elif medicine.expiry_date <= next_week %}
+                                <span class="badge bg-warning">Critical</span>
+                            {% else %}
+                                <span class="badge bg-info">Warning</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                {% if medicine.expiry_date <= today %}
+                                    <button class="btn btn-outline-danger" onclick="disposeExpired({{ medicine.pk }})" title="Dispose">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-warning" onclick="markForDisposal({{ medicine.pk }})" title="Mark for Disposal">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </button>
+                                {% endif %}
+                                <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}" class="btn btn-outline-info" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="dashboard-card text-center py-5">
+        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+        <h5 class="text-success">No Medicines Expiring Soon</h5>
+        <p class="text-muted">All medicines have sufficient time before expiry.</p>
+        <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-primary">
+            <i class="fas fa-pills me-2"></i>View All Medicines
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.medicine-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 150, 57, 0.1);
+    border-radius: 8px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+.table-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportExpiring() {
+    // Export expiring medicines report to CSV
+    window.location.href = '{% url "pharmacy:expiring_report" %}?export=csv';
+}
+
+function printReport() {
+    window.print();
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.medicine-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !selectAllCheckbox.checked;
+    });
+    
+    selectAllCheckbox.checked = !selectAllCheckbox.checked;
+}
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const checkboxes = document.querySelectorAll('.medicine-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function bulkDispose() {
+    const selectedMedicines = [];
+    const checkboxes = document.querySelectorAll('.medicine-checkbox:checked');
+    
+    checkboxes.forEach(checkbox => {
+        selectedMedicines.push(checkbox.value);
+    });
+    
+    if (selectedMedicines.length === 0) {
+        alert('Please select medicines to dispose.');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to dispose ${selectedMedicines.length} medicine(s)?`)) {
+        // In a real implementation, this would make an AJAX call to dispose medicines
+        alert(`Selected ${selectedMedicines.length} medicine(s) for disposal. Bulk disposal feature coming soon!`);
+    }
+}
+
+function disposeExpired(medicineId) {
+    if (confirm('Are you sure you want to dispose this expired medicine?')) {
+        // In a real implementation, this would make an AJAX call
+        alert('Medicine disposal feature coming soon!');
+    }
+}
+
+function markForDisposal(medicineId) {
+    if (confirm('Mark this medicine for disposal?')) {
+        // In a real implementation, this would mark the medicine for disposal
+        alert('Mark for disposal feature coming soon!');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Expiring medicines report loaded');
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000);
+});
+</script>
+{% endblock %}

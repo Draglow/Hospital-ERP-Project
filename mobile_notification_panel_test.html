@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Notification Panel Test - Ethiopian Hospital ERP</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="static/css/main.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .test-header {
+            background: linear-gradient(135deg, #009639 0%, #0F47AF 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .test-content {
+            padding: 20px;
+        }
+        
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #009639 0%, #0F47AF 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 150, 57, 0.3);
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list i {
+            color: #009639;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h2><i class="fas fa-bell me-2"></i>Mobile Notification Panel</h2>
+            <p class="mb-0">Enhanced notification system test</p>
+        </div>
+        
+        <div class="test-content">
+            <h5 class="mb-3">✨ Enhanced Features</h5>
+            <ul class="feature-list">
+                <li><i class="fas fa-arrow-right"></i>Slides in from the right</li>
+                <li><i class="fas fa-eye"></i>Glassmorphism effect with backdrop blur</li>
+                <li><i class="fas fa-layer-group"></i>Semi-transparent overlay</li>
+                <li><i class="fas fa-hand-pointer"></i>Touch-friendly 44px minimum targets</li>
+                <li><i class="fas fa-hand-paper"></i>Swipe-to-close gesture support</li>
+                <li><i class="fas fa-keyboard"></i>Escape key to close</li>
+                <li><i class="fas fa-mobile-alt"></i>Responsive design (85vw max width)</li>
+                <li><i class="fas fa-list"></i>Scrollable notification list</li>
+                <li><i class="fas fa-check-double"></i>Mark all as read functionality</li>
+                <li><i class="fas fa-external-link-alt"></i>View all notifications link</li>
+            </ul>
+            
+            <button class="test-button" onclick="testNotificationPanel()">
+                <i class="fas fa-play me-2"></i>Test Notification Panel
+            </button>
+            
+            <button class="test-button" onclick="simulateNotifications()">
+                <i class="fas fa-plus me-2"></i>Add Sample Notifications
+            </button>
+            
+            <button class="test-button" onclick="testSwipeGesture()">
+                <i class="fas fa-hand-paper me-2"></i>Test Swipe Gesture
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Notification Panel (Simulated) -->
+    <div class="mobile-notifications-panel" id="mobileNotificationsPanel">
+        <div class="mobile-notifications-header">
+            <h6 class="mobile-notifications-title">Notifications</h6>
+            <button class="mobile-notifications-close" id="mobileNotificationsClose" aria-label="Close notifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-notifications-content" id="mobileNotificationsContent">
+            <!-- Loading state -->
+            <div class="mobile-notifications-loading" id="mobileNotificationsLoading">
+                <div class="d-flex justify-content-center align-items-center py-4">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="text-muted">Loading notifications...</span>
+                </div>
+            </div>
+            
+            <!-- Notifications list -->
+            <div class="mobile-notifications-list" id="mobileNotificationsList" style="display: none;">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <!-- Empty state -->
+            <div class="mobile-notifications-empty" id="mobileNotificationsEmpty" style="display: none;">
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                    <h6 class="text-muted mb-2">No notifications</h6>
+                    <p class="text-muted small mb-0">You're all caught up!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notifications actions -->
+        <div class="mobile-notifications-actions" id="mobileNotificationsActions" style="display: none;">
+            <div class="d-flex gap-2 p-3 border-top">
+                <button class="btn btn-sm btn-outline-primary flex-fill" id="mobileMarkAllReadBtn">
+                    <i class="fas fa-check-double me-1"></i>
+                    Mark All Read
+                </button>
+                <button class="btn btn-sm btn-outline-secondary flex-fill" id="mobileViewAllNotificationsBtn">
+                    <i class="fas fa-list me-1"></i>
+                    View All
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Notifications Overlay -->
+    <div class="mobile-notifications-overlay" id="mobileNotificationsOverlay"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Simulate mobile notification panel functionality
+        let isNotificationPanelOpen = false;
+        let sampleNotifications = [
+            {
+                type: 'appointment',
+                title: 'New Appointment Scheduled',
+                message: 'Dr. Alemayehu Tadesse has a new appointment with Hanan Mohammed',
+                time: '2 minutes ago',
+                unread: true
+            },
+            {
+                type: 'patient',
+                title: 'New Patient Registered',
+                message: 'Bekele Worku has been registered as a new patient',
+                time: '15 minutes ago',
+                unread: true
+            },
+            {
+                type: 'billing',
+                title: 'Invoice Payment Received',
+                message: 'Payment of 450 ETB received for invoice INV202408160003',
+                time: '1 hour ago',
+                unread: false
+            },
+            {
+                type: 'pharmacy',
+                title: 'Low Stock Alert',
+                message: 'Paracetamol stock is running low (5 units remaining)',
+                time: '2 hours ago',
+                unread: true
+            },
+            {
+                type: 'system',
+                title: 'System Maintenance',
+                message: 'Scheduled maintenance will occur tonight at 2:00 AM',
+                time: '3 hours ago',
+                unread: false
+            }
+        ];
+
+        function testNotificationPanel() {
+            if (isNotificationPanelOpen) {
+                closeNotificationPanel();
+            } else {
+                openNotificationPanel();
+            }
+        }
+
+        function openNotificationPanel() {
+            const panel = document.getElementById('mobileNotificationsPanel');
+            const overlay = document.getElementById('mobileNotificationsOverlay');
+            
+            panel.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            isNotificationPanelOpen = true;
+            
+            // Simulate loading
+            setTimeout(() => {
+                loadSampleNotifications();
+            }, 1000);
+        }
+
+        function closeNotificationPanel() {
+            const panel = document.getElementById('mobileNotificationsPanel');
+            const overlay = document.getElementById('mobileNotificationsOverlay');
+            
+            panel.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            isNotificationPanelOpen = false;
+        }
+
+        function loadSampleNotifications() {
+            const loadingElement = document.getElementById('mobileNotificationsLoading');
+            const listElement = document.getElementById('mobileNotificationsList');
+            const actionsElement = document.getElementById('mobileNotificationsActions');
+            
+            loadingElement.style.display = 'none';
+            listElement.style.display = 'block';
+            actionsElement.style.display = 'block';
+            
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            const listElement = document.getElementById('mobileNotificationsList');
+            let html = '';
+            
+            sampleNotifications.forEach((notification, index) => {
+                html += `
+                    <div class="mobile-notification-item ${notification.unread ? 'unread' : ''}" data-index="${index}">
+                        <div class="mobile-notification-icon ${notification.type}">
+                            <i class="${getNotificationIcon(notification.type)}"></i>
+                        </div>
+                        <div class="mobile-notification-content">
+                            <div class="mobile-notification-title">${notification.title}</div>
+                            <div class="mobile-notification-message">${notification.message}</div>
+                            <div class="mobile-notification-time">${notification.time}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listElement.innerHTML = html;
+            
+            // Add click handlers
+            listElement.querySelectorAll('.mobile-notification-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.remove('unread');
+                    item.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        item.style.transform = '';
+                    }, 150);
+                });
+            });
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                appointment: 'fas fa-calendar-alt',
+                patient: 'fas fa-user-plus',
+                billing: 'fas fa-file-invoice',
+                pharmacy: 'fas fa-pills',
+                system: 'fas fa-cog'
+            };
+            return icons[type] || 'fas fa-bell';
+        }
+
+        function simulateNotifications() {
+            // Add a new notification
+            const newNotification = {
+                type: 'appointment',
+                title: 'Appointment Reminder',
+                message: 'Upcoming appointment with Sara Yohannes in 30 minutes',
+                time: 'Just now',
+                unread: true
+            };
+            
+            sampleNotifications.unshift(newNotification);
+            
+            if (isNotificationPanelOpen) {
+                renderNotifications();
+            }
+            
+            alert('New notification added! Open the panel to see it.');
+        }
+
+        function testSwipeGesture() {
+            alert('Swipe gesture test: Open the notification panel and swipe right to close it!');
+        }
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close button
+            document.getElementById('mobileNotificationsClose').addEventListener('click', closeNotificationPanel);
+            
+            // Overlay click
+            document.getElementById('mobileNotificationsOverlay').addEventListener('click', closeNotificationPanel);
+            
+            // Mark all as read
+            document.getElementById('mobileMarkAllReadBtn').addEventListener('click', function() {
+                document.querySelectorAll('.mobile-notification-item.unread').forEach(item => {
+                    item.classList.remove('unread');
+                });
+                alert('All notifications marked as read!');
+            });
+            
+            // View all notifications
+            document.getElementById('mobileViewAllNotificationsBtn').addEventListener('click', function() {
+                alert('Redirecting to full notifications page...');
+                closeNotificationPanel();
+            });
+            
+            // Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isNotificationPanelOpen) {
+                    closeNotificationPanel();
+                }
+            });
+            
+            // Swipe gesture simulation
+            let startX = 0;
+            const panel = document.getElementById('mobileNotificationsPanel');
+            
+            panel.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+            });
+            
+            panel.addEventListener('touchend', function(e) {
+                const endX = e.changedTouches[0].clientX;
+                const diffX = endX - startX;
+                
+                if (diffX > 100) { // Swipe right threshold
+                    closeNotificationPanel();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

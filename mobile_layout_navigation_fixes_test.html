@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Layout & Navigation Fixes Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            color: #009639;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 8px;
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .before, .after {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .before {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        
+        .after {
+            background: #f0fff4;
+            border-color: #28a745;
+        }
+        
+        .mobile-demo-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+        
+        /* Broken layout simulation */
+        .broken-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .broken-card {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+        }
+        
+        .navigation-demo {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-link-demo {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #009639;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 0.25rem;
+        }
+        
+        .nav-link-demo.broken {
+            background: #dc3545;
+        }
+        
+        .nav-link-demo.fixed {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Mobile Layout & Navigation Fixes Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Patient Management Mobile Fixes</h5>
+            <ul class="mb-0">
+                <li><strong>Patient Detail Cards:</strong> Fixed layout to display appointment and invoice cards side-by-side</li>
+                <li><strong>Prescription Navigation:</strong> Fixed mobile pharmacy prescription links to stay in mobile interface</li>
+                <li><strong>Mobile Templates:</strong> Created dedicated mobile prescription list and dispense templates</li>
+                <li><strong>Navigation Consistency:</strong> All mobile links maintain mobile parameter throughout navigation</li>
+                <li><strong>Ethiopian Branding:</strong> Maintains professional medical interface aesthetics</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Patient Detail Card Layout Fix -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-user me-2"></i>
+                Patient Detail Cards - Layout Fix
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Stacked)</h6>
+                    <div class="broken-layout">
+                        <div class="broken-card">
+                            <i class="fas fa-calendar-check text-success fa-2x mb-2"></i>
+                            <div class="fw-bold">15</div>
+                            <small>Total Appointments</small>
+                        </div>
+                        <div class="broken-card">
+                            <i class="fas fa-file-invoice text-primary fa-2x mb-2"></i>
+                            <div class="fw-bold">8</div>
+                            <small>Total Invoices</small>
+                        </div>
+                    </div>
+                    <small class="text-muted">Cards displayed in separate rows</small>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Side-by-Side)</h6>
+                    <div class="mobile-stats-row">
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-calendar-check text-ethiopia-green"></i>
+                            </div>
+                            <div class="mobile-stat-number">15</div>
+                            <div class="mobile-stat-label">Total Appointments</div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="mobile-stat-icon">
+                                <i class="fas fa-file-invoice text-ethiopia-blue"></i>
+                            </div>
+                            <div class="mobile-stat-number">8</div>
+                            <div class="mobile-stat-label">Total Invoices</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Cards properly displayed side-by-side</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Prescription Navigation Fix -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-prescription me-2"></i>
+                Prescription Navigation - Mobile Consistency Fix
+            </h3>
+            
+            <div class="before-after">
+                <div class="before">
+                    <h6 class="text-danger">❌ Before (Broken Navigation)</h6>
+                    <div class="navigation-demo">
+                        <p><strong>Mobile Pharmacy Page:</strong></p>
+                        <a href="#" class="nav-link-demo">📱 Prescriptions</a>
+                        <p class="mt-2"><small>↓ Clicking prescription item</small></p>
+                        <a href="#" class="nav-link-demo broken">🖥️ Desktop Prescription View</a>
+                        <p class="mt-2"><small class="text-danger">❌ Redirects to desktop version</small></p>
+                    </div>
+                </div>
+                <div class="after">
+                    <h6 class="text-success">✅ After (Fixed Navigation)</h6>
+                    <div class="navigation-demo">
+                        <p><strong>Mobile Pharmacy Page:</strong></p>
+                        <a href="#" class="nav-link-demo">📱 Prescriptions</a>
+                        <p class="mt-2"><small>↓ Clicking prescription item</small></p>
+                        <a href="#" class="nav-link-demo fixed">📱 Mobile Prescription View</a>
+                        <p class="mt-2"><small class="text-success">✅ Stays in mobile interface</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 3: Mobile Patient Detail Page -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-id-card me-2"></i>
+                Complete Mobile Patient Detail Page
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <!-- Mobile Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-1">Abebe Kebede</h5>
+                        <p class="text-muted mb-0 small">Patient ID: P001</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Fixed Stats Cards -->
+                <div class="mobile-stats-row mb-3">
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-calendar-check text-ethiopia-green"></i>
+                        </div>
+                        <div class="mobile-stat-number">15</div>
+                        <div class="mobile-stat-label">Total Appointments</div>
+                    </div>
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-file-invoice text-ethiopia-blue"></i>
+                        </div>
+                        <div class="mobile-stat-number">8</div>
+                        <div class="mobile-stat-label">Total Invoices</div>
+                    </div>
+                </div>
+                
+                <!-- Patient Info -->
+                <div class="mobile-dashboard-card mb-3">
+                    <h6 class="text-ethiopia-green mb-2">Patient Information</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <small class="text-muted">Age</small>
+                            <div class="fw-semibold">35 years</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Gender</small>
+                            <div class="fw-semibold">Male</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Phone</small>
+                            <div class="fw-semibold">+251-911-123456</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Blood Type</small>
+                            <div class="fw-semibold">O+</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="mobile-quick-actions-grid">
+                    <a href="#" class="mobile-quick-action-card">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>New Appointment</span>
+                    </a>
+                    <a href="#" class="mobile-quick-action-card">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>Create Invoice</span>
+                    </a>
+                    <a href="#" class="mobile-quick-action-card">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Patient</span>
+                    </a>
+                    <a href="#" class="mobile-quick-action-card">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 4: Mobile Prescription List -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-list me-2"></i>
+                Mobile Prescription List Interface
+            </h3>
+            
+            <div class="mobile-demo-container">
+                <!-- Mobile Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-1">Prescriptions</h5>
+                        <p class="text-muted mb-0 small">Manage patient prescriptions</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="mobile-stats-row mb-3">
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-clock text-ethiopia-yellow"></i>
+                        </div>
+                        <div class="mobile-stat-number">12</div>
+                        <div class="mobile-stat-label">Pending</div>
+                    </div>
+                    <div class="mobile-stat-card">
+                        <div class="mobile-stat-icon">
+                            <i class="fas fa-pills text-ethiopia-green"></i>
+                        </div>
+                        <div class="mobile-stat-number">45</div>
+                        <div class="mobile-stat-label">Dispensed</div>
+                    </div>
+                </div>
+                
+                <!-- Sample Prescription Item -->
+                <div class="mobile-dashboard-card">
+                    <div class="d-flex align-items-start">
+                        <div class="mobile-prescription-avatar me-3">
+                            <div class="prescription-avatar-placeholder">
+                                <i class="fas fa-prescription"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="fw-semibold">John Doe</div>
+                                <span class="badge bg-warning">Pending</span>
+                            </div>
+                            <div class="text-ethiopia-green fw-medium">Amoxicillin 500mg</div>
+                            <small class="text-muted">Capsules - Antibiotic</small>
+                            <div class="mt-2">
+                                <div class="row g-2 text-center">
+                                    <div class="col-4">
+                                        <div class="text-ethiopia-blue fw-bold">30</div>
+                                        <small class="text-muted">Prescribed</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-ethiopia-green fw-bold">0</div>
+                                        <small class="text-muted">Dispensed</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-ethiopia-yellow fw-bold">30</div>
+                                        <small class="text-muted">Remaining</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            <button class="btn btn-sm btn-success">
+                                <i class="fas fa-pills"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>All Fixes Applied Successfully</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ Layout Improvements:</h6>
+                    <ul class="small">
+                        <li>Patient detail cards now display side-by-side using mobile-stats-row</li>
+                        <li>Proper 2-column grid layout across all mobile screen sizes</li>
+                        <li>Consistent spacing and alignment</li>
+                        <li>44px minimum touch targets maintained</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Navigation Fixes:</h6>
+                    <ul class="small">
+                        <li>Created mobile prescription list template</li>
+                        <li>Created mobile prescription dispense template</li>
+                        <li>Updated pharmacy views to support mobile parameter</li>
+                        <li>All prescription links maintain mobile interface</li>
+                        <li>Proper mobile navigation consistency</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Layout & Navigation Fixes Test Loaded');
+            
+            // Test card interactions
+            document.querySelectorAll('.mobile-stat-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const label = this.querySelector('.mobile-stat-label').textContent;
+                    alert(`${label} card clicked!\n\nCards are now properly displayed side-by-side in a 2-column layout.`);
+                });
+            });
+            
+            // Test navigation links
+            document.querySelectorAll('.nav-link-demo').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isFixed = this.classList.contains('fixed');
+                    const isBroken = this.classList.contains('broken');
+                    
+                    if (isFixed) {
+                        alert('✅ Fixed Navigation!\n\nThis link now properly maintains the mobile interface and includes the mobile=1 parameter.');
+                    } else if (isBroken) {
+                        alert('❌ Broken Navigation!\n\nThis represents the old behavior where clicking would redirect to desktop version.');
+                    } else {
+                        alert('📱 Mobile Navigation\n\nThis demonstrates the mobile pharmacy interface.');
+                    }
+                });
+            });
+            
+            // Test prescription actions
+            document.querySelectorAll('.mobile-prescription-avatar, .prescription-avatar-placeholder').forEach(element => {
+                element.addEventListener('click', function() {
+                    alert('📋 Prescription Item Clicked!\n\nNow properly navigates to mobile prescription detail view instead of desktop version.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

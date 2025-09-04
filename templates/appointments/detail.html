@@ -1,0 +1,329 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Appointment Details - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Appointment Details</h1>
+        <p class="text-muted">View and manage appointment information</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+        </a>
+        {% if appointment.status != 'cancelled' %}
+            <a href="{% url 'appointments:appointment_edit' appointment.pk %}" class="btn btn-outline-primary">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">Appointment Information</h5>
+                <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'in_progress' %}warning{% else %}secondary{% endif %} fs-6">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user text-ethiopia-green me-2"></i>
+                        Patient Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Patient Name</label>
+                        <div class="fw-semibold">{{ appointment.patient.get_full_name }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Patient ID</label>
+                        <div>{{ appointment.patient.patient_id }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Age</label>
+                        <div>{{ appointment.patient.age }} years</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Phone</label>
+                        <div>{{ appointment.patient.phone_number }}</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user-md text-ethiopia-blue me-2"></i>
+                        Doctor Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Doctor Name</label>
+                        <div class="fw-semibold">Dr. {{ appointment.doctor.get_full_name }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Specialization</label>
+                        <div>{{ appointment.doctor.specialization }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Department</label>
+                        <div>{{ appointment.doctor.department }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Contact</label>
+                        <div>{{ appointment.doctor.phone_number }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-calendar-alt text-ethiopia-yellow me-2"></i>
+                        Appointment Schedule
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Date</label>
+                        <div class="fw-semibold">{{ appointment.appointment_date|date:"l, F d, Y" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Time</label>
+                        <div class="fw-semibold">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Duration</label>
+                        <div>{{ appointment.duration|default:"30" }} minutes</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                        Appointment Details
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Type</label>
+                        <div>{{ appointment.get_appointment_type_display }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Priority</label>
+                        <span class="badge bg-{% if appointment.priority == 'emergency' %}danger{% elif appointment.priority == 'urgent' %}warning{% else %}success{% endif %}">
+                            {{ appointment.get_priority_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Created</label>
+                        <div>{{ appointment.created_at|date:"M d, Y g:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if appointment.chief_complaint %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <i class="fas fa-notes-medical text-ethiopia-green me-2"></i>
+                        Chief Complaint
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ appointment.chief_complaint }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if appointment.notes %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <i class="fas fa-sticky-note text-ethiopia-blue me-2"></i>
+                        Notes
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ appointment.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-cogs text-ethiopia-green me-2"></i>
+                Quick Actions
+            </h6>
+            <div class="d-grid gap-2">
+                {% if appointment.status == 'scheduled' %}
+                    <button class="btn btn-success btn-sm" onclick="updateStatus('in_progress')">
+                        <i class="fas fa-play me-2"></i>Start Appointment
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="updateStatus('cancelled')">
+                        <i class="fas fa-times me-2"></i>Cancel Appointment
+                    </button>
+                {% elif appointment.status == 'in_progress' %}
+                    <button class="btn btn-success btn-sm" onclick="updateStatus('completed')">
+                        <i class="fas fa-check me-2"></i>Complete Appointment
+                    </button>
+                {% endif %}
+                
+                <a href="{% url 'patients:patient_detail' appointment.patient.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-user me-2"></i>View Patient Profile
+                </a>
+                
+                <a href="{% url 'doctors:doctor_detail' appointment.doctor.pk %}" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-user-md me-2"></i>View Doctor Profile
+                </a>
+                
+                {% if appointment.status == 'completed' %}
+                    <button class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-medical me-2"></i>Generate Report
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-blue me-2"></i>
+                Patient History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Previous Appointments:</strong> {{ patient_appointments_count|default:0 }}
+                </div>
+                <div class="mb-2">
+                    <strong>Last Visit:</strong> 
+                    {% if last_appointment %}
+                        {{ last_appointment.appointment_date|date:"M d, Y" }}
+                    {% else %}
+                        First visit
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <strong>Blood Type:</strong> {{ appointment.patient.blood_type|default:"Not specified" }}
+                </div>
+                <div class="mb-2">
+                    <strong>Allergies:</strong> 
+                    {% if appointment.patient.allergies %}
+                        {{ appointment.patient.allergies }}
+                    {% else %}
+                        None recorded
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if appointment.status == 'scheduled' %}
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-clock text-ethiopia-yellow me-2"></i>
+                Reminder
+            </h6>
+            <div class="small text-muted">
+                <p class="mb-2">Appointment scheduled for {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</p>
+                <p class="mb-0">Please ensure the patient arrives 15 minutes early for check-in.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateStatus(newStatus) {
+    console.log('updateStatus called with status:', newStatus);
+    let confirmMessage, endpoint;
+
+    if (newStatus === 'in_progress') {
+        confirmMessage = 'Are you sure you want to start this appointment? This will change the status to "In Progress".';
+        endpoint = `/appointments/{{ appointment.pk }}/start/`;
+    } else if (newStatus === 'cancelled') {
+        confirmMessage = 'Are you sure you want to cancel this appointment? This action cannot be undone and may affect the patient.';
+        endpoint = `/appointments/{{ appointment.pk }}/cancel-ajax/`;
+    } else if (newStatus === 'completed') {
+        confirmMessage = 'Are you sure you want to complete this appointment? This action cannot be undone.';
+        endpoint = `/appointments/{{ appointment.pk }}/complete/`;
+    } else {
+        alert('Invalid status update');
+        return;
+    }
+
+    if (confirm(confirmMessage)) {
+        // Show loading state
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showNotification(data.message, 'success');
+                // Reload page after a short delay to show the message
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification(data.message, 'error');
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error updating appointment status: ' + error.message, 'error');
+            // Re-enable buttons
+            buttons.forEach(btn => btn.disabled = false);
+        });
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

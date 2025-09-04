@@ -1,0 +1,287 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Edit Medicine - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Edit Medicine</h1>
+        <p class="text-muted">Update medicine information and inventory details</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h5 class="card-title mb-4">
+                <i class="fas fa-edit text-ethiopia-green me-2"></i>Medicine Information
+            </h5>
+            
+            <form method="post" enctype="multipart/form-data" class="mobile-form">
+                {% csrf_token %}
+                <input type="hidden" name="mobile" value="1">
+                
+                <!-- Basic Information -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-pills text-ethiopia-green me-2"></i>
+                        Basic Information
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Medicine Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" value="{{ medicine.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Generic Name</label>
+                        <input type="text" class="form-control" name="generic_name" value="{{ medicine.generic_name|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        <select class="form-select" name="category" required>
+                            <option value="">Select Category</option>
+                            {% for value, label in categories %}
+                                <option value="{{ value }}" {% if medicine.category == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Form <span class="text-danger">*</span></label>
+                        <select class="form-select" name="form" required>
+                            <option value="">Select Form</option>
+                            {% for value, label in forms %}
+                                <option value="{{ value }}" {% if medicine.form == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Strength</label>
+                        <input type="text" class="form-control" name="strength" value="{{ medicine.strength|default:'' }}" placeholder="e.g., 500mg">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Manufacturer</label>
+                        <input type="text" class="form-control" name="manufacturer" value="{{ medicine.manufacturer|default:'' }}">
+                    </div>
+                </div>
+                
+                <!-- Pricing and Stock -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-warehouse text-ethiopia-blue me-2"></i>
+                        Pricing and Stock
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Unit Price (ETB) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">Br</span>
+                            <input type="number" class="form-control" name="unit_price" value="{{ medicine.unit_price }}" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Current Stock <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="current_stock" value="{{ medicine.current_stock }}" min="0" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Minimum Stock Level</label>
+                        <input type="number" class="form-control" name="minimum_stock" value="{{ medicine.minimum_stock|default:10 }}" min="0">
+                    </div>
+                </div>
+                
+                <!-- Additional Details -->
+                <div class="mb-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-info-circle text-ethiopia-yellow me-2"></i>
+                        Additional Details
+                    </h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" class="form-control" name="expiry_date" value="{{ medicine.expiry_date|date:'Y-m-d' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Batch Number</label>
+                        <input type="text" class="form-control" name="batch_number" value="{{ medicine.batch_number|default:'' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Medicine description, usage instructions, etc.">{{ medicine.description|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="prescription_required" id="prescriptionRequired" {% if medicine.prescription_required %}checked{% endif %}>
+                        <label class="form-check-label" for="prescriptionRequired">
+                            Requires Prescription
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update Medicine
+                    </button>
+                    <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Current Status -->
+    <div class="col-12">
+        <div class="mobile-dashboard-card">
+            <h6 class="text-ethiopia-green mb-3">
+                <i class="fas fa-info-circle me-2"></i>Current Status
+            </h6>
+            
+            <div class="row g-3">
+                <div class="col-6">
+                    <small class="text-muted">Stock Status</small>
+                    <div class="d-flex align-items-center">
+                        {% if medicine.current_stock <= medicine.minimum_stock %}
+                            <span class="badge bg-danger me-2">Low Stock</span>
+                        {% elif medicine.current_stock <= 50 %}
+                            <span class="badge bg-warning me-2">Medium Stock</span>
+                        {% else %}
+                            <span class="badge bg-success me-2">In Stock</span>
+                        {% endif %}
+                        <span class="fw-bold">{{ medicine.current_stock }} units</span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <small class="text-muted">Expiry Status</small>
+                    <div>
+                        {% if medicine.expiry_date %}
+                            {% if medicine.is_expired %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% elif medicine.expires_soon %}
+                                <span class="badge bg-warning">Expires Soon</span>
+                            {% else %}
+                                <span class="badge bg-success">Valid</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-secondary">No Expiry Date</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <small class="text-muted">Last Updated</small>
+                    <div class="fw-bold">{{ medicine.updated_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form .form-control,
+.mobile-form .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+}
+
+.mobile-form .form-label {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mobile-form h6 {
+    color: var(--mobile-primary);
+    border-bottom: 2px solid rgba(0, 150, 57, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.mobile-dashboard-card {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 375px) {
+    .mobile-form .form-control,
+    .mobile-form .form-select {
+        padding: 0.625rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile medicine edit form loaded');
+    
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const name = document.querySelector('input[name="name"]').value.trim();
+        const category = document.querySelector('select[name="category"]').value;
+        const form_type = document.querySelector('select[name="form"]').value;
+        const price = document.querySelector('input[name="unit_price"]').value;
+        const stock = document.querySelector('input[name="current_stock"]').value;
+        
+        if (!name || !category || !form_type || !price || !stock) {
+            e.preventDefault();
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Please fill in all required fields.', 'danger');
+            } else {
+                alert('Please fill in all required fields.');
+            }
+            return false;
+        }
+        
+        if (parseFloat(price) <= 0) {
+            e.preventDefault();
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Unit price must be greater than 0.', 'danger');
+            } else {
+                alert('Unit price must be greater than 0.');
+            }
+            return false;
+        }
+        
+        if (parseInt(stock) < 0) {
+            e.preventDefault();
+            if (window.mobileDashboard) {
+                mobileDashboard.showMobileNotification('Stock quantity cannot be negative.', 'danger');
+            } else {
+                alert('Stock quantity cannot be negative.');
+            }
+            return false;
+        }
+    });
+    
+    // Show mobile notification if coming from detail page
+    if (document.referrer.includes('/pharmacy/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Edit mode activated!', 'info');
+        }
+    }
+});
+</script>
+{% endblock %}

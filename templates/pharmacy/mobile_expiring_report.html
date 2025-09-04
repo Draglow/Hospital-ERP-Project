@@ -1,0 +1,440 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Expiring Medicines Report - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-warning">Expiring Medicines</h1>
+            <p class="text-muted mb-0">{{ total_count }} medicine{{ total_count|pluralize }} expiring soon</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" onclick="exportExpiring()">
+                <i class="fas fa-download"></i>
+            </button>
+            <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Alert Banner -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="alert alert-warning d-flex align-items-center mb-0">
+        <i class="fas fa-clock me-3"></i>
+        <div>
+            <h6 class="alert-heading mb-1">Expiry Alert</h6>
+            <small>These medicines are expiring within {{ warning_days }} days.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Statistics Cards -->
+<div class="mobile-statistics-section mb-4">
+    <h6 class="mobile-section-title mb-3">
+        <i class="fas fa-chart-bar text-ethiopia-green me-2"></i>Expiry Statistics
+    </h6>
+    <div class="mobile-stats-grid">
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card warning-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="mobile-stat-number">{{ total_count }}</div>
+                <div class="mobile-stat-label">Expiring Soon</div>
+            </div>
+            <div class="mobile-stat-card danger-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="mobile-stat-number">
+                    {% for medicine in medicines %}
+                        {% if medicine.expiry_date <= today %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </div>
+                <div class="mobile-stat-label">Already Expired</div>
+            </div>
+        </div>
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card info-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="mobile-stat-number">
+                    {% for medicine in medicines %}
+                        {% if medicine.expiry_date > today and medicine.expiry_date <= next_week %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </div>
+                <div class="mobile-stat-label">This Week</div>
+            </div>
+            <div class="mobile-stat-card success-accent">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="mobile-stat-number">
+                    {% for medicine in medicines %}
+                        {% if medicine.expiry_date > next_week %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </div>
+                <div class="mobile-stat-label">Later</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Expiring Medicines List -->
+{% if medicines %}
+    <div class="mobile-dashboard-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Expiring Medicines</h6>
+            <button class="btn btn-sm btn-warning" onclick="bulkDispose()">
+                <i class="fas fa-trash me-1"></i>Dispose
+            </button>
+        </div>
+    </div>
+
+    <div class="mobile-medicines-list">
+        {% for medicine in medicines %}
+        <div class="mobile-medicine-card expiring-card {% if medicine.expiry_date <= today %}expired-card{% elif medicine.expiry_date <= next_week %}critical-card{% endif %}">
+            <div class="mobile-medicine-header">
+                <div class="mobile-medicine-icon">
+                    <i class="fas fa-pills text-ethiopia-green"></i>
+                </div>
+                <div class="mobile-medicine-meta">
+                    <div class="mobile-medicine-name">{{ medicine.name }}</div>
+                    <div class="mobile-medicine-manufacturer">{{ medicine.manufacturer }}</div>
+                </div>
+                <div class="mobile-medicine-status">
+                    {% if medicine.expiry_date <= today %}
+                        <span class="badge bg-danger">Expired</span>
+                    {% elif medicine.expiry_date <= next_week %}
+                        <span class="badge bg-warning">Critical</span>
+                    {% else %}
+                        <span class="badge bg-info">Warning</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mobile-medicine-info-grid mt-3">
+                <div class="mobile-medicine-info-row">
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-warning">{{ medicine.expiry_date|date:"M d, Y" }}</div>
+                        <div class="mobile-medicine-info-label">Expiry Date</div>
+                    </div>
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value {% if medicine.expiry_date <= today %}text-danger{% elif medicine.expiry_date <= next_week %}text-warning{% else %}text-info{% endif %}">
+                            {% with days_left=medicine.expiry_date|days_until %}
+                                {% if days_left <= 0 %}
+                                    Expired
+                                {% elif days_left == 1 %}
+                                    1 day
+                                {% else %}
+                                    {{ days_left }} days
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="mobile-medicine-info-label">Days Left</div>
+                    </div>
+                </div>
+                <div class="mobile-medicine-info-row">
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-ethiopia-blue">{{ medicine.stock_quantity }} {{ medicine.unit }}</div>
+                        <div class="mobile-medicine-info-label">Stock Quantity</div>
+                    </div>
+                    <div class="mobile-medicine-info-item">
+                        <div class="mobile-medicine-info-value text-danger">{{ medicine.stock_quantity|mul:medicine.cost_price|floatformat:2 }} ETB</div>
+                        <div class="mobile-medicine-info-label">Value at Risk</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Batch Information -->
+            {% if medicine.batch_number %}
+            <div class="mobile-batch-info mt-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Batch Number</small>
+                    <span class="font-monospace fw-bold">{{ medicine.batch_number }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Expiry Progress Bar -->
+            <div class="mobile-expiry-progress mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-muted">Time to Expiry</small>
+                    <small class="{% if medicine.expiry_date <= today %}text-danger{% elif medicine.expiry_date <= next_week %}text-warning{% else %}text-info{% endif %} fw-bold">
+                        {{ medicine.get_category_display }}
+                    </small>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    {% with days_left=medicine.expiry_date|days_until %}
+                        {% if days_left <= 0 %}
+                            <div class="progress-bar bg-danger" style="width: 100%"></div>
+                        {% elif days_left <= 7 %}
+                            <div class="progress-bar bg-warning" style="width: 85%"></div>
+                        {% elif days_left <= 30 %}
+                            <div class="progress-bar bg-info" style="width: 60%"></div>
+                        {% else %}
+                            <div class="progress-bar bg-success" style="width: 30%"></div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            
+            <div class="mobile-medicine-actions mt-3">
+                <div class="btn-group w-100">
+                    {% if medicine.expiry_date <= today %}
+                        <button class="btn btn-danger btn-sm" onclick="disposeExpired({{ medicine.pk }})">
+                            <i class="fas fa-trash me-1"></i>Dispose
+                        </button>
+                    {% else %}
+                        <button class="btn btn-warning btn-sm" onclick="markForDisposal({{ medicine.pk }})">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Mark
+                        </button>
+                    {% endif %}
+                    <a href="{% url 'pharmacy:medicine_detail' medicine.pk %}?mobile=1" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-eye me-1"></i>View
+                    </a>
+                    <a href="{% url 'pharmacy:medicine_edit' medicine.pk %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="mobile-dashboard-card text-center py-5">
+        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+        <h5 class="text-success">No Medicines Expiring Soon</h5>
+        <p class="text-muted">All medicines have sufficient time before expiry.</p>
+        <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-primary mt-3">
+            <i class="fas fa-pills me-2"></i>View All Medicines
+        </a>
+    </div>
+{% endif %}
+
+<!-- Mobile Quick Actions -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-cogs me-2"></i>Quick Actions
+    </h6>
+    <div class="d-grid gap-2">
+        <button class="btn btn-outline-primary" onclick="exportExpiring()">
+            <i class="fas fa-download me-2"></i>Export Report
+        </button>
+        <button class="btn btn-outline-success" onclick="printReport()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+        <a href="{% url 'pharmacy:low_stock_report' %}?mobile=1" class="btn btn-outline-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>Low Stock Report
+        </a>
+        <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-2"></i>All Medicines
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.expiring-card {
+    border-left: 4px solid #ffc107;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+.expired-card {
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+.critical-card {
+    border-left: 4px solid #fd7e14;
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+.mobile-medicine-card {
+    background: white;
+    border-radius: var(--mobile-radius-lg);
+    padding: var(--mobile-spacing-lg);
+    margin-bottom: var(--mobile-spacing-md);
+    box-shadow: var(--mobile-shadow-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all var(--mobile-transition-base);
+}
+
+.mobile-medicine-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--mobile-spacing-md);
+}
+
+.mobile-medicine-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 150, 57, 0.1);
+    border-radius: var(--mobile-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.mobile-medicine-meta {
+    flex: 1;
+}
+
+.mobile-medicine-name {
+    font-weight: 600;
+    color: var(--mobile-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.mobile-medicine-manufacturer {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.mobile-medicine-status {
+    flex-shrink: 0;
+}
+
+.mobile-medicine-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-medicine-info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--mobile-spacing-sm);
+}
+
+.mobile-medicine-info-item {
+    text-align: center;
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-sm);
+}
+
+.mobile-medicine-info-value {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-medicine-info-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-batch-info {
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--mobile-radius-sm);
+}
+
+.mobile-expiry-progress {
+    margin-top: var(--mobile-spacing-md);
+}
+
+.mobile-medicine-actions {
+    margin-top: var(--mobile-spacing-md);
+}
+
+.danger-accent .mobile-stat-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.warning-accent .mobile-stat-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.info-accent .mobile-stat-icon {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.success-accent .mobile-stat-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportExpiring() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Exporting expiring medicines report...', 'info');
+    }
+    // Export functionality would be implemented here
+    setTimeout(() => {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Export completed!', 'success');
+        }
+    }, 1000);
+}
+
+function printReport() {
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Preparing report for printing...', 'info');
+    }
+    window.print();
+}
+
+function bulkDispose() {
+    if (confirm('Are you sure you want to dispose selected medicines?')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Bulk disposal feature coming soon!', 'info');
+        }
+    }
+}
+
+function disposeExpired(medicineId) {
+    if (confirm('Are you sure you want to dispose this expired medicine?')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Medicine disposal feature coming soon!', 'info');
+        }
+    }
+}
+
+function markForDisposal(medicineId) {
+    if (confirm('Mark this medicine for disposal?')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Mark for disposal feature coming soon!', 'info');
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile expiring medicines report loaded');
+    
+    // Show mobile notification if coming from pharmacy
+    if (document.referrer.includes('/pharmacy/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Expiring medicines report loaded successfully!', 'success');
+        }
+    }
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,304 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Responsive Detection Test - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h2 class="text-ethiopia-green mb-4">🔄 Responsive Dashboard Detection Test</h2>
+                
+                <!-- Current State Display -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Current State</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Current URL:</strong></td>
+                                        <td id="currentUrl">{{ request.get_full_path }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Dashboard Type:</strong></td>
+                                        <td id="dashboardType">Desktop</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Viewport:</strong></td>
+                                        <td id="viewport">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Device Type:</strong></td>
+                                        <td id="deviceType">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Manual Override:</strong></td>
+                                        <td id="manualOverride">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Outer Dimensions:</strong></td>
+                                        <td id="outerDimensions">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Dev Tools Status:</strong></td>
+                                        <td id="devToolsStatus">-</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Detection Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="detectionStatus" class="alert alert-info">
+                                    Initializing responsive detection...
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-primary btn-sm" onclick="triggerManualCheck()">
+                                        <i class="fas fa-sync"></i> Manual Check
+                                    </button>
+                                    <button class="btn btn-info btn-sm" onclick="showDetectionState()">
+                                        <i class="fas fa-info"></i> Show State
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" onclick="triggerDevToolsCheck()">
+                                        <i class="fas fa-tools"></i> Dev Tools Check
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Controls -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Test Controls</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6>Direct Navigation</h6>
+                                        <div class="btn-group-vertical w-100">
+                                            <a href="/dashboard/" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-desktop"></i> Desktop Dashboard
+                                            </a>
+                                            <a href="/dashboard/mobile/" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-mobile-alt"></i> Mobile Dashboard
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <h6>With Manual Override</h6>
+                                        <div class="btn-group-vertical w-100">
+                                            <a href="/dashboard/?desktop=1" class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-desktop"></i> Force Desktop
+                                            </a>
+                                            <a href="/dashboard/?mobile=1" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-mobile-alt"></i> Force Mobile
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <h6>Developer Tools Testing</h6>
+                                        <div class="btn-group-vertical w-100">
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="showDevToolsInstructions()">
+                                                🔧 Dev Tools Instructions
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="showDevToolsStatus()">
+                                                📊 Dev Tools Status
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" onclick="triggerDevToolsCheck()">
+                                                🔄 Check Dev Tools
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Event Log</h5>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="clearEventLog()">
+                                    <i class="fas fa-trash"></i> Clear
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="eventLog" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.85rem;">
+                                    <div class="text-muted">Event log will appear here...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Responsive Dashboard Detection -->
+<script src="{% static 'js/responsive-dashboard.js' %}"></script>
+
+<script>
+let eventLogCount = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateDisplayInfo();
+    logEvent('Page loaded', 'info');
+    
+    // Update display info on resize
+    window.addEventListener('resize', function() {
+        updateDisplayInfo();
+        logEvent(`Viewport resized to ${window.innerWidth}x${window.innerHeight}`, 'info');
+    });
+    
+    // Monitor for redirects
+    const originalLocation = window.location.href;
+    setInterval(function() {
+        if (window.location.href !== originalLocation) {
+            logEvent('Redirect detected', 'warning');
+        }
+    }, 1000);
+});
+
+function updateDisplayInfo() {
+    const viewport = `${window.innerWidth} × ${window.innerHeight}`;
+    const outerDimensions = `${window.outerWidth} × ${window.outerHeight}`;
+    const deviceType = window.innerWidth <= 768 ? 'Mobile' : window.innerWidth <= 1024 ? 'Tablet' : 'Desktop';
+    const urlParams = new URLSearchParams(window.location.search);
+    const manualOverride = urlParams.get('desktop') === '1' ? 'Desktop' :
+                          urlParams.get('mobile') === '1' ? 'Mobile' : 'None';
+
+    // Check dev tools status
+    const devToolsOpen = window.responsiveDashboard ?
+        window.responsiveDashboard.getDevToolsStatus().isOpen :
+        (window.outerHeight - window.innerHeight > 160);
+
+    document.getElementById('viewport').textContent = viewport;
+    document.getElementById('outerDimensions').textContent = outerDimensions;
+    document.getElementById('deviceType').textContent = deviceType;
+    document.getElementById('manualOverride').textContent = manualOverride;
+    document.getElementById('devToolsStatus').textContent = devToolsOpen ? 'Open' : 'Closed';
+    
+    // Update detection status
+    const isMobile = window.innerWidth <= 768;
+    const isDesktopDashboard = window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard';
+    const isMobileDashboard = window.location.pathname.includes('/mobile/');
+    
+    let status = '';
+    let statusClass = '';
+    
+    if (isMobile && isDesktopDashboard && !urlParams.get('desktop')) {
+        status = '⚠️ Should redirect to mobile dashboard';
+        statusClass = 'alert-warning';
+    } else if (!isMobile && isMobileDashboard && !urlParams.get('mobile')) {
+        status = '⚠️ Should redirect to desktop dashboard';
+        statusClass = 'alert-warning';
+    } else {
+        status = '✅ Correct dashboard for viewport';
+        statusClass = 'alert-success';
+    }
+    
+    const statusElement = document.getElementById('detectionStatus');
+    statusElement.textContent = status;
+    statusElement.className = `alert ${statusClass}`;
+}
+
+function triggerManualCheck() {
+    if (window.responsiveDashboard) {
+        window.responsiveDashboard.triggerCheck();
+        logEvent('Manual check triggered', 'info');
+    } else {
+        logEvent('Responsive dashboard not initialized', 'error');
+    }
+}
+
+function showDetectionState() {
+    if (window.responsiveDashboard) {
+        const state = window.responsiveDashboard.getState();
+        logEvent(`Detection state: ${JSON.stringify(state, null, 2)}`, 'info');
+    } else {
+        logEvent('Responsive dashboard not initialized', 'error');
+    }
+}
+
+function triggerDevToolsCheck() {
+    if (window.responsiveDashboard) {
+        window.responsiveDashboard.triggerDevToolsCheck();
+        logEvent('Developer tools check triggered manually', 'info');
+    } else {
+        logEvent('Responsive dashboard not initialized', 'error');
+    }
+}
+
+function showDevToolsStatus() {
+    if (window.responsiveDashboard) {
+        const status = window.responsiveDashboard.getDevToolsStatus();
+        logEvent(`Dev Tools Status: ${JSON.stringify(status, null, 2)}`, 'info');
+    } else {
+        logEvent('Responsive dashboard not initialized', 'error');
+    }
+}
+
+function showDevToolsInstructions() {
+    const instructions = `
+Developer Tools Testing Instructions:
+
+1. Open this page in desktop browser (>768px width)
+2. Press F12 to open developer tools
+3. Switch to device simulation mode
+4. Select a mobile device (e.g., iPhone)
+5. Observe automatic redirect to mobile dashboard
+6. Close developer tools (F12 again)
+7. Observe automatic redirect back to desktop dashboard
+
+The system should automatically detect when dev tools are closed
+and immediately check if the viewport requires a dashboard switch.
+    `;
+    logEvent(instructions, 'info');
+}
+
+function logEvent(message, type = 'info') {
+    const log = document.getElementById('eventLog');
+    const timestamp = new Date().toLocaleTimeString();
+    const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+    
+    const entry = document.createElement('div');
+    entry.className = `text-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'info'}`;
+    entry.innerHTML = `<small>[${timestamp}]</small> ${icon} ${message}`;
+    
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
+    
+    eventLogCount++;
+    if (eventLogCount > 50) {
+        log.removeChild(log.firstChild);
+        eventLogCount--;
+    }
+}
+
+function clearEventLog() {
+    document.getElementById('eventLog').innerHTML = '<div class="text-muted">Event log cleared...</div>';
+    eventLogCount = 0;
+}
+</script>
+{% endblock %}

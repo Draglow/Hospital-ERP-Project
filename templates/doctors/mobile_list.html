@@ -1,0 +1,385 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Doctors - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header - Match Desktop -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Doctors</h1>
+        <p class="text-muted">Manage medical staff and specialists</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportDoctors()">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </button>
+        <a href="{% url 'doctors:doctor_add' %}?mobile=1" class="btn btn-primary mobile-add-doctor-btn">
+            <i class="fas fa-plus me-2"></i>
+            <span class="mobile-btn-text">Add Doctor</span>
+        </a>
+    </div>
+</div>
+
+<div class="mobile-dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Medical Staff ({{ total_doctors }} total)</h5>
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-2">
+                <input type="hidden" name="mobile" value="1">
+                <div class="input-group" style="width: 200px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search doctors..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select name="specialty" class="form-select" style="width: 120px;" onchange="this.form.submit()">
+                    <option value="">All Specialties</option>
+                    {% for specialty in specialties %}
+                        <option value="{{ specialty }}" {% if specialty_filter == specialty %}selected{% endif %}>{{ specialty|title }}</option>
+                    {% endfor %}
+                </select>
+                <select name="availability" class="form-select" style="width: 110px;" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    {% for availability_code, availability_name in availabilities %}
+                        <option value="{{ availability_code }}" {% if availability_filter == availability_code %}selected{% endif %}>{{ availability_name }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or specialty_filter or availability_filter %}
+                    <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+        {% for doctor in page_obj %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 mobile-doctor-card hover-lift">
+                <div class="card-body text-center">
+                    <div class="mobile-doctor-avatar mb-3">
+                        {% if doctor.user.profile_image %}
+                            <img src="{{ doctor.user.profile_image.url }}" alt="{{ doctor.get_full_name }}" class="mobile-doctor-profile-image">
+                        {% else %}
+                            <div class="mobile-doctor-icon-container bg-ethiopia-green">
+                                <i class="fas fa-user-md text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="card-title mb-1">{{ doctor.get_full_name }}</h5>
+                    <p class="text-ethiopia-green fw-semibold mb-2">{{ doctor.get_specialty_display }}</p>
+
+                    {% if doctor.sub_specialty %}
+                        <p class="text-muted small mb-2">{{ doctor.sub_specialty }}</p>
+                    {% endif %}
+
+                    <!-- Doctor Information Grid - 2x2 Layout -->
+                    <div class="mobile-doctor-info-grid mb-3">
+                        <!-- Row 1: Years Experience and Consultations Today -->
+                        <div class="mobile-doctor-info-row">
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-blue">{{ doctor.years_of_experience }}</div>
+                                <div class="mobile-doctor-info-label">Years Experience</div>
+                            </div>
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-red">{{ doctor.today_appointments|default:0 }}</div>
+                                <div class="mobile-doctor-info-label">Consultations Today</div>
+                            </div>
+                        </div>
+                        <!-- Row 2: Total Patients and Consultation Fee -->
+                        <div class="mobile-doctor-info-row">
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-green">{{ doctor.total_patients|default:0 }}</div>
+                                <div class="mobile-doctor-info-label">Total Patients</div>
+                            </div>
+                            <div class="mobile-doctor-info-item">
+                                <div class="mobile-doctor-info-value text-ethiopia-yellow">{{ doctor.consultation_fee }} ETB</div>
+                                <div class="mobile-doctor-info-label">Consultation Fee</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="badge bg-{% if doctor.availability_status == 'full_time' %}success{% elif doctor.availability_status == 'part_time' %}warning{% elif doctor.availability_status == 'on_call' %}info{% else %}secondary{% endif %}">
+                            {{ doctor.get_availability_status_display }}
+                        </span>
+                        {% if doctor.is_available_today %}
+                            <span class="badge bg-success ms-1">Available Today</span>
+                        {% else %}
+                            <span class="badge bg-secondary ms-1">Not Available</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {% if doctor.languages_spoken %}
+                            <span class="badge bg-ethiopia-blue me-1">{{ doctor.languages_spoken }}</span>
+                        {% else %}
+                            <span class="badge bg-ethiopia-blue me-1">Amharic</span>
+                            <span class="badge bg-ethiopia-blue me-1">English</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <div class="btn-group">
+                            <a href="{% url 'doctors:doctor_detail' doctor.pk %}?mobile=1" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{% url 'doctors:doctor_schedule' doctor.pk %}?mobile=1" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-calendar me-1"></i>Schedule
+                            </a>
+                            <a href="{% url 'appointments:appointment_add' %}?doctor={{ doctor.pk }}&mobile=1" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-plus me-1"></i>Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-id-badge me-1"></i>{{ doctor.license_number }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-graduation-cap me-1"></i>{{ doctor.graduation_year }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                <h5>No doctors found</h5>
+                <p class="text-muted">{% if search_query %}No doctors match your search criteria.{% else %}No doctors have been added yet.{% endif %}</p>
+                <a href="{% url 'doctors:doctor_add' %}?mobile=1" class="btn btn-primary mobile-add-doctor-btn">
+                    <i class="fas fa-plus me-2"></i>
+                    <span class="mobile-btn-text">Add First Doctor</span>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    {% if page_obj.paginator.count > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} doctors
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&mobile=1{% if search_query %}&search={{ search_query }}{% endif %}{% if specialty_filter %}&specialty={{ specialty_filter }}{% endif %}{% if availability_filter %}&availability={{ availability_filter }}{% endif %}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-doctor-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile Doctor Avatar Container */
+.mobile-doctor-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 1rem auto;
+    width: 100%;
+}
+
+/* Mobile Doctor Profile Image */
+.mobile-doctor-profile-image {
+    object-fit: cover;
+    border: 2px solid var(--primary-green);
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 3px 8px rgba(0, 150, 57, 0.2);
+    transition: all 0.3s ease;
+}
+
+.mobile-doctor-profile-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
+}
+
+/* Mobile Doctor Icon Container */
+.mobile-doctor-icon-container {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    border: 2px solid var(--primary-green);
+    box-shadow: 0 3px 8px rgba(0, 150, 57, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mobile-doctor-icon-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
+}
+
+.mobile-doctor-icon-container i {
+    position: relative;
+    z-index: 1;
+    font-size: 1.25rem !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+    .mobile-doctor-profile-image {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .mobile-doctor-icon-container {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .mobile-doctor-icon-container i {
+        font-size: 1.1rem !important;
+    }
+
+    .mobile-doctor-avatar {
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .mobile-doctor-profile-image {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .mobile-doctor-icon-container {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .mobile-doctor-icon-container i {
+        font-size: 1rem !important;
+    }
+
+    .mobile-doctor-avatar {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Ensure proper spacing between avatar and name */
+.mobile-doctor-card .card-title {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportDoctors() {
+    // Create CSV export functionality
+    const doctors = [];
+    const cards = document.querySelectorAll('.mobile-doctor-card');
+
+    // Add header
+    doctors.push(['Name', 'Specialty', 'License', 'Experience', 'Fee', 'Status', 'Languages']);
+
+    // Add data rows
+    cards.forEach(card => {
+        const name = card.querySelector('.card-title').textContent.trim();
+        const specialty = card.querySelector('.text-ethiopia-green').textContent.trim();
+        const license = card.querySelector('.card-footer small').textContent.replace('🆔', '').trim();
+        const experience = card.querySelector('.text-ethiopia-blue').textContent.trim();
+        const fee = card.querySelector('.text-ethiopia-yellow').textContent.trim();
+        const status = card.querySelector('.badge').textContent.trim();
+        const languages = Array.from(card.querySelectorAll('.badge.bg-ethiopia-blue')).map(badge => badge.textContent.trim()).join(', ');
+
+        doctors.push([name, specialty, license, experience, fee, status, languages]);
+    });
+
+    // Create and download CSV
+    const csvContent = doctors.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'doctors_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile doctors list loaded');
+
+    // Show mobile notification if coming from dashboard
+    if (document.referrer.includes('/dashboard/mobile/')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Doctors loaded successfully!', 'success');
+        }
+    }
+});
+</script>
+{% endblock %}

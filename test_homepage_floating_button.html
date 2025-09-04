@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage Floating Button Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Simulate homepage environment */
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Floating Action Button - Exact copy from homepage template */
+        .floating-action-btn {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            width: 180px !important;
+            height: 60px !important;
+            background: linear-gradient(135deg, #009639, #0F47AF) !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 30px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            cursor: pointer !important;
+            z-index: 9999 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            overflow: hidden !important;
+            animation: floatingGlow 2s ease-in-out infinite alternate !important;
+        }
+
+        .floating-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .floating-action-btn:hover::before {
+            left: 100%;
+        }
+
+        .floating-action-btn:hover {
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+
+        .floating-action-btn:active {
+            transform: translateY(-1px) scale(1.02) !important;
+        }
+
+        .floating-action-btn i {
+            font-size: 16px !important;
+        }
+
+        @keyframes floatingGlow {
+            from {
+                box-shadow: 0 0 20px rgba(0, 150, 57, 0.4), 0 0 30px rgba(0, 150, 57, 0.3), 0 0 40px rgba(0, 150, 57, 0.2) !important;
+            }
+            to {
+                box-shadow: 0 0 30px rgba(0, 150, 57, 0.6), 0 0 40px rgba(0, 150, 57, 0.4), 0 0 50px rgba(0, 150, 57, 0.3) !important;
+            }
+        }
+
+        /* Responsive Design for Floating Button */
+        @media (max-width: 768px) {
+            .floating-action-btn {
+                width: 160px !important;
+                height: 50px !important;
+                bottom: 20px !important;
+                right: 20px !important;
+                font-size: 12px !important;
+            }
+            
+            .floating-action-btn i {
+                font-size: 14px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .floating-action-btn {
+                width: 140px !important;
+                height: 45px !important;
+                bottom: 15px !important;
+                right: 15px !important;
+                font-size: 11px !important;
+            }
+            
+            .floating-action-btn i {
+                font-size: 12px !important;
+            }
+        }
+
+        /* Accessibility */
+        .floating-action-btn:focus {
+            outline: 3px solid #FFCD00 !important;
+            outline-offset: 2px !important;
+        }
+
+        .floating-action-btn:focus:not(:focus-visible) {
+            outline: none !important;
+        }
+
+        /* Test content */
+        .hero-section {
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(0, 150, 57, 0.9), rgba(15, 71, 175, 0.9)), 
+                        url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3') center/cover;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator">
+        <div>✅ Floating Button Test</div>
+        <div>Look for button in bottom-right corner</div>
+    </div>
+
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center text-white">
+                    <h1 class="display-4 fw-bold mb-4">Ethiopian Hospital ERP</h1>
+                    <p class="lead mb-4">Advanced Healthcare Management System</p>
+                    <p>The floating action button should be visible in the bottom-right corner with a glowing animation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="test-content">
+        <h2>Floating Button Test Results</h2>
+        <p>If you can see this page, the CSS is loading correctly.</p>
+        
+        <h3>What to Look For:</h3>
+        <ul>
+            <li>✅ Floating button in bottom-right corner</li>
+            <li>✅ Green-to-blue gradient background</li>
+            <li>✅ Glowing animation effect</li>
+            <li>✅ "Contact Developer" text with icon</li>
+            <li>✅ Hover effects (lift and shimmer)</li>
+        </ul>
+
+        <h3>Test Actions:</h3>
+        <ol>
+            <li>Scroll up and down - button should stay fixed</li>
+            <li>Hover over button - should lift and shimmer</li>
+            <li>Click button - should show alert</li>
+            <li>Resize window - button should adapt</li>
+            <li>Tab to button - should show focus outline</li>
+        </ol>
+    </div>
+
+    <div style="height: 1000px; background: rgba(255,255,255,0.1); margin: 2rem; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center; color: white;">
+            <h3>Scroll Test Area</h3>
+            <p>The floating button should remain fixed while scrolling through this content.</p>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <a href="#developer" class="floating-action-btn" role="button" aria-label="Contact Developer - Learn more about the developer" onclick="alert('🎉 Floating button is working! Click OK to continue.'); return false;">
+        <i class="fas fa-user-tie" aria-hidden="true"></i>
+        <span>Contact Developer</span>
+    </a>
+
+    <script>
+        // Test functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Page loaded');
+            
+            const btn = document.querySelector('.floating-action-btn');
+            if (btn) {
+                console.log('✅ Floating button found');
+                console.log('Button styles:', window.getComputedStyle(btn));
+                
+                // Test visibility
+                const rect = btn.getBoundingClientRect();
+                console.log('Button position:', rect);
+                
+                if (rect.width > 0 && rect.height > 0) {
+                    console.log('✅ Button is visible');
+                } else {
+                    console.log('❌ Button is not visible');
+                }
+            } else {
+                console.log('❌ Floating button not found');
+            }
+        });
+    </script>
+</body>
+</html>

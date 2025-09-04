@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Sidebar Profile & Logout Test - Ethiopian Hospital ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/mobile.css" rel="stylesheet">
+    <link href="static/css/mobile/mobile-dashboard.css" rel="stylesheet">
+    <style>
+        /* Test-specific styles */
+        .test-container {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .test-title {
+            color: #009639;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .test-description {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #009639;
+        }
+        
+        .sidebar-demo {
+            position: relative;
+            width: 280px;
+            height: 600px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-title {
+            color: #009639;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 150, 57, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Mobile Sidebar Profile & Logout Test</h1>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-info-circle text-primary me-2"></i>Profile Settings & Logout Fixes</h5>
+            <ul class="mb-0">
+                <li><strong>Fixed Styling:</strong> Profile settings and logout buttons now have proper styling</li>
+                <li><strong>Consistent Layout:</strong> Quick actions in sidebar footer are properly aligned</li>
+                <li><strong>Touch Targets:</strong> All buttons meet 44px minimum touch target requirement</li>
+                <li><strong>Visual Hierarchy:</strong> Clear distinction between profile, settings, and logout</li>
+                <li><strong>Ethiopian Branding:</strong> Maintains green color scheme with red accent for logout</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Sidebar Footer -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-user me-2"></i>
+                Sidebar Footer - Profile & Quick Actions
+            </h3>
+            
+            <div class="sidebar-demo">
+                <!-- Mobile Sidebar Content -->
+                <div class="mobile-sidebar-content">
+                    <!-- User Info -->
+                    <div class="mobile-user-info">
+                        <div class="mobile-user-avatar">
+                            <div class="user-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="mobile-user-details">
+                            <h6 class="user-name">Dr. Abebe Kebede</h6>
+                            <small class="user-role">Administrator</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Menu (Shortened for demo) -->
+                    <nav class="mobile-nav-menu">
+                        <ul class="mobile-nav-list">
+                            <li class="mobile-nav-item">
+                                <a class="mobile-nav-link active" href="#">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="mobile-nav-item">
+                                <a class="mobile-nav-link" href="#">
+                                    <i class="fas fa-users"></i>
+                                    <span>Patients</span>
+                                </a>
+                            </li>
+                            <li class="mobile-nav-item">
+                                <a class="mobile-nav-link" href="#">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Appointments</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <!-- Mobile Sidebar Footer -->
+                    <div class="mobile-sidebar-footer">
+                        <div class="mobile-time-info">
+                            <div class="current-time">
+                                <small class="time-label">Current Time</small>
+                                <small class="time-value">2:30 PM</small>
+                            </div>
+                            <div class="ethiopian-date">
+                                <small class="date-label">Today</small>
+                                <small class="date-value">Tahsas 15, 2016</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="mobile-quick-actions">
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: Profile Panel -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-id-card me-2"></i>
+                Profile Panel - Enhanced Styling
+            </h3>
+            
+            <div class="sidebar-demo">
+                <!-- Mobile Profile Panel -->
+                <div class="mobile-profile-panel active">
+                    <div class="mobile-profile-header">
+                        <h6>Profile</h6>
+                        <button class="mobile-profile-close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-profile-content">
+                        <div class="mobile-profile-info">
+                            <div class="mobile-profile-avatar">
+                                <div class="profile-avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <h6>Dr. Abebe Kebede</h6>
+                            <small>Administrator</small>
+                        </div>
+                        <div class="mobile-profile-actions">
+                            <a href="#" class="mobile-profile-action">
+                                <i class="fas fa-user me-2"></i>View Profile
+                            </a>
+                            <a href="#" class="mobile-profile-action">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                            <a href="#" class="mobile-profile-action">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 3: Quick Actions Comparison -->
+        <div class="demo-section">
+            <h3 class="demo-title">
+                <i class="fas fa-check-circle me-2"></i>
+                Quick Actions - Before vs After
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-danger">❌ Before (Broken):</h6>
+                    <div class="p-3 bg-light border rounded">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <div style="background: transparent; border: none; padding: 0.5rem; color: #6c757d;">
+                                <i class="fas fa-user"></i><br>
+                                <span style="font-size: 0.75rem;">Profile</span>
+                            </div>
+                            <div style="background: transparent; border: none; padding: 0.5rem; color: #6c757d;">
+                                <i class="fas fa-cog"></i><br>
+                                <span style="font-size: 0.75rem;">Settings</span>
+                            </div>
+                            <div style="background: transparent; border: none; padding: 0.5rem; color: #6c757d;">
+                                <i class="fas fa-sign-out-alt"></i><br>
+                                <span style="font-size: 0.75rem;">Logout</span>
+                            </div>
+                        </div>
+                        <small class="text-muted">No styling, poor visibility, no touch targets</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-success">✅ After (Fixed):</h6>
+                    <div class="p-3 bg-light border rounded">
+                        <div class="mobile-quick-actions">
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="mobile-quick-action">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                        <small class="text-muted">Proper styling, clear visibility, 44px touch targets</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-description">
+            <h5><i class="fas fa-check-circle text-success me-2"></i>Fixes Applied</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>✅ Sidebar Footer Quick Actions:</h6>
+                    <ul class="small">
+                        <li>Added proper CSS for .mobile-quick-actions</li>
+                        <li>Styled .mobile-quick-action buttons</li>
+                        <li>44px minimum touch targets</li>
+                        <li>Hover and focus states</li>
+                        <li>Special red styling for logout</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>✅ Profile Avatar Improvements:</h6>
+                    <ul class="small">
+                        <li>Enhanced gradient backgrounds</li>
+                        <li>Proper border radius</li>
+                        <li>Subtle shadow effects</li>
+                        <li>Consistent sizing</li>
+                        <li>Ethiopian green branding</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile Sidebar Profile Test Loaded');
+            
+            // Test quick action interactions
+            document.querySelectorAll('.mobile-quick-action, .mobile-profile-action').forEach(action => {
+                action.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const actionType = this.textContent.trim();
+                    
+                    if (actionType.includes('Logout')) {
+                        alert('Logout action clicked! Styling is now properly visible with red accent.');
+                    } else {
+                        alert(`${actionType} action clicked! Styling is now properly visible.`);
+                    }
+                });
+            });
+            
+            // Test profile panel close
+            document.querySelector('.mobile-profile-close')?.addEventListener('click', function() {
+                alert('Profile panel close button works!');
+            });
+        });
+    </script>
+</body>
+</html>

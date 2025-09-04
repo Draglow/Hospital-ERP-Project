@@ -1,0 +1,368 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Add Doctor - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Add New Doctor</h1>
+            <p class="text-muted mb-0">Register a new doctor</p>
+        </div>
+        <div>
+            <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Form -->
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">Doctor Information</h6>
+    
+    <form method="post" class="mobile-form needs-validation" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="mobile" value="1">
+        
+        <!-- Personal Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Personal Information</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Leave blank to auto-generate">
+                    <div class="form-text">Username will be auto-generated if left blank</div>
+                </div>
+                <div class="col-12">
+                    <label for="password" class="form-label">Password *</label>
+                    <input type="password" class="form-control" id="password" name="password" required minlength="8" value="doctor123">
+                    <div class="invalid-feedback">Please enter a password (minimum 8 characters).</div>
+                    <div class="form-text">Default password: doctor123 (can be changed later)</div>
+                </div>
+                <div class="col-6">
+                    <label for="first_name" class="form-label">First Name *</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    <div class="invalid-feedback">Please enter first name.</div>
+                </div>
+                <div class="col-6">
+                    <label for="last_name" class="form-label">Last Name *</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    <div class="invalid-feedback">Please enter last name.</div>
+                </div>
+                <div class="col-12">
+                    <label for="email" class="form-label">Email *</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+                <div class="col-12">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="+251912345678">
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Professional Information</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="specialty" class="form-label">Specialty *</label>
+                    <select class="form-select" id="specialty" name="specialty" required>
+                        <option value="">Select Specialty</option>
+                        {% for value, label in specialties %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a specialty.</div>
+                </div>
+                <div class="col-12">
+                    <label for="sub_specialty" class="form-label">Sub-Specialty</label>
+                    <input type="text" class="form-control" id="sub_specialty" name="sub_specialty" placeholder="e.g., Interventional Cardiology">
+                </div>
+                <div class="col-12">
+                    <label for="years_of_experience" class="form-label">Years of Experience</label>
+                    <input type="number" class="form-control" id="years_of_experience" name="years_of_experience" min="0" max="50" value="0">
+                </div>
+                <div class="col-12">
+                    <label for="medical_school" class="form-label">Medical School *</label>
+                    <input type="text" class="form-control" id="medical_school" name="medical_school" required placeholder="e.g., Addis Ababa University">
+                    <div class="invalid-feedback">Please enter medical school.</div>
+                </div>
+                <div class="col-6">
+                    <label for="graduation_year" class="form-label">Graduation Year *</label>
+                    <input type="number" class="form-control" id="graduation_year" name="graduation_year" required min="1950" max="2030" placeholder="2020">
+                    <div class="invalid-feedback">Please enter graduation year.</div>
+                </div>
+                <div class="col-6">
+                    <label for="license_number" class="form-label">License Number</label>
+                    <input type="text" class="form-control" id="license_number" name="license_number" placeholder="Leave blank to auto-generate">
+                    <div class="form-text">Will be auto-generated if left blank</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Work Information</h6>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="department" class="form-label">Department</label>
+                    <input type="text" class="form-control" id="department" name="department" placeholder="e.g., Emergency, Cardiology">
+                </div>
+                <div class="col-12">
+                    <label for="consultation_fee" class="form-label">Consultation Fee (ETB) *</label>
+                    <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" min="0" step="0.01" required value="500">
+                    <div class="invalid-feedback">Please enter consultation fee.</div>
+                </div>
+                <div class="col-12">
+                    <label for="availability_status" class="form-label">Availability Status</label>
+                    <select class="form-select" id="availability_status" name="availability_status">
+                        {% for value, label in availabilities %}
+                        <option value="{{ value }}" {% if value == 'full_time' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mobile-form-section">
+            <h6 class="mobile-form-section-title">Additional Information</h6>
+            <div class="mb-3">
+                <label for="bio" class="form-label">Biography</label>
+                <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="Brief professional biography"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="certifications" class="form-label">Certifications</label>
+                <textarea class="form-control" id="certifications" name="certifications" rows="2" placeholder="Professional certifications and qualifications (MD, PhD, etc.)"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="languages_spoken" class="form-label">Languages Spoken</label>
+                <input type="text" class="form-control" id="languages_spoken" name="languages_spoken" value="Amharic, English" placeholder="Amharic, English, Oromo">
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mobile-form-actions">
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-user-md me-2"></i>Add Doctor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    <a href="{% url 'doctors:doctor_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-user-md"></i>
+        <span>All Doctors</span>
+    </a>
+    <a href="{% url 'appointments:appointment_add' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-calendar-plus"></i>
+        <span>New Appointment</span>
+    </a>
+    <a href="{% url 'patients:patient_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-users"></i>
+        <span>Patients</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1rem;
+}
+
+.mobile-form-section-title {
+    color: #009639;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 150, 57, 0.2);
+}
+
+.mobile-form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(0, 150, 57, 0.1);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #009639;
+    box-shadow: 0 0 0 0.2rem rgba(0, 150, 57, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #009639, #0F47AF);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 150, 57, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 375px) {
+    .mobile-form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+    
+    .mobile-form-section-title {
+        font-size: 0.9rem;
+    }
+    
+    .form-control,
+    .form-select {
+        padding: 10px 14px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Show mobile notification
+                if (window.mobileDashboard) {
+                    mobileDashboard.showMobileNotification('Please fill in all required fields', 'danger');
+                }
+            }
+            form.classList.add('was-validated');
+        }, false);
+    }
+    
+    // Auto-generate username and license number from name
+    const firstNameInput = document.getElementById('first_name');
+    const lastNameInput = document.getElementById('last_name');
+    const usernameInput = document.getElementById('username');
+    const licenseInput = document.getElementById('license_number');
+
+    function generateUsername() {
+        const firstName = firstNameInput.value.trim().toLowerCase();
+        const lastName = lastNameInput.value.trim().toLowerCase();
+
+        if (firstName && lastName && !usernameInput.value.trim()) {
+            const username = `dr.${firstName}.${lastName}`;
+            usernameInput.value = username;
+            usernameInput.placeholder = `Suggested: ${username}`;
+        }
+    }
+
+    function generateLicenseNumber() {
+        const firstName = firstNameInput.value.trim().toUpperCase();
+        const lastName = lastNameInput.value.trim().toUpperCase();
+
+        if (firstName && lastName && !licenseInput.value.trim()) {
+            const year = new Date().getFullYear();
+            const firstInitials = firstName.substring(0, 3);
+            const lastInitials = lastName.substring(0, 3);
+            const license = `ETH-MD-${year}-${firstInitials}${lastInitials}`;
+            licenseInput.value = license;
+            licenseInput.placeholder = `Suggested: ${license}`;
+        }
+    }
+
+    function clearFieldsIfEmpty() {
+        if (!usernameInput.value.trim()) {
+            usernameInput.placeholder = "Leave blank to auto-generate";
+        }
+        if (!licenseInput.value.trim()) {
+            licenseInput.placeholder = "Leave blank to auto-generate";
+        }
+    }
+
+    if (firstNameInput && lastNameInput && usernameInput && licenseInput) {
+        firstNameInput.addEventListener('blur', function() {
+            generateUsername();
+            generateLicenseNumber();
+        });
+        lastNameInput.addEventListener('blur', function() {
+            generateUsername();
+            generateLicenseNumber();
+        });
+        usernameInput.addEventListener('focus', clearFieldsIfEmpty);
+        licenseInput.addEventListener('focus', clearFieldsIfEmpty);
+    }
+    
+    // Phone number formatting
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('251')) {
+                value = '+' + value;
+            } else if (value.startsWith('0')) {
+                value = '+251' + value.substring(1);
+            } else if (!value.startsWith('+251') && value.length > 0) {
+                value = '+251' + value;
+            }
+            e.target.value = value;
+        });
+    }
+    
+    // Show success notification on form load
+    if (window.mobileDashboard) {
+        mobileDashboard.showMobileNotification('Doctor form loaded successfully!', 'info');
+    }
+});
+</script>
+{% endblock %}

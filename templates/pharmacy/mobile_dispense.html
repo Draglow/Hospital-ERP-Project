@@ -1,0 +1,298 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Dispense Prescription - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-0">Dispense Prescription</h1>
+        <p class="text-muted">{{ prescription.medicine.name }} for {{ prescription.appointment.patient.get_full_name }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pharmacy:prescription_list' %}?mobile=1" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Prescription Details Card -->
+<div class="mobile-dashboard-card mb-3">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-prescription me-2"></i>
+        Prescription Details
+    </h6>
+    
+    <div class="row g-3">
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Patient</div>
+                <div class="mobile-info-value">{{ prescription.appointment.patient.get_full_name }}</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Patient ID</div>
+                <div class="mobile-info-value">{{ prescription.appointment.patient.patient_id }}</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Medicine</div>
+                <div class="mobile-info-value">{{ prescription.medicine.name }}</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Strength</div>
+                <div class="mobile-info-value">{{ prescription.medicine.strength }}</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Prescribed</div>
+                <div class="mobile-info-value text-ethiopia-blue">{{ prescription.quantity_prescribed }} units</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Already Dispensed</div>
+                <div class="mobile-info-value text-ethiopia-green">{{ prescription.quantity_dispensed }} units</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Remaining</div>
+                <div class="mobile-info-value text-ethiopia-yellow">{{ prescription.remaining_quantity }} units</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="mobile-info-item">
+                <div class="mobile-info-label">Available Stock</div>
+                <div class="mobile-info-value {% if prescription.medicine.stock_quantity < prescription.remaining_quantity %}text-danger{% else %}text-success{% endif %}">
+                    {{ prescription.medicine.stock_quantity }} units
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Card -->
+<div class="mobile-dashboard-card mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="mb-1">Current Status</h6>
+            <span class="badge bg-{% if prescription.status == 'dispensed' %}success{% elif prescription.status == 'pending' %}warning{% elif prescription.status == 'partially_dispensed' %}info{% else %}danger{% endif %} fs-6">
+                {{ prescription.get_status_display }}
+            </span>
+        </div>
+        <div class="text-end">
+            <small class="text-muted">Prescribed on</small>
+            <div class="fw-semibold">{{ prescription.prescribed_date|date:"M d, Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Dispense Form -->
+{% if prescription.status != 'dispensed' and prescription.status != 'cancelled' %}
+<div class="mobile-dashboard-card">
+    <h6 class="text-ethiopia-green mb-3">
+        <i class="fas fa-pills me-2"></i>
+        Dispense Medicine
+    </h6>
+    
+    <form method="post" class="mobile-form">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="quantity_dispensed" class="form-label">Quantity to Dispense</label>
+            <div class="input-group">
+                <input type="number" 
+                       class="form-control" 
+                       id="quantity_dispensed" 
+                       name="quantity_dispensed" 
+                       min="1" 
+                       max="{{ prescription.remaining_quantity }}" 
+                       value="{{ prescription.remaining_quantity }}"
+                       required>
+                <span class="input-group-text">units</span>
+            </div>
+            <div class="form-text">
+                Maximum: {{ prescription.remaining_quantity }} units (remaining to dispense)
+                <br>Available stock: {{ prescription.medicine.stock_quantity }} units
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="notes" class="form-label">Dispensing Notes (Optional)</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any notes about this dispensing..."></textarea>
+        </div>
+        
+        <div class="mobile-form-actions">
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{% url 'pharmacy:prescription_list' %}?mobile=1" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-success w-100" id="dispenseBtn">
+                        <i class="fas fa-pills me-2"></i>
+                        <span class="mobile-btn-text">Dispense</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% else %}
+<div class="mobile-dashboard-card">
+    <div class="text-center py-4">
+        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+        <h5>Prescription Complete</h5>
+        <p class="text-muted">This prescription has been fully dispensed.</p>
+        <a href="{% url 'pharmacy:prescription_list' %}?mobile=1" class="btn btn-primary">
+            <i class="fas fa-list me-2"></i>Back to Prescriptions
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="mobile-quick-actions-grid mt-3">
+    <a href="{% url 'pharmacy:prescription_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-prescription"></i>
+        <span>All Prescriptions</span>
+    </a>
+    <a href="{% url 'pharmacy:medicine_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-pills"></i>
+        <span>Medicines</span>
+    </a>
+    <a href="{% url 'patients:patient_list' %}?mobile=1" class="mobile-quick-action-card">
+        <i class="fas fa-users"></i>
+        <span>Patients</span>
+    </a>
+    <a href="{% url 'patients:mobile_dashboard' %}" class="mobile-quick-action-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.mobile-info-item {
+    text-align: center;
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0, 150, 57, 0.05);
+    border-radius: var(--mobile-radius-md);
+    border: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+.mobile-info-label {
+    font-size: 0.75rem;
+    color: var(--mobile-secondary);
+    font-weight: 500;
+    margin-bottom: var(--mobile-spacing-xs);
+}
+
+.mobile-info-value {
+    font-weight: 600;
+    color: var(--mobile-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.mobile-form {
+    max-width: 100%;
+}
+
+.mobile-form-actions {
+    margin-top: var(--mobile-spacing-lg);
+    padding-top: var(--mobile-spacing-lg);
+    border-top: 1px solid rgba(0, 150, 57, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 375px) {
+    .mobile-info-item {
+        padding: var(--mobile-spacing-xs);
+    }
+    
+    .mobile-info-label {
+        font-size: 0.7rem;
+    }
+    
+    .mobile-info-value {
+        font-size: 0.85rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile prescription dispense loaded');
+    
+    // Form validation
+    const form = document.querySelector('.mobile-form');
+    const quantityInput = document.getElementById('quantity_dispensed');
+    const dispenseBtn = document.getElementById('dispenseBtn');
+    
+    if (form && quantityInput && dispenseBtn) {
+        form.addEventListener('submit', function(e) {
+            const quantity = parseInt(quantityInput.value);
+            const maxQuantity = parseInt(quantityInput.getAttribute('max'));
+            const availableStock = {{ prescription.medicine.stock_quantity }};
+            
+            if (quantity > maxQuantity) {
+                e.preventDefault();
+                alert('Cannot dispense more than ' + maxQuantity + ' units (remaining quantity).');
+                return false;
+            }
+            
+            if (quantity > availableStock) {
+                e.preventDefault();
+                alert('Insufficient stock. Only ' + availableStock + ' units available.');
+                return false;
+            }
+            
+            // Show confirmation
+            const confirmMessage = 'Dispense ' + quantity + ' units of {{ prescription.medicine.name }} to {{ prescription.appointment.patient.get_full_name }}?';
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            dispenseBtn.disabled = true;
+            dispenseBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Dispensing...';
+        });
+        
+        // Real-time validation
+        quantityInput.addEventListener('input', function() {
+            const quantity = parseInt(this.value);
+            const maxQuantity = parseInt(this.getAttribute('max'));
+            const availableStock = {{ prescription.medicine.stock_quantity }};
+            
+            if (quantity > maxQuantity || quantity > availableStock) {
+                this.classList.add('is-invalid');
+                dispenseBtn.disabled = true;
+            } else {
+                this.classList.remove('is-invalid');
+                dispenseBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Show mobile notification if coming from prescriptions list
+    if (document.referrer.includes('/pharmacy/prescriptions/') && document.referrer.includes('mobile=1')) {
+        if (window.mobileDashboard) {
+            mobileDashboard.showMobileNotification('Prescription dispense page loaded!', 'info');
+        }
+    }
+});
+</script>
+{% endblock %}

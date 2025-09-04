@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Dashboard - Ethiopian Hospital ERP{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dashboard-body" data-theme="light">
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top navbar-3d">
+        <div class="container-fluid">
+            <!-- Sidebar Toggle -->
+            <button class="btn btn-outline-primary me-2" type="button" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold flex-grow-1 flex-lg-grow-0" href="/">
+                <img src="{% static 'images/logo.png' %}" alt="Ethiopian Hospital ERP Logo" class="me-1 d-none d-sm-inline" style="height: 50px; width: auto;">
+                <span class="d-none d-sm-inline">TenaERP</span>
+                <span class="d-sm-none">EH ERP</span>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="d-none d-md-flex flex-grow-1 mx-4">
+                <div class="input-group" style="max-width: 400px;">
+                    <input type="text" class="form-control" placeholder="Search patients, appointments..." id="globalSearch">
+                    <button class="btn btn-outline-primary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Side Items -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Notifications -->
+                <div class="dropdown position-relative">
+                    <button class="btn btn-outline-success position-relative" data-bs-toggle="dropdown" id="notificationDropdown" aria-label="Notifications" style="border-color: #009639; color: #009639; overflow: visible;">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="position-absolute badge rounded-pill bg-danger" id="notificationBadge" style="top: -8px; right: -8px; transform: none; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; line-height: 1; padding: 0 2px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); z-index: 1000; white-space: nowrap;">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="notificationDropdownMenu" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+                        <!-- Dynamic content will be loaded here -->
+                        <li class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- User Profile -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-label="User menu">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:settings' %}"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <!-- User Info -->
+            <div class="user-info p-3 text-center border-bottom">
+                <div class="user-avatar mb-2">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="Profile" class="rounded-circle" width="60" height="60">
+                    {% else %}
+                        <div class="bg-ethiopia-green rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="fas fa-user text-white fs-4"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                <small class="text-muted">{{ user.role|title }}</small>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'patients:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'patients' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'patients:patient_list' %}">
+                            <i class="fas fa-users"></i>
+                            <span>Patients</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'appointments' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'appointments:appointment_list' %}">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'doctors' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'doctors:doctor_list' %}">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctors</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'billing' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'billing:invoice_list' %}">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'pharmacy' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'pharmacy:medicine_list' %}">
+                            <i class="fas fa-pills"></i>
+                            <span>Pharmacy</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#reportsMenu" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="reportsMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'patients:dashboard' %}#analytics">
+                                        <i class="fas fa-chart-line"></i>Analytics
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'patients:patient_export' %}">
+                                        <i class="fas fa-file-excel"></i>Export Patients
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" onclick="exportAllData()">
+                                        <i class="fas fa-database"></i>Export All Data
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer p-3 border-top">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted d-block">Current Time</small>
+                    <small class="fw-bold" id="current-time">--:--:--</small>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted d-block">Today</small>
+                    <small class="fw-bold" id="ethiopian-date">Loading...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            {% if messages %}
+                <div class="container-fluid p-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Global Error Handler -->
+    {% include 'errors/error_handler.html' %}
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+
+    <script>
+    // Enhanced Mobile Dashboard Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Mobile sidebar toggle
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isOpen = sidebar.classList.contains('show');
+
+                if (isOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('show');
+            sidebarOverlay.classList.add('show');
+            document.body.classList.add('sidebar-open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+            document.body.classList.remove('sidebar-open');
+            document.body.style.overflow = '';
+        }
+
+        // Close sidebar when clicking overlay
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+                closeSidebar();
+            });
+        }
+
+        // Close sidebar when clicking nav links on mobile
+        const navLinks = document.querySelectorAll('.sidebar .nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+
+        // Touch gestures for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 80;
+            const swipeDistance = touchEndX - touchStartX;
+            const verticalDistance = Math.abs(touchEndY - touchStartY);
+
+            // Only handle horizontal swipes (ignore vertical scrolling)
+            if (verticalDistance > 100) return;
+
+            // Swipe right to open sidebar (from left edge)
+            if (swipeDistance > swipeThreshold && touchStartX < 30 && window.innerWidth <= 768 && !sidebar.classList.contains('show')) {
+                openSidebar();
+            }
+
+            // Swipe left to close sidebar
+            if (swipeDistance < -swipeThreshold && sidebar.classList.contains('show')) {
+                closeSidebar();
+            }
+        }
+
+        // Enhanced search functionality for mobile
+        const globalSearch = document.getElementById('globalSearch');
+        if (globalSearch) {
+            globalSearch.addEventListener('focus', function() {
+                if (window.innerWidth <= 768) {
+                    this.placeholder = 'Search...';
+                }
+            });
+
+            globalSearch.addEventListener('blur', function() {
+                if (window.innerWidth <= 768) {
+                    this.placeholder = 'Search patients, appointments...';
+                }
+            });
+        }
+
+        // Ensure navbar stays properly positioned and connected to sidebar
+        const navbar = document.querySelector('.navbar');
+
+        // Remove any transform styles that might interfere with fixed positioning
+        if (navbar) {
+            navbar.style.transform = 'none';
+            navbar.style.transition = 'none';
+        }
+
+        // Handle window resize to maintain navbar-sidebar connection
+        window.addEventListener('resize', function() {
+            if (navbar) {
+                // Ensure navbar maintains proper positioning on resize
+                navbar.style.transform = 'none';
+            }
+        });
+    });
+
+    function exportAllData() {
+        // Show loading message
+        const originalText = event.target.innerHTML;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+        event.target.disabled = true;
+
+        // Create a comprehensive export
+        const exportData = {
+            timestamp: new Date().toISOString(),
+            hospital: 'Ethiopian Hospital ERP',
+            exports: [
+                { name: 'Patients', url: '{% url "patients:patient_export" %}' },
+                // Add more export URLs as needed
+            ]
+        };
+
+        // For now, just export patients
+        window.open('{% url "patients:patient_export" %}', '_blank');
+
+        // Reset button
+        setTimeout(() => {
+            event.target.innerHTML = originalText;
+            event.target.disabled = false;
+        }, 2000);
+    }
+
+    // Notification System
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationMenu = document.getElementById('notificationDropdownMenu');
+
+        if (notificationDropdown && notificationMenu) {
+            notificationDropdown.addEventListener('click', function() {
+                // Load notifications when dropdown is clicked
+                loadNotifications();
+            });
+        }
+
+        function loadNotifications() {
+            fetch('/notifications/dropdown/')
+                .then(response => response.text())
+                .then(html => {
+                    notificationMenu.innerHTML = html;
+
+                    // Attach event listeners to the newly loaded content
+                    attachNotificationEventListeners();
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                    notificationMenu.innerHTML = '<li class="text-center py-3"><div class="text-danger">Error loading notifications</div></li>';
+                });
+        }
+
+        function attachNotificationEventListeners() {
+            // Handle mark as read button clicks
+            notificationMenu.querySelectorAll('.mark-as-read').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const notificationId = this.dataset.notificationId;
+                    markNotificationAsRead(notificationId, this);
+                });
+            });
+
+            // Handle delete button clicks
+            notificationMenu.querySelectorAll('.delete-notification').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const notificationId = this.dataset.notificationId;
+                    deleteDropdownNotification(notificationId, this);
+                });
+            });
+
+            // Handle mark all as read button
+            const markAllBtn = notificationMenu.querySelector('#markAllAsReadTop');
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    markAllNotificationsAsRead(this);
+                });
+            }
+
+            // Handle notification content clicks (mark as read)
+            notificationMenu.querySelectorAll('.notification-content').forEach(content => {
+                content.addEventListener('click', function(e) {
+                    const notificationItem = this.closest('.notification-item');
+                    const notificationId = notificationItem.dataset.notificationId;
+                    if (notificationItem.classList.contains('unread')) {
+                        markNotificationAsRead(notificationId, null, true);
+                    }
+                });
+            });
+        }
+
+        // Auto-refresh notifications every 30 seconds
+        setInterval(function() {
+            if (!document.hidden) {
+                updateNotificationBadge();
+            }
+        }, 30000);
+
+        function updateNotificationBadge() {
+            // Create a dedicated endpoint call for just getting the count
+            fetch('/notifications/dropdown/')
+                .then(response => response.text())
+                .then(html => {
+                    // Extract unread count from response
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    // Look for unread notifications in the dropdown content
+                    const unreadItems = tempDiv.querySelectorAll('.notification-item.unread');
+                    const unreadCount = unreadItems.length;
+
+                    let currentBadge = document.getElementById('notificationBadge');
+
+                    if (unreadCount > 0) {
+                        if (currentBadge) {
+                            currentBadge.textContent = unreadCount;
+                            currentBadge.style.display = 'block';
+                        } else {
+                            // Create badge if it doesn't exist
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'position-absolute badge rounded-pill bg-danger';
+                            newBadge.id = 'notificationBadge';
+                            newBadge.textContent = unreadCount;
+                            newBadge.style.cssText = `
+                                top: -8px;
+                                right: -8px;
+                                transform: none;
+                                min-width: 20px;
+                                height: 20px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 0.7rem;
+                                font-weight: 600;
+                                line-height: 1;
+                                padding: 0 2px;
+                                border: 2px solid white;
+                                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                                z-index: 1000;
+                                white-space: nowrap;
+                            `;
+                            notificationDropdown.appendChild(newBadge);
+                        }
+                    } else if (currentBadge) {
+                        currentBadge.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating notification badge:', error);
+                });
+        }
+
+        // Notification action functions
+        function markNotificationAsRead(notificationId, button, isContentClick = false) {
+            console.log('Marking notification as read:', notificationId);
+
+            // Get CSRF token from meta tag or form
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                showNotificationFeedback('Security token not found. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Add loading state if button exists
+            let originalIcon = '';
+            if (button) {
+                originalIcon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+            }
+
+            fetch(`/notifications/mark-read/${notificationId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const notificationItem = notificationMenu.querySelector(`[data-notification-id="${notificationId}"]`);
+                    if (notificationItem) {
+                        notificationItem.classList.remove('unread');
+
+                        // Remove the unread indicator
+                        const unreadIndicator = notificationItem.querySelector('.notification-unread-indicator');
+                        if (unreadIndicator) {
+                            unreadIndicator.style.transition = 'all 0.3s ease';
+                            unreadIndicator.style.transform = 'scale(0)';
+                            unreadIndicator.style.opacity = '0';
+                            setTimeout(() => unreadIndicator.remove(), 300);
+                        }
+
+                        // Remove the mark as read button if it exists
+                        if (button) {
+                            button.style.transition = 'all 0.3s ease';
+                            button.style.transform = 'scale(0)';
+                            button.style.opacity = '0';
+                            setTimeout(() => button.remove(), 300);
+                        } else {
+                            // If content click, remove the mark as read button
+                            const markBtn = notificationItem.querySelector('.mark-as-read');
+                            if (markBtn) {
+                                markBtn.style.transition = 'all 0.3s ease';
+                                markBtn.style.transform = 'scale(0)';
+                                markBtn.style.opacity = '0';
+                                setTimeout(() => markBtn.remove(), 300);
+                            }
+                        }
+                    }
+
+                    // Update notification count
+                    updateNotificationBadge();
+
+                    // Show success feedback
+                    showNotificationFeedback('Notification marked as read', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to mark notification as read');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+
+                // Restore button state if button exists
+                if (button) {
+                    button.innerHTML = originalIcon;
+                    button.disabled = false;
+                }
+
+                showNotificationFeedback('Failed to mark notification as read. Please try again.', 'error');
+            });
+        }
+
+        function deleteDropdownNotification(notificationId, button) {
+            console.log('Deleting notification:', notificationId);
+
+            const notificationItem = button.closest('.notification-item');
+            const notificationTitle = notificationItem.querySelector('.notification-title')?.textContent || 'this notification';
+
+            if (!confirm(`Delete "${notificationTitle}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            const listItem = notificationItem.parentElement;
+            const wasUnread = notificationItem.classList.contains('unread');
+
+            // Get CSRF token from meta tag or form
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                showNotificationFeedback('Security token not found. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Add loading state
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            notificationItem.style.opacity = '0.6';
+
+            fetch(`/notifications/delete/${notificationId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Animate removal
+                    listItem.style.transition = 'all 0.3s ease';
+                    listItem.style.transform = 'translateX(100%)';
+                    listItem.style.opacity = '0';
+
+                    setTimeout(() => {
+                        listItem.remove();
+
+                        // Check if dropdown is empty
+                        const remainingItems = notificationMenu.querySelectorAll('.notification-item');
+                        if (remainingItems.length === 0) {
+                            notificationMenu.innerHTML = `
+                                <li class="text-center py-3">
+                                    <div class="text-muted">
+                                        <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                                        <div>No notifications</div>
+                                    </div>
+                                </li>
+                            `;
+                        }
+
+                        // Update notification count
+                        updateNotificationBadge();
+
+                        // Show success message
+                        showNotificationFeedback(data.message, 'success');
+                    }, 300);
+                } else {
+                    throw new Error(data.message || 'Failed to delete notification');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting notification:', error);
+
+                // Restore button state
+                button.innerHTML = originalIcon;
+                button.disabled = false;
+                notificationItem.style.opacity = '1';
+
+                showNotificationFeedback('Failed to delete notification. Please try again.', 'error');
+            });
+        }
+
+        function markAllNotificationsAsRead(button) {
+            console.log('Marking all notifications as read...');
+
+            // Get CSRF token from meta tag or form
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                showNotificationFeedback('Security token not found. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Add loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Marking...';
+            button.disabled = true;
+
+            fetch('/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI immediately
+                    notificationMenu.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+
+                        // Remove unread indicator
+                        const unreadIndicator = item.querySelector('.notification-unread-indicator');
+                        if (unreadIndicator) {
+                            unreadIndicator.style.transition = 'all 0.3s ease';
+                            unreadIndicator.style.transform = 'scale(0)';
+                            unreadIndicator.style.opacity = '0';
+                            setTimeout(() => unreadIndicator.remove(), 300);
+                        }
+
+                        // Remove mark as read button
+                        const markBtn = item.querySelector('.mark-as-read');
+                        if (markBtn) {
+                            markBtn.style.transition = 'all 0.3s ease';
+                            markBtn.style.transform = 'scale(0)';
+                            markBtn.style.opacity = '0';
+                            setTimeout(() => markBtn.remove(), 300);
+                        }
+                    });
+
+                    // Update notification count
+                    updateNotificationBadge();
+
+                    // Hide the mark all button
+                    button.style.transition = 'all 0.3s ease';
+                    button.style.transform = 'scale(0)';
+                    button.style.opacity = '0';
+                    setTimeout(() => button.remove(), 300);
+
+                    // Show success feedback
+                    showNotificationFeedback('All notifications marked as read!', 'success');
+                } else {
+                    // Restore button on error
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showNotificationFeedback('Failed to mark notifications as read', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking all notifications as read:', error);
+
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+
+                showNotificationFeedback('Failed to mark all notifications as read. Please try again.', 'error');
+            });
+        }
+
+        function showNotificationFeedback(message, type = 'info') {
+            // Create feedback element
+            const feedback = document.createElement('div');
+            feedback.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+            feedback.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border: none;
+                border-radius: 8px;
+            `;
+
+            feedback.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(feedback);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.classList.remove('show');
+                    setTimeout(() => {
+                        if (feedback.parentNode) {
+                            feedback.parentNode.removeChild(feedback);
+                        }
+                    }, 150);
+                }
+            }, 3000);
+        }
+
+        // Make updateNotificationBadge available globally for other scripts
+        window.updateNotificationBadge = updateNotificationBadge;
+    });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

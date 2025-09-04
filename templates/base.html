@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital ERP - Ethiopian Healthcare Management{% endblock %}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block description %}Advanced Ethiopian Hospital ERP system providing comprehensive healthcare management, patient care, and medical services with cutting-edge technology.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}Ethiopian hospital, ERP system, healthcare management, patient care, medical services, Addis Ababa, Ethiopia{% endblock %}">
+    <meta name="author" content="Ethiopian Hospital ERP">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}Ethiopian Hospital ERP - Advanced Healthcare Management{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Leading healthcare innovation in Ethiopia with cutting-edge technology and compassionate care.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% load static %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:site_name" content="Ethiopian Hospital ERP">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Ethiopian Hospital ERP - Advanced Healthcare Management{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Leading healthcare innovation in Ethiopia with cutting-edge technology and compassionate care.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% load static %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/twitter-card.jpg' %}{% endblock %}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'css/mobile.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Structured Data -->
+    {% block structured_data %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

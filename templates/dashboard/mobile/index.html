@@ -1,0 +1,749 @@
+{% extends 'dashboard/mobile/base.html' %}
+{% load static %}
+
+{% block title %}Mobile Dashboard - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<!-- Mobile Page Header -->
+<div class="mobile-page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-gray-800">Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+        </div>
+        <div class="d-flex gap-2">
+            <!--  -->
+            <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                <i class="fas fa-print"></i>
+            </button>
+            <button class="btn btn-sm btn-primary mobile-add-quick-btn" data-bs-toggle="modal" data-bs-target="#mobileQuickAddModal">
+                <i class="fas fa-plus me-1"></i>
+                <span class="mobile-btn-text">Add</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions - Enhanced 2x2 Grid Layout
+<div class="mobile-quick-actions-section mb-4">
+    <h6 class="mobile-section-title mb-3">
+        <i class="fas fa-bolt text-ethiopia-green me-2"></i>Quick Actions
+    </h6>
+    <div class="mobile-quick-actions-grid">
+        <div class="mobile-quick-action-wrapper">
+            <a href="{% url 'appointments:appointment_add' %}?mobile=1" class="mobile-quick-action-card">
+                <div class="mobile-quick-action-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <span class="mobile-quick-action-text">New Appointment</span>
+            </a>
+        </div>
+        <div class="mobile-quick-action-wrapper">
+            <a href="{% url 'patients:patient_add' %}?mobile=1" class="mobile-quick-action-card">
+                <div class="mobile-quick-action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <span class="mobile-quick-action-text">Add Patient</span>
+            </a>
+        </div>
+        <div class="mobile-quick-action-wrapper">
+            <a href="{% url 'billing:invoice_add' %}?mobile=1" class="mobile-quick-action-card">
+                <div class="mobile-quick-action-icon">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <span class="mobile-quick-action-text">Create Invoice</span>
+            </a>
+        </div>
+        <div class="mobile-quick-action-wrapper">
+            <a href="{% url 'pharmacy:medicine_add' %}?mobile=1" class="mobile-quick-action-card">
+                <div class="mobile-quick-action-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <span class="mobile-quick-action-text">Add Medicine</span>
+            </a>
+        </div>
+    </div>
+</div> -->
+
+<!-- Mobile Statistics Cards - Enhanced 2x2 Grid Layout -->
+<div class="mobile-statistics-section mb-4">
+    <h6 class="mobile-section-title mb-3">
+        <i class="fas fa-chart-bar text-ethiopia-green me-2"></i>Key Statistics
+    </h6>
+    <div class="mobile-stats-grid">
+        <!-- Row 1: Today's Appointments & Total Patients -->
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card primary-accent" role="button" tabindex="0" aria-label="Today's appointments statistics">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                </div>
+                <div class="mobile-stat-number" id="mobiletodayAppointments" aria-live="polite">{{ today_appointments|default:0 }}</div>
+                <div class="mobile-stat-label">Today's Appointments</div>
+                <div class="mobile-stat-change">
+                    <small class="text-{% if appointments_change.direction == 'up' %}success{% elif appointments_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                        <i class="fas fa-arrow-{% if appointments_change.direction == 'up' %}up{% elif appointments_change.direction == 'down' %}down{% else %}right{% endif %}" aria-hidden="true"></i>
+                        {{ appointments_change.percentage|default:0 }}% from yesterday
+                    </small>
+                </div>
+            </div>
+            <div class="mobile-stat-card" role="button" tabindex="0" aria-label="Total patients statistics">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-users text-ethiopia-green" aria-hidden="true"></i>
+                </div>
+                <div class="mobile-stat-number" id="mobiletotalPatients" aria-live="polite">{{ total_patients|default:0 }}</div>
+                <div class="mobile-stat-label">Total Patients</div>
+                <div class="mobile-stat-change">
+                    <small class="text-{% if patient_change.direction == 'up' %}success{% elif patient_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                        <i class="fas fa-arrow-{% if patient_change.direction == 'up' %}up{% elif patient_change.direction == 'down' %}down{% else %}right{% endif %}" aria-hidden="true"></i>
+                        {{ patient_change.percentage|default:0 }}% this month
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Monthly Revenue & Low Stock Medicines -->
+        <div class="mobile-stats-row">
+            <div class="mobile-stat-card" role="button" tabindex="0" aria-label="Monthly revenue statistics">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-money-bill-wave text-ethiopia-green" aria-hidden="true"></i>
+                </div>
+                <div class="mobile-stat-number" id="mobilemonthlyRevenue" aria-live="polite">{{ monthly_revenue|default:0|floatformat:0 }}</div>
+                <div class="mobile-stat-label">Monthly Revenue (ETB)</div>
+                <div class="mobile-stat-change">
+                    <small class="text-{% if revenue_change.direction == 'up' %}success{% elif revenue_change.direction == 'down' %}danger{% else %}muted{% endif %}">
+                        <i class="fas fa-arrow-{% if revenue_change.direction == 'up' %}up{% elif revenue_change.direction == 'down' %}down{% else %}right{% endif %}" aria-hidden="true"></i>
+                        {{ revenue_change.percentage|default:0 }}% from last month
+                    </small>
+                </div>
+            </div>
+            <div class="mobile-stat-card {% if low_stock_medicines > 0 %}warning-accent{% endif %}" role="button" tabindex="0" aria-label="Low stock medicines alert">
+                <div class="mobile-stat-icon">
+                    <i class="fas fa-{% if low_stock_medicines > 0 %}exclamation-triangle text-warning{% else %}check-circle text-ethiopia-green{% endif %}" aria-hidden="true"></i>
+                </div>
+                <div class="mobile-stat-number" id="mobilelowStockMedicines" aria-live="polite">{{ low_stock_medicines|default:0 }}</div>
+                <div class="mobile-stat-label">Low Stock Medicines</div>
+                <div class="mobile-stat-change">
+                    <small class="text-{% if low_stock_medicines > 0 %}warning{% else %}success{% endif %}">
+                        <i class="fas fa-{% if low_stock_medicines > 0 %}exclamation-circle{% else %}check-circle{% endif %}" aria-hidden="true"></i>
+                        {% if low_stock_medicines > 0 %}Needs attention{% else %}All good{% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Charts Section -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-8">
+        <div class="mobile-dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="card-title mb-0">Patient Trends</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        6M
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">3 Months</a></li>
+                        <li><a class="dropdown-item" href="#">6 Months</a></li>
+                        <li><a class="dropdown-item" href="#">1 Year</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mobile-chart-container">
+                <canvas id="mobilePatientTrendsChart"></canvas>
+            </div>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <div class="text-center">
+                        <div class="h6 text-ethiopia-green mb-0">{{ patient_trends.total_new_patients|default:0 }}</div>
+                        <small class="text-muted">New Patients</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center">
+                        <div class="h6 text-ethiopia-blue mb-0">{{ patient_trends.average_per_month|default:0 }}</div>
+                        <small class="text-muted">Avg/Month</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 col-lg-4">
+        <div class="mobile-dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="card-title mb-0">Revenue</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        Month
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">This Month</a></li>
+                        <li><a class="dropdown-item" href="#">Last Month</a></li>
+                        <li><a class="dropdown-item" href="#">3 Months</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mobile-chart-container">
+                <canvas id="mobileRevenueChart"></canvas>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Paid invoices only
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row - Match Desktop Layout -->
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="mobile-dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="card-title mb-0">Appointments by Doctor</h6>
+                <a href="{% url 'appointments:appointment_list' %}?mobile=1" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="mobile-chart-container">
+                <canvas id="mobileAppointmentsChart"></canvas>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="text-center">
+                        <div class="h6 text-ethiopia-green mb-0">{{ appointments_by_doctor.total_appointments_this_month|default:0 }}</div>
+                        <small class="text-muted">Total Appointments This Month</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h6 class="text-muted mb-2">Doctor Performance</h6>
+                {% for doctor in appointments_by_doctor.doctor_performance %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small">{{ doctor.name }}</span>
+                    <div class="d-flex align-items-center">
+                        <div class="progress me-2" style="width: 60px; height: 8px;">
+                            <div class="progress-bar bg-ethiopia-green" style="width: {{ doctor.completion_rate }}%"></div>
+                        </div>
+                        <span class="small text-muted">{{ doctor.completion_rate }}%</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-2">
+                    <small>No appointment data available</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="mobile-dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="card-title mb-0">Recent Activity</h6>
+                <a href="{% url 'patients:patient_list' %}?mobile=1" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="mobile-activity-list">
+                {% for activity in recent_activity %}
+                <div class="mobile-activity-item">
+                    <div class="mobile-activity-icon bg-{{ activity.color }} text-white">
+                        <i class="{{ activity.icon }}"></i>
+                    </div>
+                    <div class="mobile-activity-content">
+                        <div class="mobile-activity-title">{{ activity.title }}</div>
+                        <div class="mobile-activity-time">{{ activity.description|truncatechars:50 }}</div>
+                        <small class="text-muted">{{ activity.time|timesince }} ago</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="mobile-activity-item">
+                    <div class="mobile-activity-icon bg-muted text-white">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="mobile-activity-content">
+                        <div class="mobile-activity-title">No recent activity</div>
+                        <div class="mobile-activity-time">System activity will appear here</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Modal - Match Desktop Layout -->
+<div class="modal fade" id="mobileQuickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="{% url 'patients:patient_add' %}?mobile=1" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 mobile-add-patient-btn">
+                            <i class="fas fa-user-plus fs-2 mb-2"></i>
+                            <span class="mobile-btn-text">Add Patient</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'appointments:appointment_add' %}?mobile=1" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 mobile-add-appointment-btn">
+                            <i class="fas fa-calendar-plus fs-2 mb-2"></i>
+                            <span class="mobile-btn-text">New Appointment</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'doctors:doctor_add' %}?mobile=1" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 mobile-add-doctor-btn">
+                            <i class="fas fa-user-md fs-2 mb-2"></i>
+                            <span class="mobile-btn-text">Add Doctor</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'pharmacy:medicine_add' %}?mobile=1" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 mobile-add-medicine-btn">
+                            <i class="fas fa-pills fs-2 mb-2"></i>
+                            <span class="mobile-btn-text">Add Medicine</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Responsive Dashboard Detection -->
+<script src="{% static 'js/responsive-dashboard.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dashboard-specific functionality
+    console.log('Mobile Dashboard loaded successfully');
+
+    // Initialize charts with real data
+    initMobileRealDataCharts();
+
+    // Welcome message is handled by mobile-dashboard.js to prevent duplicates
+
+    // Auto-refresh dashboard every 5 minutes
+    setInterval(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 300000); // 5 minutes
+});
+
+function initMobileRealDataCharts() {
+    // Patient Trends Chart with real data
+    
+    // Patient Trends Chart
+    const patientTrendsCtx = document.getElementById('mobilePatientTrendsChart');
+    if (patientTrendsCtx) {
+        new Chart(patientTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ patient_trends.labels|safe }},
+                datasets: [{
+                    label: 'New Patients',
+                    data: {{ patient_trends.data|safe }},
+                    borderColor: '#009639',
+                    backgroundColor: 'rgba(0, 150, 57, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            maxRotation: window.innerWidth <= 768 ? 45 : 0,
+                            padding: 8
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: window.innerWidth <= 768 ? 3 : 4,
+                        hoverRadius: window.innerWidth <= 768 ? 5 : 6
+                    },
+                    line: {
+                        borderWidth: window.innerWidth <= 768 ? 2 : 3
+                    }
+                }
+            }
+        });
+    }
+
+    // Revenue Chart
+    const revenueCtx = document.getElementById('mobileRevenueChart');
+    if (revenueCtx) {
+        new Chart(revenueCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ revenue_breakdown.labels|safe }},
+                datasets: [{
+                    data: {{ revenue_breakdown.data|safe }},
+                    backgroundColor: [
+                        '#009639', '#FFCD00', '#DA020E', '#0F47AF',
+                        '#FF6B35', '#6C5CE7', '#00B894', '#FDCB6E'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: window.innerWidth <= 768 ? 'bottom' : 'right',
+                        labels: {
+                            padding: window.innerWidth <= 768 ? 10 : 15,
+                            usePointStyle: true,
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            boxWidth: window.innerWidth <= 768 ? 8 : 12,
+                            boxHeight: window.innerWidth <= 768 ? 8 : 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value.toLocaleString()} ETB (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: window.innerWidth <= 768 ? '50%' : '60%',
+                layout: {
+                    padding: window.innerWidth <= 768 ? 5 : 10
+                }
+            }
+        });
+    }
+
+    // Appointments Chart
+    const appointmentsCtx = document.getElementById('mobileAppointmentsChart');
+    if (appointmentsCtx) {
+        new Chart(appointmentsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ appointments_by_doctor.labels|safe }},
+                datasets: [{
+                    label: 'Appointments',
+                    data: {{ appointments_by_doctor.data|safe }},
+                    backgroundColor: ['#009639', '#FFCD00', '#DA020E', '#0F47AF', '#009639'],
+                    borderRadius: window.innerWidth <= 768 ? 6 : 10,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#009639',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 10 : 12
+                            },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: window.innerWidth <= 768 ? 9 : 12
+                            },
+                            maxRotation: window.innerWidth <= 768 ? 45 : 0,
+                            padding: 8
+                        }
+                    }
+                },
+                elements: {
+                    bar: {
+                        borderRadius: window.innerWidth <= 768 ? 6 : 10,
+                        borderSkipped: false
+                    }
+                },
+                layout: {
+                    padding: window.innerWidth <= 768 ? 5 : 10
+                }
+            }
+        });
+    }
+}
+
+function getDefaultMobileChartOptions() {
+    const isMobile = window.innerWidth <= 768;
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: isMobile ? 'bottom' : 'right',
+                labels: {
+                    padding: isMobile ? 10 : 15,
+                    usePointStyle: true,
+                    font: { size: isMobile ? 10 : 12 },
+                    boxWidth: isMobile ? 8 : 12,
+                    boxHeight: isMobile ? 8 : 12
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(0, 0, 0, 0.1)', drawBorder: false },
+                ticks: { color: '#6c757d', font: { size: isMobile ? 10 : 12 }, padding: 8 }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { 
+                    color: '#6c757d', 
+                    font: { size: isMobile ? 10 : 12 }, 
+                    maxRotation: isMobile ? 45 : 0, 
+                    padding: 8 
+                }
+            }
+        },
+        elements: {
+            point: { radius: isMobile ? 3 : 4, hoverRadius: isMobile ? 5 : 6 },
+            line: { borderWidth: isMobile ? 2 : 3 },
+            bar: { borderRadius: isMobile ? 6 : 10, borderSkipped: false }
+        },
+        layout: { padding: isMobile ? 5 : 10 }
+    };
+}
+
+function updateMobileStats() {
+    // Fetch updated stats
+    fetch('/dashboard/api/dashboard-stats/')
+        .then(response => response.json())
+        .then(data => {
+            // Update mobile stats
+            const stats = [
+                { id: 'mobiletodayAppointments', value: data.today_appointments || 0 },
+                { id: 'mobiletotalAppointments', value: data.total_appointments_month || 0 },
+                { id: 'mobiletotalPatients', value: data.total_patients || 0 },
+                { id: 'mobilenewPatients', value: data.new_patients_month || 0 },
+                { id: 'mobiletotalDoctors', value: data.total_doctors || 0 },
+                { id: 'mobilenewDoctors', value: data.new_doctors_month || 0 },
+                { id: 'mobiletotalMedicines', value: data.total_medicines || 0 },
+                { id: 'mobilelowStockMedicines', value: data.low_stock_medicines || 0 },
+                { id: 'mobilemonthlyRevenue', value: data.monthly_revenue || 0 },
+                { id: 'mobileyearlyRevenue', value: data.yearly_revenue || 0 }
+            ];
+
+            stats.forEach(stat => {
+                const element = document.getElementById(stat.id);
+                if (element) {
+                    const currentValue = parseInt(element.textContent.replace(/,/g, '')) || 0;
+                    if (currentValue !== stat.value) {
+                        animateNumber(element, currentValue, stat.value);
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error updating mobile stats:', error);
+        });
+}
+
+function animateNumber(element, start, end) {
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const current = Math.round(start + (end - start) * progress);
+
+        // Enhanced number formatting for better mobile display
+        let formattedNumber;
+        if (current >= 1000000) {
+            formattedNumber = (current / 1000000).toFixed(1) + 'M';
+        } else if (current >= 1000) {
+            formattedNumber = (current / 1000).toFixed(1) + 'K';
+        } else {
+            formattedNumber = current.toLocaleString();
+        }
+
+        element.textContent = formattedNumber;
+
+        // Add large-number class for styling
+        if (current >= 10000) {
+            element.classList.add('large-number');
+        } else {
+            element.classList.remove('large-number');
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+// Enhanced mobile statistics card interactions
+function initMobileStatsInteractions() {
+    const statCards = document.querySelectorAll('.mobile-stat-card');
+
+    statCards.forEach(card => {
+        // Add touch feedback
+        card.addEventListener('touchstart', function() {
+            this.style.transform = 'translateY(-1px) scale(0.98)';
+        });
+
+        card.addEventListener('touchend', function() {
+            this.style.transform = '';
+        });
+
+        // Add keyboard navigation
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+}
+
+// Initialize mobile dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize mobile features
+    if (typeof MobileDashboard !== 'undefined') {
+        MobileDashboard.init();
+    }
+
+    // Initialize enhanced stat card interactions
+    initMobileStatsInteractions();
+
+    // Update stats every 30 seconds
+    updateMobileStats();
+    setInterval(updateMobileStats, 30000);
+});
+
+// Export all data function
+function exportAllData() {
+    const originalText = event.target.innerHTML;
+    event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+    event.target.disabled = true;
+
+    // For now, just export patients
+    window.open('{% url "patients:patient_export" %}', '_blank');
+
+    // Reset button
+    setTimeout(() => {
+        event.target.innerHTML = originalText;
+        event.target.disabled = false;
+    }, 2000);
+}
+</script>
+{% endblock %}

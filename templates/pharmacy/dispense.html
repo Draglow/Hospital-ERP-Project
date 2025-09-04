@@ -1,0 +1,220 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dispense Prescription - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dispense Prescription</h1>
+        <p class="text-muted">Dispense medication to patient</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Prescriptions
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <h5 class="card-title mb-4">Prescription Details</h5>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-user text-ethiopia-green me-2"></i>
+                        Patient Information
+                    </h6>
+                    <div class="mb-2">
+                        <strong>Name:</strong> {{ prescription.appointment.patient.get_full_name }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Patient ID:</strong> {{ prescription.appointment.patient.patient_id }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Age:</strong> {{ prescription.appointment.patient.age }} years
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="mb-3">
+                        <i class="fas fa-pills text-ethiopia-blue me-2"></i>
+                        Medicine Information
+                    </h6>
+                    <div class="mb-2">
+                        <strong>Medicine:</strong> {{ prescription.medicine.name }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Strength:</strong> {{ prescription.medicine.strength }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Form:</strong> {{ prescription.medicine.get_form_display }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h6 class="mb-3">
+                        <i class="fas fa-prescription text-ethiopia-yellow me-2"></i>
+                        Prescription Details
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h5 text-primary mb-0">{{ prescription.quantity_prescribed }}</div>
+                                <small class="text-muted">Prescribed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h5 text-success mb-0">{{ prescription.quantity_dispensed }}</div>
+                                <small class="text-muted">Dispensed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h5 text-warning mb-0">{{ prescription.remaining_quantity }}</div>
+                                <small class="text-muted">Remaining</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h5 text-info mb-0">{{ prescription.medicine.stock_quantity }}</div>
+                                <small class="text-muted">In Stock</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if prescription.instructions %}
+            <div class="mb-4">
+                <h6 class="mb-2">
+                    <i class="fas fa-info-circle text-ethiopia-red me-2"></i>
+                    Instructions
+                </h6>
+                <div class="alert alert-info">
+                    {{ prescription.instructions }}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if prescription.remaining_quantity > 0 and prescription.medicine.stock_quantity > 0 %}
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Quantity to Dispense *</label>
+                            <input type="number" class="form-control" name="quantity_dispensed" 
+                                   min="1" max="{{ prescription.remaining_quantity|floatformat:0 }}" 
+                                   value="{{ prescription.remaining_quantity|floatformat:0 }}" required>
+                            <div class="form-text">
+                                Maximum: {{ prescription.remaining_quantity }} units (Available: {{ prescription.medicine.stock_quantity }})
+                            </div>
+                            <div class="invalid-feedback">Please enter a valid quantity.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Dispense Medicine
+                    </button>
+                    <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-warning">
+                {% if prescription.remaining_quantity <= 0 %}
+                    <i class="fas fa-check-circle me-2"></i>
+                    This prescription has been fully dispensed.
+                {% else %}
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Insufficient stock to dispense this prescription.
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-history text-ethiopia-green me-2"></i>
+                Prescription History
+            </h6>
+            <div class="small">
+                <div class="mb-2">
+                    <strong>Prescribed:</strong> {{ prescription.prescribed_date|date:"M d, Y g:i A" }}
+                </div>
+                {% if prescription.dispensed_date %}
+                <div class="mb-2">
+                    <strong>Last Dispensed:</strong> {{ prescription.dispensed_date|date:"M d, Y g:i A" }}
+                </div>
+                {% endif %}
+                {% if prescription.dispensed_by %}
+                <div class="mb-2">
+                    <strong>Dispensed By:</strong> {{ prescription.dispensed_by.get_full_name }}
+                </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if prescription.status == 'dispensed' %}success{% elif prescription.status == 'partially_dispensed' %}warning{% else %}primary{% endif %}">
+                        {{ prescription.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        {% if prescription.medicine.side_effects %}
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Side Effects
+            </h6>
+            <div class="small text-muted">
+                {{ prescription.medicine.side_effects }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if prescription.medicine.contraindications %}
+        <div class="dashboard-card">
+            <h6 class="card-title">
+                <i class="fas fa-ban text-danger me-2"></i>
+                Contraindications
+            </h6>
+            <div class="small text-muted">
+                {{ prescription.medicine.contraindications }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

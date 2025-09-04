@@ -1,0 +1,190 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Test Appointment Functionality - Ethiopian Hospital ERP{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h5 class="card-title">Test Appointment Functionality</h5>
+                <p class="text-muted">This page is for testing the start and cancel appointment functionality.</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Available Appointments</h6>
+                        <div id="appointments-list">
+                            {% for appointment in appointments %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ appointment.appointment_id }}</h6>
+                                    <p class="card-text">
+                                        <strong>Patient:</strong> {{ appointment.patient.get_full_name }}<br>
+                                        <strong>Doctor:</strong> {{ appointment.doctor.get_full_name }}<br>
+                                        <strong>Status:</strong> 
+                                        <span class="badge bg-{% if appointment.status == 'scheduled' %}primary{% elif appointment.status == 'in_progress' %}warning{% elif appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span><br>
+                                        <strong>Date/Time:</strong> {{ appointment.appointment_date }} {{ appointment.appointment_time }}<br>
+                                        <strong>Can be cancelled:</strong> {{ appointment.can_be_cancelled|yesno:"Yes,No" }}
+                                    </p>
+                                    
+                                    <div class="btn-group" role="group">
+                                        {% if appointment.status == 'scheduled' or appointment.status == 'confirmed' %}
+                                            <button class="btn btn-success btn-sm" onclick="testStartAppointment({{ appointment.pk }})">
+                                                <i class="fas fa-play me-1"></i>Start
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if appointment.status == 'in_progress' %}
+                                            <button class="btn btn-info btn-sm" onclick="testCompleteAppointment({{ appointment.pk }})">
+                                                <i class="fas fa-check me-1"></i>Complete
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if appointment.can_be_cancelled %}
+                                            <button class="btn btn-danger btn-sm" onclick="testCancelAppointment({{ appointment.pk }})">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                        {% endif %}
+                                        
+                                        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Test Results</h6>
+                        <div id="test-results" class="border p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                            <p class="text-muted">Test results will appear here...</p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear Results</button>
+                            <button class="btn btn-info btn-sm" onclick="location.reload()">Refresh Page</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function logResult(message, type = 'info') {
+    const resultsDiv = document.getElementById('test-results');
+    const timestamp = new Date().toLocaleTimeString();
+    const typeClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+    
+    resultsDiv.innerHTML += `<div class="${typeClass}"><strong>[${timestamp}]</strong> ${message}</div>`;
+    resultsDiv.scrollTop = resultsDiv.scrollHeight;
+}
+
+function clearResults() {
+    document.getElementById('test-results').innerHTML = '<p class="text-muted">Test results will appear here...</p>';
+}
+
+function testStartAppointment(appointmentId) {
+    logResult(`🧪 Testing START appointment for ID: ${appointmentId}`);
+    
+    fetch(`/appointments/${appointmentId}/start/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => {
+        logResult(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        logResult(`📦 Response data: ${JSON.stringify(data)}`);
+        if (data.success) {
+            logResult(`✅ SUCCESS: ${data.message}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            logResult(`❌ ERROR: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        logResult(`💥 FETCH ERROR: ${error.message}`, 'error');
+        console.error('Error:', error);
+    });
+}
+
+function testCancelAppointment(appointmentId) {
+    logResult(`🧪 Testing CANCEL appointment for ID: ${appointmentId}`);
+    
+    fetch(`/appointments/${appointmentId}/cancel-ajax/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => {
+        logResult(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        logResult(`📦 Response data: ${JSON.stringify(data)}`);
+        if (data.success) {
+            logResult(`✅ SUCCESS: ${data.message}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            logResult(`❌ ERROR: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        logResult(`💥 FETCH ERROR: ${error.message}`, 'error');
+        console.error('Error:', error);
+    });
+}
+
+function testCompleteAppointment(appointmentId) {
+    logResult(`🧪 Testing COMPLETE appointment for ID: ${appointmentId}`);
+    
+    fetch(`/appointments/${appointmentId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => {
+        logResult(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        logResult(`📦 Response data: ${JSON.stringify(data)}`);
+        if (data.success) {
+            logResult(`✅ SUCCESS: ${data.message}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            logResult(`❌ ERROR: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        logResult(`💥 FETCH ERROR: ${error.message}`, 'error');
+        console.error('Error:', error);
+    });
+}
+
+// Log initial page load
+document.addEventListener('DOMContentLoaded', function() {
+    logResult('🚀 Test page loaded successfully');
+    logResult('📋 CSRF Token found: ' + (document.querySelector('[name=csrfmiddlewaretoken]') ? 'Yes' : 'No'));
+});
+</script>
+{% endblock %}

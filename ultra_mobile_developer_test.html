@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Ultra-Modern Mobile Developer Page Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #009639;
+            --primary-yellow: #FFCD00;
+            --primary-red: #DA020E;
+            --primary-blue: #0F47AF;
+            --vh: 1vh;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, rgba(0, 150, 57, 0.9), rgba(15, 71, 175, 0.9)), 
+                        url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3') center/cover;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Mobile-First Ultra-Responsive Design */
+        .developer-hero {
+            min-height: calc(var(--vh, 1vh) * 100);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background-attachment: fixed;
+        }
+
+        .profile-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-yellow);
+            box-shadow: 
+                0 0 30px rgba(255, 205, 0, 0.3),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: profileFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes profileFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin: 0 1rem 2rem;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            animation: mobileSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .section-card:nth-child(1) { animation-delay: 0.1s; }
+        .section-card:nth-child(2) { animation-delay: 0.2s; }
+        .section-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes mobileSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            60% {
+                opacity: 0.8;
+                transform: translateY(-5px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 50px;
+            margin: 0.4rem 0.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 150, 57, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .skill-tag:hover::before {
+            left: 100%;
+        }
+
+        .skill-tag:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 150, 57, 0.3);
+        }
+
+        .mobile-nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-dot.active {
+            background: var(--primary-yellow);
+            border-color: var(--primary-yellow);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(255, 205, 0, 0.5);
+        }
+
+        .nav-dot:hover {
+            transform: scale(1.2);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-green);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 1.25rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        /* Ultra-Responsive Typography */
+        .display-4 {
+            font-size: clamp(2.5rem, 10vw, 4rem) !important;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .lead {
+            font-size: clamp(1.1rem, 4.5vw, 1.4rem) !important;
+            font-weight: 400;
+            line-height: 1.6;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Touch Optimizations */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        .section-card,
+        .skill-tag {
+            transform: translateZ(0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        /* Ripple Effect */
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .test-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .test-info {
+                top: 10px;
+                right: 10px;
+                font-size: 10px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <div>📱 Ultra-Mobile Test</div>
+        <div>🌟 Amazing UI Active</div>
+        <div id="viewport-size"></div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="#" class="back-btn" onclick="alert('Back button works!'); return false;">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Home</span>
+    </a>
+
+    <!-- Mobile Navigation Dots -->
+    <div class="mobile-nav-dots">
+        <div class="nav-dot active" data-target="hero"></div>
+        <div class="nav-dot" data-target="about"></div>
+        <div class="nav-dot" data-target="skills"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="developer-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 text-center text-white">
+                    <div data-aos="fade-up" data-aos-duration="800">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&w=400&h=400&fit=crop&crop=face" 
+                             alt="Developer Profile" class="profile-image mb-4">
+                        <h1 class="display-4 fw-bold mb-3">
+                            Meet the Developer
+                        </h1>
+                        <p class="lead mb-4">
+                            Ultra-modern mobile-first design with amazing UI
+                        </p>
+                        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                            <a href="#about" class="btn btn-outline-light btn-lg">Learn More</a>
+                            <a href="#skills" class="btn btn-warning btn-lg">View Skills</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="section-card" data-aos="fade-up">
+                <h2 class="h3 fw-bold text-primary mb-4">
+                    <i class="fas fa-user-circle me-2"></i>About Me
+                </h2>
+                <p class="lead mb-4">
+                    Ultra-responsive mobile-first developer with passion for creating amazing user experiences.
+                </p>
+                <p class="mb-0">
+                    This page demonstrates cutting-edge mobile responsiveness with glassmorphism effects, 
+                    smooth animations, and touch-optimized interactions.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-5">
+        <div class="container">
+            <div class="section-card" data-aos="fade-up">
+                <h2 class="h3 fw-bold text-primary mb-4">
+                    <i class="fas fa-code me-2"></i>Mobile-First Skills
+                </h2>
+                <div class="skills-container text-center">
+                    <span class="skill-tag">Ultra-Responsive Design</span>
+                    <span class="skill-tag">Mobile-First CSS</span>
+                    <span class="skill-tag">Touch Interactions</span>
+                    <span class="skill-tag">Glassmorphism</span>
+                    <span class="skill-tag">Micro-Animations</span>
+                    <span class="skill-tag">Progressive Enhancement</span>
+                    <span class="skill-tag">Performance Optimization</span>
+                    <span class="skill-tag">Accessibility</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Ultra-Enhanced Mobile Experience
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize AOS with mobile optimization
+            AOS.init({
+                duration: 600,
+                once: true,
+                offset: 30,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+            });
+
+            // Set viewport height for mobile
+            function setVH() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                document.getElementById('viewport-size').textContent = `${window.innerWidth}x${window.innerHeight}`;
+            }
+            
+            setVH();
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', () => setTimeout(setVH, 500));
+
+            // Advanced touch feedback with ripple effect
+            const interactiveElements = document.querySelectorAll('.skill-tag, .section-card, .btn');
+            
+            interactiveElements.forEach(element => {
+                element.addEventListener('touchstart', function(e) {
+                    // Scale effect
+                    this.style.transform = 'scale(0.97)';
+                    
+                    // Ripple effect
+                    const ripple = document.createElement('div');
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.touches[0].clientX - rect.left - size / 2;
+                    const y = e.touches[0].clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+                
+                element.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+
+            // Mobile navigation dots
+            const navDots = document.querySelectorAll('.nav-dot');
+            const sections = document.querySelectorAll('section[id]');
+            
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const targetId = entry.target.id;
+                        navDots.forEach(dot => {
+                            dot.classList.toggle('active', dot.dataset.target === targetId);
+                        });
+                    }
+                });
+            }, { threshold: 0.3 });
+            
+            sections.forEach(section => sectionObserver.observe(section));
+            
+            navDots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Haptic feedback
+                        if (navigator.vibrate) {
+                            navigator.vibrate(50);
+                        }
+                    }
+                });
+            });
+
+            console.log('🌟 Ultra-Modern Mobile Developer Page Loaded!');
+        });
+    </script>
+</body>
+</html>
