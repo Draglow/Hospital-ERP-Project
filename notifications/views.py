@@ -43,10 +43,14 @@ def notification_list(request):
         notifications = notifications.order_by('created_at')
     elif sort_by == 'priority':
         # Custom ordering for priority: urgent, high, normal, low
-        priority_order = ['urgent', 'high', 'normal', 'low']
-        notifications = notifications.extra(
-            select={'priority_order': f"CASE priority {' '.join([f'WHEN \'{p}\' THEN {i}' for i, p in enumerate(priority_order)])} END"}
-        ).order_by('priority_order', '-created_at')
+       priority_order = ['urgent', 'high', 'normal', 'low']
+
+       case_statement = " ".join([f"WHEN '{p}' THEN {i}" for i, p in enumerate(priority_order)])
+
+       notifications = notifications.extra(
+        select={'priority_order': f"CASE priority {case_statement} END"}
+       ).order_by('priority_order', '-created_at')
+
     elif sort_by == 'type':
         notifications = notifications.order_by('notification_type', '-created_at')
     elif sort_by == 'unread_first':
